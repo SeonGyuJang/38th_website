@@ -101,8 +101,16 @@
             <p class="footer-text" style="margin-top: 1rem; opacity: 0.6;">
                 © 2025 고려대학교 38대 총학생회. All rights reserved.
             </p>
+
+            <!-- 관리자 로그인 -->
+            <div class="footer-admin">
+                <a href="{{ url_for('admin_login') }}">관리자 로그인</a>
+            </div>
         </div>
     </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="맨 위로">↑</button>
 
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

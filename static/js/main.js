@@ -24,6 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Alert 메시지 자동 닫기
     initAlertAutoClose();
+
+    // Scroll to Top 버튼
+    initScrollToTop();
+
+    // Header 스크롤 효과
+    initHeaderScroll();
+
+    // 파일 업로드 미리보기
+    initFileUpload();
 });
 
 // ============ 모바일 메뉴 토글 ============
@@ -379,3 +388,58 @@ document.querySelectorAll('form[data-loading]').forEach(form => {
         showLoading();
     });
 });
+
+// ============ Scroll to Top 버튼 ============
+function initScrollToTop() {
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+
+    if (!scrollToTopBtn) return;
+
+    // 스크롤 이벤트 감지
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('visible');
+        } else {
+            scrollToTopBtn.classList.remove('visible');
+        }
+    });
+
+    // 버튼 클릭 시 맨 위로 스크롤
+    scrollToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// ============ Header 스크롤 효과 ============
+function initHeaderScroll() {
+    const header = document.querySelector('.header');
+
+    if (!header) return;
+
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+}
+
+// ============ 파일 업로드 미리보기 ============
+function initFileUpload() {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function(e) {
+            const fileName = this.files[0]?.name;
+            const fileNameDisplay = this.parentElement.querySelector('.file-name');
+
+            if (fileNameDisplay && fileName) {
+                fileNameDisplay.textContent = `선택된 파일: ${fileName}`;
+            }
+        });
+    });
+}
