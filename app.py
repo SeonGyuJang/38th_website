@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.utils import secure_filename
 from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner
 from config import Config
 from datetime import datetime
@@ -7,6 +8,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
+Config.init_app(app)  # Initialize upload folders
 
 # Initialize extensions
 db.init_app(app)
@@ -18,37 +20,42 @@ login_manager.login_view = 'admin_login'
 def load_user(user_id):
     return Admin.query.get(int(user_id))
 
+# ============ Helper Functions ============
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+
+def save_file(file, subfolder='files'):
+    """
+    파일을 저장하고 웹 접근 가능한 URL을 반환합니다.
+    """
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # Add timestamp to prevent overwrite
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+        filename = timestamp + filename
+        
+        # Ensure directory exists
+        save_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        save_path = os.path.join(save_dir, filename)
+        file.save(save_path)
+        
+        # Return web-accessible path
+        return url_for('static', filename=f'uploads/{subfolder}/{filename}')
+    return None
 
 # ============ Public Routes ============
 
 @app.route('/')
 def index():
-    """홈페이지"""
+    """홈페이지 (Apple Style Main)"""
     # 배너 가져오기 (이벤트 배너 우선, 없으면 기본 배너)
     banner = Banner.query.filter_by(is_active=True, is_event_banner=True).order_by(Banner.order).first()
     if not banner:
         banner = Banner.query.filter_by(is_active=True, is_event_banner=False).order_by(Banner.order).first()
-
-    # 조직도 데이터 구조화
-    organization_data = None
-    all_members = Organization.query.order_by(Organization.order).all()
-    if all_members:
-        organization_data = {
-            'presidents': [],  # 총학생회장, 부총학생회장
-            'chairs': [],  # 위원장들
-            'departments': {}  # 부서별 그룹
-        }
-
-        for member in all_members:
-            position = member.position.lower()
-            if '총학생회장' in position or '회장' in position:
-                organization_data['presidents'].append(member)
-            elif '위원장' in position:
-                organization_data['chairs'].append(member)
-            elif member.department:
-                if member.department not in organization_data['departments']:
-                    organization_data['departments'][member.department] = []
-                organization_data['departments'][member.department].append(member)
 
     # 공약 이행률 계산
     promises_list = Promise.query.all()
@@ -57,22 +64,20 @@ def index():
         total_progress = sum(p.progress_rate for p in promises_list)
         promise_rate = total_progress / len(promises_list)
 
-    # 상위 공약 3개
-    top_promises = Promise.query.order_by(Promise.progress_rate.desc(), Promise.order).limit(3).all()
-
-    # 최근 회의록 3개
-    recent_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).limit(3).all()
-
-    # 최근 회칙 3개
-    recent_regulations = Regulation.query.order_by(Regulation.order).limit(3).all()
+    # 주요 데이터 (Bento Grid용)
+    # 1. 다가오는 일정
+    recent_schedule = Schedule.query.filter(Schedule.start_date >= datetime.now()).order_by(Schedule.start_date).first()
+    # 2. 최신 회의록
+    recent_minute = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).first()
+    # 3. 모집중인 프로그램
+    active_program = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).first()
 
     return render_template('index.html',
                          banner=banner,
-                         organization_data=organization_data,
-                         promise_rate=promise_rate,
-                         top_promises=top_promises,
-                         recent_minutes=recent_minutes,
-                         recent_regulations=recent_regulations)
+                         promise_rate=int(promise_rate),
+                         recent_schedule=recent_schedule,
+                         recent_minute=recent_minute,
+                         active_program=active_program)
 
 
 @app.route('/schedule')
@@ -84,26 +89,66 @@ def schedule():
 
 @app.route('/organization')
 def organization():
-    """조직도 페이지"""
-    members = Organization.query.order_by(Organization.order).all()
-    return render_template('organization.html', members=members)
+    """조직도 페이지 (Tree Structure Data)"""
+    # 조직도 구조화를 위한 데이터 처리
+    
+    # 1. Leadership (회장단)
+    # '회장'이 포함되지만 '부회장'은 아닌 경우 (총학생회장)
+    presidents = Organization.query.filter(
+        (Organization.position.contains('회장')) & 
+        (~Organization.position.contains('부회장')) &
+        (~Organization.position.contains('국장')) &
+        (~Organization.position.contains('위원장'))
+    ).order_by(Organization.order).all()
+    
+    # '부회장'인 경우
+    vice_presidents = Organization.query.filter(
+        Organization.position.contains('부회장')
+    ).order_by(Organization.order).all()
+
+    # 2. Heads (위원장 등)
+    heads = Organization.query.filter(
+        Organization.position.contains('위원장')
+    ).order_by(Organization.order).all()
+
+    # 3. Departments (각 국)
+    # 회장단과 위원장이 아닌 나머지 멤버들
+    others = Organization.query.filter(
+        ~Organization.position.contains('회장'), # 부회장도 포함해서 제외됨 (contains 회장)
+        ~Organization.position.contains('위원장')
+    ).order_by(Organization.order).all()
+
+    # 부서별 그룹화
+    departments = {}
+    for member in others:
+        # 부회장 필터링 보완 (위에서 contains '회장'으로 다 제외되었을 수 있음)
+        # 명확하게 부서가 있는 국원들만 처리
+        if '부회장' in member.position: # 혹시 쿼리에서 안걸러졌을 경우
+            continue
+            
+        dept = member.department or "기타"
+        if dept not in departments:
+            departments[dept] = []
+        departments[dept].append(member)
+
+    return render_template('organization.html', 
+                         presidents=presidents,
+                         vice_presidents=vice_presidents,
+                         heads=heads,
+                         departments=departments)
 
 
 @app.route('/promises')
 def promises():
     """공약 페이지"""
     promises_list = Promise.query.order_by(Promise.order).all()
-
-    # 카테고리별로 그룹화
     categories = {}
     for promise in promises_list:
         if promise.category not in categories:
             categories[promise.category] = []
         categories[promise.category].append(promise)
-
-    # 전체 이행률 계산
+    
     total_progress = sum(p.progress_rate for p in promises_list) / len(promises_list) if promises_list else 0
-
     return render_template('promises.html', categories=categories, total_progress=round(total_progress))
 
 
@@ -133,14 +178,11 @@ def minute_detail(minute_id):
 def regulations():
     """회칙 페이지"""
     regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
-
-    # 카테고리별로 그룹화
     categories = {}
     for regulation in regulations_list:
         if regulation.category not in categories:
             categories[regulation.category] = []
         categories[regulation.category].append(regulation)
-
     return render_template('regulations.html', categories=categories)
 
 
@@ -162,7 +204,6 @@ def admin_login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
         admin = Admin.query.filter_by(username=username).first()
 
         if admin and admin.check_password(password):
@@ -347,7 +388,7 @@ def admin_promise_progress_add(promise_id):
     return render_template('admin/promise_progress_form.html', promise=promise)
 
 
-# ============ Admin Minutes Management ============
+# ============ Admin Minutes Management (File Upload) ============
 
 @app.route('/admin/minutes')
 @login_required
@@ -360,8 +401,20 @@ def admin_minutes():
 @app.route('/admin/minutes/add', methods=['GET', 'POST'])
 @login_required
 def admin_minute_add():
-    """회의록 추가"""
+    """회의록 추가 (파일 업로드 지원)"""
     if request.method == 'POST':
+        # File Upload Logic
+        file_url = None
+        if 'file' in request.files:
+            file = request.files['file']
+            saved_path = save_file(file, 'minutes')
+            if saved_path:
+                file_url = saved_path
+        
+        # URL fallback if text input provided
+        if not file_url and request.form.get('file_url_text'):
+             file_url = request.form.get('file_url_text')
+
         minute = MeetingMinutes(
             title=request.form['title'],
             meeting_type=request.form.get('meeting_type'),
@@ -370,7 +423,7 @@ def admin_minute_add():
             agenda=request.form.get('agenda'),
             content=request.form['content'],
             decisions=request.form.get('decisions'),
-            file_url=request.form.get('file_url')
+            file_url=file_url
         )
         db.session.add(minute)
         db.session.commit()
@@ -383,10 +436,21 @@ def admin_minute_add():
 @app.route('/admin/minutes/edit/<int:minute_id>', methods=['GET', 'POST'])
 @login_required
 def admin_minute_edit(minute_id):
-    """회의록 수정"""
+    """회의록 수정 (파일 업로드 지원)"""
     minute = MeetingMinutes.query.get_or_404(minute_id)
 
     if request.method == 'POST':
+        # File Upload Logic
+        if 'file' in request.files:
+            file = request.files['file']
+            saved_path = save_file(file, 'minutes')
+            if saved_path:
+                minute.file_url = saved_path
+        
+        # If manual URL text provided, override
+        if request.form.get('file_url_text'):
+             minute.file_url = request.form.get('file_url_text')
+
         minute.title = request.form['title']
         minute.meeting_type = request.form.get('meeting_type')
         minute.meeting_date = datetime.strptime(request.form['meeting_date'], '%Y-%m-%d')
@@ -394,7 +458,6 @@ def admin_minute_edit(minute_id):
         minute.agenda = request.form.get('agenda')
         minute.content = request.form['content']
         minute.decisions = request.form.get('decisions')
-        minute.file_url = request.form.get('file_url')
 
         db.session.commit()
         flash('회의록이 수정되었습니다.', 'success')
@@ -414,7 +477,86 @@ def admin_minute_delete(minute_id):
     return redirect(url_for('admin_minutes'))
 
 
-# ============ Admin Programs Management ============
+# ============ Admin Regulations Management (File Upload) ============
+
+@app.route('/admin/regulations')
+@login_required
+def admin_regulations():
+    """관리자 회칙 관리"""
+    regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
+    return render_template('admin/regulations.html', regulations=regulations_list)
+
+
+@app.route('/admin/regulations/add', methods=['GET', 'POST'])
+@login_required
+def admin_regulation_add():
+    """회칙 추가 (파일 업로드 지원)"""
+    if request.method == 'POST':
+        file_url = None
+        if 'file' in request.files:
+            file = request.files['file']
+            saved_path = save_file(file, 'regulations')
+            if saved_path:
+                file_url = saved_path
+        
+        if not file_url and request.form.get('file_url_text'):
+             file_url = request.form.get('file_url_text')
+
+        regulation = Regulation(
+            category=request.form['category'],
+            title=request.form['title'],
+            content=request.form['content'],
+            file_url=file_url,
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(regulation)
+        db.session.commit()
+        flash('회칙이 추가되었습니다.', 'success')
+        return redirect(url_for('admin_regulations'))
+
+    return render_template('admin/regulation_form.html')
+
+
+@app.route('/admin/regulations/edit/<int:regulation_id>', methods=['GET', 'POST'])
+@login_required
+def admin_regulation_edit(regulation_id):
+    """회칙 수정"""
+    regulation = Regulation.query.get_or_404(regulation_id)
+
+    if request.method == 'POST':
+        if 'file' in request.files:
+            file = request.files['file']
+            saved_path = save_file(file, 'regulations')
+            if saved_path:
+                regulation.file_url = saved_path
+        
+        if request.form.get('file_url_text'):
+             regulation.file_url = request.form.get('file_url_text')
+
+        regulation.category = request.form['category']
+        regulation.title = request.form['title']
+        regulation.content = request.form['content']
+        regulation.order = int(request.form.get('order', 0))
+
+        db.session.commit()
+        flash('회칙이 수정되었습니다.', 'success')
+        return redirect(url_for('admin_regulations'))
+
+    return render_template('admin/regulation_form.html', regulation=regulation)
+
+
+@app.route('/admin/regulations/delete/<int:regulation_id>', methods=['POST'])
+@login_required
+def admin_regulation_delete(regulation_id):
+    """회칙 삭제"""
+    regulation = Regulation.query.get_or_404(regulation_id)
+    db.session.delete(regulation)
+    db.session.commit()
+    flash('회칙이 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_regulations'))
+
+
+# ============ Admin Programs Management (Image Upload) ============
 
 @app.route('/admin/programs')
 @login_required
@@ -427,8 +569,18 @@ def admin_programs():
 @app.route('/admin/programs/add', methods=['GET', 'POST'])
 @login_required
 def admin_program_add():
-    """프로그램 추가"""
+    """프로그램 추가 (이미지 업로드)"""
     if request.method == 'POST':
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            saved_path = save_file(file, 'programs')
+            if saved_path:
+                image_url = saved_path
+        
+        if not image_url and request.form.get('image_url_text'):
+            image_url = request.form.get('image_url_text')
+
         program = Program(
             title=request.form['title'],
             category=request.form.get('category'),
@@ -441,7 +593,7 @@ def admin_program_add():
             application_end=datetime.strptime(request.form['application_end'], '%Y-%m-%d') if request.form.get('application_end') else None,
             location=request.form.get('location'),
             link=request.form.get('link'),
-            image_url=request.form.get('image_url'),
+            image_url=image_url,
             is_active=request.form.get('is_active') == 'on'
         )
         db.session.add(program)
@@ -459,6 +611,15 @@ def admin_program_edit(program_id):
     program = Program.query.get_or_404(program_id)
 
     if request.method == 'POST':
+        if 'image' in request.files:
+            file = request.files['image']
+            saved_path = save_file(file, 'programs')
+            if saved_path:
+                program.image_url = saved_path
+        
+        if request.form.get('image_url_text'):
+            program.image_url = request.form.get('image_url_text')
+
         program.title = request.form['title']
         program.category = request.form.get('category')
         program.description = request.form['description']
@@ -470,7 +631,6 @@ def admin_program_edit(program_id):
         program.application_end = datetime.strptime(request.form['application_end'], '%Y-%m-%d') if request.form.get('application_end') else None
         program.location = request.form.get('location')
         program.link = request.form.get('link')
-        program.image_url = request.form.get('image_url')
         program.is_active = request.form.get('is_active') == 'on'
 
         db.session.commit()
@@ -491,7 +651,7 @@ def admin_program_delete(program_id):
     return redirect(url_for('admin_programs'))
 
 
-# ============ Admin Banner Management ============
+# ============ Admin Banner Management (Image Upload) ============
 
 @app.route('/admin/banners')
 @login_required
@@ -504,11 +664,21 @@ def admin_banners():
 @app.route('/admin/banners/add', methods=['GET', 'POST'])
 @login_required
 def admin_banner_add():
-    """배너 추가"""
+    """배너 추가 (이미지 업로드)"""
     if request.method == 'POST':
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            saved_path = save_file(file, 'banners')
+            if saved_path:
+                image_url = saved_path
+        
+        if not image_url and request.form.get('image_url_text'):
+            image_url = request.form.get('image_url_text')
+
         banner = Banner(
             title=request.form['title'],
-            image_url=request.form['image_url'],
+            image_url=image_url,
             link=request.form.get('link'),
             is_active=request.form.get('is_active') == 'on',
             is_event_banner=request.form.get('is_event_banner') == 'on',
@@ -529,8 +699,16 @@ def admin_banner_edit(banner_id):
     banner = Banner.query.get_or_404(banner_id)
 
     if request.method == 'POST':
+        if 'image' in request.files:
+            file = request.files['image']
+            saved_path = save_file(file, 'banners')
+            if saved_path:
+                banner.image_url = saved_path
+        
+        if request.form.get('image_url_text'):
+            banner.image_url = request.form.get('image_url_text')
+
         banner.title = request.form['title']
-        banner.image_url = request.form['image_url']
         banner.link = request.form.get('link')
         banner.is_active = request.form.get('is_active') == 'on'
         banner.is_event_banner = request.form.get('is_event_banner') == 'on'
@@ -553,7 +731,7 @@ def admin_banner_delete(banner_id):
     return redirect(url_for('admin_banners'))
 
 
-# ============ Admin Organization Management ============
+# ============ Admin Organization Management (Photo Upload) ============
 
 @app.route('/admin/organization')
 @login_required
@@ -566,8 +744,18 @@ def admin_organization():
 @app.route('/admin/organization/add', methods=['GET', 'POST'])
 @login_required
 def admin_organization_add():
-    """조직도 멤버 추가"""
+    """조직도 멤버 추가 (사진 업로드)"""
     if request.method == 'POST':
+        photo_url = None
+        if 'photo' in request.files:
+            file = request.files['photo']
+            saved_path = save_file(file, 'profiles')
+            if saved_path:
+                photo_url = saved_path
+        
+        if not photo_url and request.form.get('photo_url_text'):
+            photo_url = request.form.get('photo_url_text')
+
         member = Organization(
             name=request.form['name'],
             position=request.form['position'],
@@ -576,7 +764,7 @@ def admin_organization_add():
             student_id=request.form.get('student_id'),
             phone=request.form.get('phone'),
             email=request.form.get('email'),
-            photo_url=request.form.get('photo_url'),
+            photo_url=photo_url,
             order=int(request.form.get('order', 0))
         )
         db.session.add(member)
@@ -594,6 +782,15 @@ def admin_organization_edit(member_id):
     member = Organization.query.get_or_404(member_id)
 
     if request.method == 'POST':
+        if 'photo' in request.files:
+            file = request.files['photo']
+            saved_path = save_file(file, 'profiles')
+            if saved_path:
+                member.photo_url = saved_path
+        
+        if request.form.get('photo_url_text'):
+            member.photo_url = request.form.get('photo_url_text')
+
         member.name = request.form['name']
         member.position = request.form['position']
         member.department = request.form.get('department')
@@ -601,7 +798,6 @@ def admin_organization_edit(member_id):
         member.student_id = request.form.get('student_id')
         member.phone = request.form.get('phone')
         member.email = request.form.get('email')
-        member.photo_url = request.form.get('photo_url')
         member.order = int(request.form.get('order', 0))
 
         db.session.commit()
@@ -620,67 +816,6 @@ def admin_organization_delete(member_id):
     db.session.commit()
     flash('조직도 멤버가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_organization'))
-
-
-# ============ Admin Regulations Management ============
-
-@app.route('/admin/regulations')
-@login_required
-def admin_regulations():
-    """관리자 회칙 관리"""
-    regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
-    return render_template('admin/regulations.html', regulations=regulations_list)
-
-
-@app.route('/admin/regulations/add', methods=['GET', 'POST'])
-@login_required
-def admin_regulation_add():
-    """회칙 추가"""
-    if request.method == 'POST':
-        regulation = Regulation(
-            category=request.form['category'],
-            title=request.form['title'],
-            content=request.form['content'],
-            file_url=request.form.get('file_url'),
-            order=int(request.form.get('order', 0))
-        )
-        db.session.add(regulation)
-        db.session.commit()
-        flash('회칙이 추가되었습니다.', 'success')
-        return redirect(url_for('admin_regulations'))
-
-    return render_template('admin/regulation_form.html')
-
-
-@app.route('/admin/regulations/edit/<int:regulation_id>', methods=['GET', 'POST'])
-@login_required
-def admin_regulation_edit(regulation_id):
-    """회칙 수정"""
-    regulation = Regulation.query.get_or_404(regulation_id)
-
-    if request.method == 'POST':
-        regulation.category = request.form['category']
-        regulation.title = request.form['title']
-        regulation.content = request.form['content']
-        regulation.file_url = request.form.get('file_url')
-        regulation.order = int(request.form.get('order', 0))
-
-        db.session.commit()
-        flash('회칙이 수정되었습니다.', 'success')
-        return redirect(url_for('admin_regulations'))
-
-    return render_template('admin/regulation_form.html', regulation=regulation)
-
-
-@app.route('/admin/regulations/delete/<int:regulation_id>', methods=['POST'])
-@login_required
-def admin_regulation_delete(regulation_id):
-    """회칙 삭제"""
-    regulation = Regulation.query.get_or_404(regulation_id)
-    db.session.delete(regulation)
-    db.session.commit()
-    flash('회칙이 삭제되었습니다.', 'success')
-    return redirect(url_for('admin_regulations'))
 
 
 # ============ Initialize Database ============
@@ -702,7 +837,7 @@ def init_db():
 
 if __name__ == '__main__':
     # 포트 번호를 환경 변수로 설정 가능
-    port = int(os.environ.get('PORT', 1234))
+    port = int(os.environ.get('PORT', 2020))
 
     # watchdog 호환성 문제 해결: stat reloader 사용
     app.run(debug=True, host='0.0.0.0', port=port, use_reloader=True, reloader_type='stat')

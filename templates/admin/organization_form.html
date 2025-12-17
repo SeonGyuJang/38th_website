@@ -1,69 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}{% if member %}멤버 수정{% else %}멤버 추가{% endif %} - 관리자{% endblock %}
+{% block title %}멤버 관리 - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700;">{% if member %}멤버 수정{% else %}멤버 추가{% endif %}</h1>
-    </div>
+<div class="container" style="padding-top: 100px;">
+    <h1 class="section-title">멤버 {% if member %}수정{% else %}추가{% endif %}</h1>
 
-    <div style="margin-bottom: var(--spacing-md);">
-        <a href="{{ url_for('admin_organization') }}" class="btn btn-secondary btn-small">← 목록으로</a>
-    </div>
+    <form method="POST" enctype="multipart/form-data" style="max-width: 800px; margin: 0 auto;">
+        <div class="form-group">
+            <label class="form-label">이름</label>
+            <input type="text" class="form-input" name="name" value="{{ member.name if member else '' }}" required>
+        </div>
 
-    <div class="content">
-        <form method="POST" data-validate>
-            <div class="form-group">
-                <label class="form-label" for="name">이름 *</label>
-                <input type="text" class="form-input" id="name" name="name" value="{{ member.name if member else '' }}" required>
-            </div>
+        <div class="form-group">
+            <label class="form-label">직책</label>
+            <input type="text" class="form-input" name="position" value="{{ member.position if member else '' }}" required placeholder="예: 총학생회장, 기획국장">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="position">직책 *</label>
-                <input type="text" class="form-input" id="position" name="position" value="{{ member.position if member else '' }}" required placeholder="예: 회장, 부회장, 국장">
-            </div>
+        <div class="form-group">
+            <label class="form-label">부서</label>
+            <input type="text" class="form-input" name="department" value="{{ member.department if member else '' }}" placeholder="예: 기획국 (회장단은 비워두세요)">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="department">부서</label>
-                <input type="text" class="form-input" id="department" name="department" value="{{ member.department if member else '' }}" placeholder="예: 기획국, 홍보국">
-            </div>
+        <div class="form-group">
+            <label class="form-label">전공</label>
+            <input type="text" class="form-input" name="major" value="{{ member.major if member else '' }}">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="major">전공</label>
-                <input type="text" class="form-input" id="major" name="major" value="{{ member.major if member else '' }}">
-            </div>
+        <div class="form-group" style="background: var(--bg-secondary); padding: 20px; border-radius: 12px;">
+            <label class="form-label">프로필 사진</label>
+            <input type="file" name="photo" class="file-input" accept="image/*">
+            {% if member and member.photo_url %}
+            <img src="{{ member.photo_url }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-top: 10px;">
+            {% endif %}
+            <p style="margin-top: 10px; font-size: 0.9rem;">또는 URL 직접 입력:</p>
+            <input type="url" class="form-input" name="photo_url_text" value="{{ member.photo_url if member and member.photo_url.startswith('http') else '' }}">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="student_id">학번</label>
-                <input type="text" class="form-input" id="student_id" name="student_id" value="{{ member.student_id if member else '' }}">
-            </div>
+        <div class="form-group">
+            <label class="form-label">순서</label>
+            <input type="number" class="form-input" name="order" value="{{ member.order if member else 0 }}">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="phone">전화번호</label>
-                <input type="tel" class="form-input" id="phone" name="phone" value="{{ member.phone if member else '' }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="email">이메일</label>
-                <input type="email" class="form-input" id="email" name="email" value="{{ member.email if member else '' }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="photo_url">프로필 사진 URL</label>
-                <input type="url" class="form-input" id="photo_url" name="photo_url" value="{{ member.photo_url if member else '' }}" placeholder="https://...">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="order">정렬 순서</label>
-                <input type="number" class="form-input" id="order" name="order" value="{{ member.order if member else 0 }}">
-            </div>
-
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary">{% if member %}수정{% else %}추가{% endif %}</button>
-                <a href="{{ url_for('admin_organization') }}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
-    </div>
+        <div style="margin-top: 40px; display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary">저장</button>
+            <a href="{{ url_for('admin_organization') }}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
 </div>
 {% endblock %}

@@ -3,89 +3,93 @@
 {% block title %}{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %} - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700;">{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %}</h1>
-    </div>
+<div class="container" style="padding-top: 100px;">
+    <h1 class="section-title">{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %}</h1>
 
-    <div style="margin-bottom: var(--spacing-md);">
-        <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary btn-small">← 목록으로</a>
-    </div>
+    <form method="POST" enctype="multipart/form-data" style="max-width: 800px; margin: 0 auto;">
+        <div class="form-group">
+            <label class="form-label">프로그램명</label>
+            <input type="text" class="form-input" name="title" value="{{ program.title if program else '' }}" required>
+        </div>
 
-    <div class="content">
-        <form method="POST" data-validate>
+        <div class="form-group">
+            <label class="form-label">카테고리</label>
+            <input type="text" class="form-input" name="category" value="{{ program.category if program else '' }}" placeholder="예: 학술, 문화, 복지">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">설명</label>
+            <textarea class="form-textarea" name="description" rows="5" required>{{ program.description if program else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">주최</label>
+            <input type="text" class="form-input" name="organizer" value="{{ program.organizer if program else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">대상</label>
+            <input type="text" class="form-input" name="target" value="{{ program.target if program else '' }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group">
-                <label class="form-label" for="title">제목 *</label>
-                <input type="text" class="form-input" id="title" name="title" value="{{ program.title if program else '' }}" required>
+                <label class="form-label">시작일</label>
+                <input type="date" class="form-input" name="start_date" value="{{ program.start_date.strftime('%Y-%m-%d') if program and program.start_date else '' }}">
             </div>
-
             <div class="form-group">
-                <label class="form-label" for="category">카테고리</label>
-                <input type="text" class="form-input" id="category" name="category" value="{{ program.category if program else '' }}" placeholder="예: 학술, 문화, 취업">
+                <label class="form-label">종료일</label>
+                <input type="date" class="form-input" name="end_date" value="{{ program.end_date.strftime('%Y-%m-%d') if program and program.end_date else '' }}">
             </div>
+        </div>
 
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group">
-                <label class="form-label" for="description">설명 *</label>
-                <textarea class="form-textarea" id="description" name="description" required data-enhance>{{ program.description if program else '' }}</textarea>
+                <label class="form-label">신청 시작일</label>
+                <input type="date" class="form-input" name="application_start" value="{{ program.application_start.strftime('%Y-%m-%d') if program and program.application_start else '' }}">
             </div>
-
             <div class="form-group">
-                <label class="form-label" for="organizer">주최기관</label>
-                <input type="text" class="form-input" id="organizer" name="organizer" value="{{ program.organizer if program else '' }}">
+                <label class="form-label">신청 마감일</label>
+                <input type="date" class="form-input" name="application_end" value="{{ program.application_end.strftime('%Y-%m-%d') if program and program.application_end else '' }}">
             </div>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="target">대상</label>
-                <input type="text" class="form-input" id="target" name="target" value="{{ program.target if program else '' }}" placeholder="예: 전체 학생">
-            </div>
+        <div class="form-group">
+            <label class="form-label">장소</label>
+            <input type="text" class="form-input" name="location" value="{{ program.location if program else '' }}">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="start_date">시작일</label>
-                <input type="date" class="form-input" id="start_date" name="start_date" value="{{ program.start_date.strftime('%Y-%m-%d') if program and program.start_date else '' }}">
-            </div>
+        <div class="form-group">
+            <label class="form-label">신청/관련 링크</label>
+            <input type="url" class="form-input" name="link" value="{{ program.link if program else '' }}" placeholder="https://...">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="end_date">종료일</label>
-                <input type="date" class="form-input" id="end_date" name="end_date" value="{{ program.end_date.strftime('%Y-%m-%d') if program and program.end_date else '' }}">
+        <div class="form-group" style="background: var(--bg-secondary); padding: 24px; border-radius: 16px;">
+            <label class="form-label">대표 이미지</label>
+            <input type="file" name="image" class="file-input" accept="image/*">
+            {% if program and program.image_url %}
+            <div style="margin-top: 15px;">
+                <img src="{{ program.image_url }}" style="width: 100%; max-width: 300px; border-radius: 8px; box-shadow: var(--shadow-sm);">
             </div>
+            {% endif %}
+            
+            <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">또는 이미지 URL 직접 입력</label>
+                <input type="url" class="form-input" name="image_url_text" value="{{ program.image_url if program and program.image_url.startswith('http') and not program.image_url.startswith('/') else '' }}">
+            </div>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="application_start">신청 시작일</label>
-                <input type="date" class="form-input" id="application_start" name="application_start" value="{{ program.application_start.strftime('%Y-%m-%d') if program and program.application_start else '' }}">
-            </div>
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="is_active" {% if not program or program.is_active %}checked{% endif %} style="width: 20px; height: 20px;">
+                <span style="font-weight: 600;">활성화 (공개)</span>
+            </label>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="application_end">신청 마감일</label>
-                <input type="date" class="form-input" id="application_end" name="application_end" value="{{ program.application_end.strftime('%Y-%m-%d') if program and program.application_end else '' }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="location">장소</label>
-                <input type="text" class="form-input" id="location" name="location" value="{{ program.location if program else '' }}">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="link">관련 링크</label>
-                <input type="url" class="form-input" id="link" name="link" value="{{ program.link if program else '' }}" placeholder="https://...">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="image_url">이미지 URL</label>
-                <input type="url" class="form-input" id="image_url" name="image_url" value="{{ program.image_url if program else '' }}" placeholder="https://...">
-            </div>
-
-            <div class="form-group">
-                <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
-                    <input type="checkbox" name="is_active" {% if not program or program.is_active %}checked{% endif %}>
-                    <span class="form-label" style="margin: 0;">활성화</span>
-                </label>
-            </div>
-
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary">{% if program %}수정{% else %}추가{% endif %}</button>
-                <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
-    </div>
+        <div style="margin-top: 40px; display: flex; gap: 15px;">
+            <button type="submit" class="btn btn-primary">저장하기</button>
+            <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
 </div>
 {% endblock %}

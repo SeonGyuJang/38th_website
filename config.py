@@ -12,6 +12,18 @@ class Config:
     # Session configuration
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
 
-    # Upload folder for images/files
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+    # Upload folder configuration
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+    
+    # Allowed file extensions
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'hwp', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'zip'}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+    # Ensure upload directories exist
+    @staticmethod
+    def init_app(app):
+        # Create subdirectories for organized storage
+        folders = ['files', 'images', 'profiles', 'minutes', 'regulations', 'programs', 'banners']
+        for folder in folders:
+            os.makedirs(os.path.join(Config.UPLOAD_FOLDER, folder), exist_ok=True)

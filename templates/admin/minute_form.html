@@ -3,62 +3,66 @@
 {% block title %}{% if minute %}회의록 수정{% else %}회의록 추가{% endif %} - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700;">{% if minute %}회의록 수정{% else %}회의록 추가{% endif %}</h1>
+<div class="container" style="padding-top: 100px;">
+    <div class="admin-header" style="margin-bottom: 40px;">
+        <h1 class="section-title">{% if minute %}회의록 수정{% else %}회의록 추가{% endif %}</h1>
     </div>
 
-    <div style="margin-bottom: var(--spacing-md);">
-        <a href="{{ url_for('admin_minutes') }}" class="btn btn-secondary btn-small">← 목록으로</a>
-    </div>
+    <form method="POST" enctype="multipart/form-data" style="max-width: 800px; margin: 0 auto;">
+        <div class="form-group">
+            <label class="form-label">제목</label>
+            <input type="text" class="form-input" name="title" value="{{ minute.title if minute else '' }}" required>
+        </div>
 
-    <div class="content">
-        <form method="POST" data-validate>
-            <div class="form-group">
-                <label class="form-label" for="title">제목 *</label>
-                <input type="text" class="form-input" id="title" name="title" value="{{ minute.title if minute else '' }}" required>
-            </div>
+        <div class="form-group">
+            <label class="form-label">회의 유형</label>
+            <input type="text" class="form-input" name="meeting_type" value="{{ minute.meeting_type if minute else '' }}" placeholder="예: 정기회의, 임시회의">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="meeting_type">회의 유형</label>
-                <input type="text" class="form-input" id="meeting_type" name="meeting_type" value="{{ minute.meeting_type if minute else '' }}" placeholder="예: 정기회의, 임시회의">
-            </div>
+        <div class="form-group">
+            <label class="form-label">회의 날짜</label>
+            <input type="date" class="form-input" name="meeting_date" value="{{ minute.meeting_date.strftime('%Y-%m-%d') if minute else '' }}" required>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="meeting_date">회의 날짜 *</label>
-                <input type="date" class="form-input" id="meeting_date" name="meeting_date" value="{{ minute.meeting_date.strftime('%Y-%m-%d') if minute else '' }}" required>
-            </div>
+        <div class="form-group">
+            <label class="form-label">참석자</label>
+            <input type="text" class="form-input" name="attendees" value="{{ minute.attendees if minute else '' }}" placeholder="이름을 쉼표로 구분">
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="attendees">참석자</label>
-                <input type="text" class="form-input" id="attendees" name="attendees" value="{{ minute.attendees if minute else '' }}" placeholder="쉼표(,)로 구분">
-            </div>
+        <div class="form-group">
+            <label class="form-label">안건</label>
+            <textarea class="form-textarea" name="agenda" rows="4">{{ minute.agenda if minute else '' }}</textarea>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="agenda">안건</label>
-                <textarea class="form-textarea" id="agenda" name="agenda">{{ minute.agenda if minute else '' }}</textarea>
-            </div>
+        <div class="form-group">
+            <label class="form-label">회의 내용</label>
+            <textarea class="form-textarea" name="content" style="height: 300px;" required>{{ minute.content if minute else '' }}</textarea>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="content">회의 내용 *</label>
-                <textarea class="form-textarea" id="content" name="content" required data-enhance>{{ minute.content if minute else '' }}</textarea>
-            </div>
+        <div class="form-group">
+            <label class="form-label">결정사항</label>
+            <textarea class="form-textarea" name="decisions" rows="4">{{ minute.decisions if minute else '' }}</textarea>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="decisions">결정사항</label>
-                <textarea class="form-textarea" id="decisions" name="decisions" data-enhance>{{ minute.decisions if minute else '' }}</textarea>
+        <div class="form-group" style="background: var(--bg-secondary); padding: 24px; border-radius: 16px;">
+            <label class="form-label">첨부파일 (PDF, DOCX, HWP 등)</label>
+            <input type="file" name="file" class="file-input">
+            {% if minute and minute.file_url %}
+            <div style="margin-top: 10px; font-size: 0.9rem;">
+                현재 파일: <a href="{{ minute.file_url }}" target="_blank" style="color: var(--korea-crimson); font-weight: 600;">다운로드</a>
             </div>
+            {% endif %}
+            
+            <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">또는 외부 URL 직접 입력</label>
+                <input type="url" class="form-input" name="file_url_text" value="{{ minute.file_url if minute and minute.file_url.startswith('http') and not minute.file_url.startswith('/') else '' }}" placeholder="https://...">
+            </div>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label" for="file_url">첨부파일 URL</label>
-                <input type="url" class="form-input" id="file_url" name="file_url" value="{{ minute.file_url if minute else '' }}" placeholder="https://...">
-            </div>
-
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary">{% if minute %}수정{% else %}추가{% endif %}</button>
-                <a href="{{ url_for('admin_minutes') }}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
-    </div>
+        <div style="margin-top: 40px; display: flex; gap: 15px;">
+            <button type="submit" class="btn btn-primary">저장하기</button>
+            <a href="{{ url_for('admin_minutes') }}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
 </div>
 {% endblock %}
