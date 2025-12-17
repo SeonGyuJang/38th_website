@@ -25,7 +25,7 @@ def load_user(user_id):
 def index():
     """홈페이지"""
     recent_schedules = Schedule.query.order_by(Schedule.start_date.desc()).limit(3).all()
-    recent_programs = Program.query.filter_by(is_active=True).order_by(Schedule.created_at.desc()).limit(4).all()
+    recent_programs = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).limit(4).all()
     return render_template('index.html', schedules=recent_schedules, programs=recent_programs)
 
 
