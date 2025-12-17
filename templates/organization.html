@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}조직도 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">조직도</h1>
+        <p class="section-subtitle">38대 총학생회 임원진을 소개합니다</p>
+    </div>
+
+    {% if members %}
+    <div class="card-grid">
+        {% for member in members %}
+        <div class="card">
+            {% if member.photo_url %}
+            <img src="{{ member.photo_url }}" alt="{{ member.name }}"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto var(--spacing-md);">
+            {% else %}
+            <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-secondary);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-md);
+                        font-size: 2.5rem;">👤</div>
+            {% endif %}
+
+            <div class="text-center">
+                <h3 class="card-title">{{ member.name }}</h3>
+                <p class="card-subtitle">{{ member.position }}</p>
+                {% if member.department %}
+                <p class="card-subtitle" style="margin-top: var(--spacing-xs);">{{ member.department }}</p>
+                {% endif %}
+            </div>
+
+            <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); font-size: 0.875rem;">
+                {% if member.major %}
+                <p><strong>전공:</strong> {{ member.major }}</p>
+                {% endif %}
+                {% if member.student_id %}
+                <p><strong>학번:</strong> {{ member.student_id }}</p>
+                {% endif %}
+                {% if member.email %}
+                <p><strong>Email:</strong> <a href="mailto:{{ member.email }}">{{ member.email }}</a></p>
+                {% endif %}
+                {% if member.phone %}
+                <p><strong>Tel:</strong> {{ member.phone }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 조직도 정보가 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

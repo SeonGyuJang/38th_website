@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{% if schedule %}일정 수정{% else %}일정 추가{% endif %} - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1 style="font-size: 2rem; font-weight: 700;">{% if schedule %}일정 수정{% else %}일정 추가{% endif %}</h1>
+    </div>
+
+    <div style="margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('admin_schedules') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <form method="POST" data-validate>
+            <div class="form-group">
+                <label class="form-label" for="title">제목 *</label>
+                <input type="text" class="form-input" id="title" name="title" value="{{ schedule.title if schedule else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="category">카테고리</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">선택</option>
+                    <option value="회의" {% if schedule and schedule.category == '회의' %}selected{% endif %}>회의</option>
+                    <option value="행사" {% if schedule and schedule.category == '행사' %}selected{% endif %}>행사</option>
+                    <option value="프로젝트" {% if schedule and schedule.category == '프로젝트' %}selected{% endif %}>프로젝트</option>
+                    <option value="기타" {% if schedule and schedule.category == '기타' %}selected{% endif %}>기타</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="start_date">시작 일시 *</label>
+                <input type="datetime-local" class="form-input" id="start_date" name="start_date"
+                       value="{{ schedule.start_date.strftime('%Y-%m-%dT%H:%M') if schedule else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="end_date">종료 일시</label>
+                <input type="datetime-local" class="form-input" id="end_date" name="end_date"
+                       value="{{ schedule.end_date.strftime('%Y-%m-%dT%H:%M') if schedule and schedule.end_date else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="location">장소</label>
+                <input type="text" class="form-input" id="location" name="location" value="{{ schedule.location if schedule else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">설명</label>
+                <textarea class="form-textarea" id="description" name="description" data-enhance>{{ schedule.description if schedule else '' }}</textarea>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">{% if schedule %}수정{% else %}추가{% endif %}</button>
+                <a href="{{ url_for('admin_schedules') }}" class="btn btn-secondary">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

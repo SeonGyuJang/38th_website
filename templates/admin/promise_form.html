@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{% if promise %}공약 수정{% else %}공약 추가{% endif %} - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1 style="font-size: 2rem; font-weight: 700;">{% if promise %}공약 수정{% else %}공약 추가{% endif %}</h1>
+    </div>
+
+    <div style="margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <form method="POST" data-validate>
+            <div class="form-group">
+                <label class="form-label" for="category">카테고리 *</label>
+                <input type="text" class="form-input" id="category" name="category" value="{{ promise.category if promise else '' }}" required placeholder="예: 학술, 복지, 문화">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="title">제목 *</label>
+                <input type="text" class="form-input" id="title" name="title" value="{{ promise.title if promise else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">간단한 설명 *</label>
+                <textarea class="form-textarea" id="description" name="description" required>{{ promise.description if promise else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="detailed_description">상세 설명</label>
+                <textarea class="form-textarea" id="detailed_description" name="detailed_description" data-enhance>{{ promise.detailed_description if promise else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="progress_rate">이행률 (0-100) *</label>
+                <input type="number" class="form-input" id="progress_rate" name="progress_rate" min="0" max="100" value="{{ promise.progress_rate if promise else 0 }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="status">상태 *</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="진행중" {% if promise and promise.status == '진행중' %}selected{% endif %}>진행중</option>
+                    <option value="완료" {% if promise and promise.status == '완료' %}selected{% endif %}>완료</option>
+                    <option value="보류" {% if promise and promise.status == '보류' %}selected{% endif %}>보류</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="order">정렬 순서</label>
+                <input type="number" class="form-input" id="order" name="order" value="{{ promise.order if promise else 0 }}">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">{% if promise %}수정{% else %}추가{% endif %}</button>
+                <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

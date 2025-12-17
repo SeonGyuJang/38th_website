@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}일정 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">일정</h1>
+        <p class="section-subtitle">학생회의 모든 일정을 확인하세요</p>
+    </div>
+
+    {% if schedules %}
+    <div class="content">
+        <div class="timeline">
+            {% for schedule in schedules %}
+            <div class="timeline-item">
+                <div class="timeline-date">
+                    {{ schedule.start_date.strftime('%Y년 %m월 %d일') }}
+                    {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
+                    {{ schedule.start_date.strftime('%H:%M') }}
+                    {% endif %}
+                    {% if schedule.end_date %}
+                    - {{ schedule.end_date.strftime('%m월 %d일 %H:%M') }}
+                    {% endif %}
+                </div>
+                <div class="flex-between" style="align-items: flex-start; margin-bottom: var(--spacing-xs);">
+                    <h3 class="timeline-title">{{ schedule.title }}</h3>
+                    {% if schedule.category %}
+                    <span class="badge badge-primary">{{ schedule.category }}</span>
+                    {% endif %}
+                </div>
+                {% if schedule.description %}
+                <p class="timeline-content">{{ schedule.description }}</p>
+                {% endif %}
+                {% if schedule.location %}
+                <p class="timeline-content" style="margin-top: var(--spacing-xs);">
+                    <strong>장소:</strong> {{ schedule.location }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 일정이 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

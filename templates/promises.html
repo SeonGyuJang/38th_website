@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}공약 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">공약</h1>
+        <p class="section-subtitle">학우 여러분과의 약속을 지켜나가겠습니다</p>
+    </div>
+
+    <!-- 전체 이행률 -->
+    <div class="content">
+        <div class="progress-container">
+            <div class="progress-header">
+                <span class="progress-label">전체 공약 이행률</span>
+                <span class="progress-value">{{ total_progress }}%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ total_progress }}%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 카테고리별 공약 -->
+    {% if categories %}
+        {% for category, promises_list in categories.items() %}
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title" style="font-size: 1.5rem;">{{ category }}</h2>
+            </div>
+
+            <div class="card-grid">
+                {% for promise in promises_list %}
+                <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" class="card" style="text-decoration: none;">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ promise.title }}</h3>
+                        <span class="badge
+                            {% if promise.status == '완료' %}badge-success
+                            {% elif promise.status == '진행중' %}badge-info
+                            {% elif promise.status == '보류' %}badge-warning
+                            {% else %}badge-secondary{% endif %}">
+                            {{ promise.status }}
+                        </span>
+                    </div>
+                    <p class="card-content">{{ promise.description }}</p>
+
+                    <div style="margin-top: var(--spacing-md);">
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label" style="font-size: 0.8125rem;">이행률</span>
+                                <span class="progress-value" style="font-size: 1rem;">{{ promise.progress_rate }}%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: {{ promise.progress_rate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 공약이 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

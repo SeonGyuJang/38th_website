@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %} - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1 style="font-size: 2rem; font-weight: 700;">{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %}</h1>
+    </div>
+
+    <div style="margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <form method="POST" data-validate>
+            <div class="form-group">
+                <label class="form-label" for="title">제목 *</label>
+                <input type="text" class="form-input" id="title" name="title" value="{{ program.title if program else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="category">카테고리</label>
+                <input type="text" class="form-input" id="category" name="category" value="{{ program.category if program else '' }}" placeholder="예: 학술, 문화, 취업">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">설명 *</label>
+                <textarea class="form-textarea" id="description" name="description" required data-enhance>{{ program.description if program else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="organizer">주최기관</label>
+                <input type="text" class="form-input" id="organizer" name="organizer" value="{{ program.organizer if program else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="target">대상</label>
+                <input type="text" class="form-input" id="target" name="target" value="{{ program.target if program else '' }}" placeholder="예: 전체 학생">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="start_date">시작일</label>
+                <input type="date" class="form-input" id="start_date" name="start_date" value="{{ program.start_date.strftime('%Y-%m-%d') if program and program.start_date else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="end_date">종료일</label>
+                <input type="date" class="form-input" id="end_date" name="end_date" value="{{ program.end_date.strftime('%Y-%m-%d') if program and program.end_date else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="application_start">신청 시작일</label>
+                <input type="date" class="form-input" id="application_start" name="application_start" value="{{ program.application_start.strftime('%Y-%m-%d') if program and program.application_start else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="application_end">신청 마감일</label>
+                <input type="date" class="form-input" id="application_end" name="application_end" value="{{ program.application_end.strftime('%Y-%m-%d') if program and program.application_end else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="location">장소</label>
+                <input type="text" class="form-input" id="location" name="location" value="{{ program.location if program else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="link">관련 링크</label>
+                <input type="url" class="form-input" id="link" name="link" value="{{ program.link if program else '' }}" placeholder="https://...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="image_url">이미지 URL</label>
+                <input type="url" class="form-input" id="image_url" name="image_url" value="{{ program.image_url if program else '' }}" placeholder="https://...">
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: var(--spacing-xs); cursor: pointer;">
+                    <input type="checkbox" name="is_active" {% if not program or program.is_active %}checked{% endif %}>
+                    <span class="form-label" style="margin: 0;">활성화</span>
+                </label>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">{% if program %}수정{% else %}추가{% endif %}</button>
+                <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

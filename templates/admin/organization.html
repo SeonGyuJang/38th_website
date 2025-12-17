@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}조직도 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <div class="flex-between">
+            <h1 style="font-size: 2rem; font-weight: 700;">조직도 관리</h1>
+            <a href="{{ url_for('admin_organization_add') }}" class="btn btn-primary">➕ 멤버 추가</a>
+        </div>
+    </div>
+
+    <div class="admin-nav">
+        <ul>
+            <li><a href="{{ url_for('admin_dashboard') }}">대시보드</a></li>
+            <li><a href="{{ url_for('admin_schedules') }}">일정 관리</a></li>
+            <li><a href="{{ url_for('admin_organization') }}" class="active">조직도 관리</a></li>
+            <li><a href="{{ url_for('admin_promises') }}">공약 관리</a></li>
+            <li><a href="{{ url_for('admin_minutes') }}">회의록 관리</a></li>
+            <li><a href="{{ url_for('admin_regulations') }}">회칙 관리</a></li>
+            <li><a href="{{ url_for('admin_programs') }}">프로그램 관리</a></li>
+        </ul>
+    </div>
+
+    {% if members %}
+    <div class="content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>직책</th>
+                    <th>부서</th>
+                    <th>전공</th>
+                    <th>학번</th>
+                    <th>순서</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td><strong>{{ member.name }}</strong></td>
+                    <td>{{ member.position }}</td>
+                    <td>{{ member.department or '-' }}</td>
+                    <td>{{ member.major or '-' }}</td>
+                    <td>{{ member.student_id or '-' }}</td>
+                    <td>{{ member.order }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_organization_edit', member_id=member.id) }}" class="btn btn-small btn-secondary">수정</a>
+                        <form method="POST" action="{{ url_for('admin_organization_delete', member_id=member.id) }}" style="display: inline;" onsubmit="return confirmDelete()">
+                            <button type="submit" class="btn btn-small" style="background: #dc3545; color: white;">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">등록된 조직도 멤버가 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

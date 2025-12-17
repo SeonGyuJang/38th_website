@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}회의록 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">회의록</h1>
+        <p class="section-subtitle">학생회 회의 내용을 투명하게 공개합니다</p>
+    </div>
+
+    {% if minutes %}
+    <div class="card-grid">
+        {% for minute in minutes %}
+        <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="card" style="text-decoration: none;">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">{{ minute.title }}</h3>
+                    <p class="card-subtitle">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
+                </div>
+                {% if minute.meeting_type %}
+                <span class="badge badge-primary">{{ minute.meeting_type }}</span>
+                {% endif %}
+            </div>
+
+            {% if minute.agenda %}
+            <div style="margin: var(--spacing-md) 0;">
+                <p style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-xs);">안건</p>
+                <p class="card-content">{{ minute.agenda[:100] }}{% if minute.agenda|length > 100 %}...{% endif %}</p>
+            </div>
+            {% endif %}
+
+            <div class="card-footer">
+                {% if minute.attendees %}
+                <span>참석자: {{ minute.attendees.split(',')[0] }}{% if minute.attendees.split(',') | length > 1 %} 외 {{ minute.attendees.split(',') | length - 1 }}명{% endif %}</span>
+                {% endif %}
+                <span style="color: var(--korea-crimson);">자세히 보기 →</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 회의록이 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

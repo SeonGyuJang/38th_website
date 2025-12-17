@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - 고려대학교 38대 총학생회</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-secondary);">
+    <div class="content" style="max-width: 400px; width: 100%; margin: var(--spacing-md);">
+        <div class="text-center" style="margin-bottom: var(--spacing-xl);">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--korea-crimson); margin-bottom: var(--spacing-xs);">
+                🎓 관리자 로그인
+            </h1>
+            <p style="color: var(--text-secondary);">고려대학교 38대 총학생회</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="margin-bottom: var(--spacing-md);">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <div class="form-group">
+                <label class="form-label" for="username">아이디</label>
+                <input type="text" class="form-input" id="username" name="username" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">비밀번호</label>
+                <input type="password" class="form-input" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-md);">
+                로그인
+            </button>
+        </form>
+
+        <div class="text-center" style="margin-top: var(--spacing-lg);">
+            <a href="{{ url_for('index') }}" style="color: var(--text-secondary); font-size: 0.875rem;">
+                ← 홈으로 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

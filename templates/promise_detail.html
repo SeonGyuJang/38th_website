@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ promise.title }} - 공약 상세 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('promises') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <!-- 공약 헤더 -->
+        <div class="flex-between" style="margin-bottom: var(--spacing-md); flex-wrap: wrap; gap: var(--spacing-sm);">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: var(--spacing-xs);">{{ promise.category }}</span>
+                <h1 class="section-title" style="margin-bottom: var(--spacing-xs);">{{ promise.title }}</h1>
+            </div>
+            <span class="badge
+                {% if promise.status == '완료' %}badge-success
+                {% elif promise.status == '진행중' %}badge-info
+                {% elif promise.status == '보류' %}badge-warning
+                {% else %}badge-secondary{% endif %}"
+                style="height: fit-content; font-size: 0.875rem; padding: 0.5rem 1rem;">
+                {{ promise.status }}
+            </span>
+        </div>
+
+        <!-- 이행률 -->
+        <div class="progress-container" style="margin-bottom: var(--spacing-xl);">
+            <div class="progress-header">
+                <span class="progress-label">이행률</span>
+                <span class="progress-value">{{ promise.progress_rate }}%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ promise.progress_rate }}%"></div>
+            </div>
+        </div>
+
+        <!-- 공약 설명 -->
+        <div style="margin-bottom: var(--spacing-xl);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">공약 내용</h2>
+            <p style="line-height: 1.8; white-space: pre-wrap;">{{ promise.description }}</p>
+        </div>
+
+        <!-- 상세 설명 -->
+        {% if promise.detailed_description %}
+        <div style="margin-bottom: var(--spacing-xl); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">상세 설명</h2>
+            <p style="line-height: 1.8; white-space: pre-wrap;">{{ promise.detailed_description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- 진행 상황 -->
+        {% if progress_updates %}
+        <div>
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">진행 상황</h2>
+            <div class="timeline">
+                {% for update in progress_updates %}
+                <div class="timeline-item">
+                    <div class="timeline-date">{{ update.date.strftime('%Y년 %m월 %d일') }}</div>
+                    <h3 class="timeline-title">{{ update.title }}</h3>
+                    <p class="timeline-content" style="white-space: pre-wrap;">{{ update.content }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

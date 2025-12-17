@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}교내 프로그램 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">교내 프로그램</h1>
+        <p class="section-subtitle">다양한 교내 프로그램 정보를 확인하세요</p>
+    </div>
+
+    {% if programs %}
+    <div class="card-grid">
+        {% for program in programs %}
+        <div class="card">
+            {% if program.image_url %}
+            <img src="{{ program.image_url }}" alt="{{ program.title }}"
+                 style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
+            {% endif %}
+
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">{{ program.title }}</h3>
+                    {% if program.organizer %}
+                    <p class="card-subtitle">{{ program.organizer }}</p>
+                    {% endif %}
+                </div>
+                {% if program.category %}
+                <span class="badge badge-info">{{ program.category }}</span>
+                {% endif %}
+            </div>
+
+            <p class="card-content">{{ program.description }}</p>
+
+            <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); font-size: 0.875rem;">
+                {% if program.target %}
+                <p style="margin-bottom: var(--spacing-xs);"><strong>대상:</strong> {{ program.target }}</p>
+                {% endif %}
+                {% if program.location %}
+                <p style="margin-bottom: var(--spacing-xs);"><strong>장소:</strong> {{ program.location }}</p>
+                {% endif %}
+                {% if program.start_date and program.end_date %}
+                <p style="margin-bottom: var(--spacing-xs);"><strong>기간:</strong> {{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</p>
+                {% elif program.start_date %}
+                <p style="margin-bottom: var(--spacing-xs);"><strong>일시:</strong> {{ program.start_date.strftime('%Y.%m.%d') }}</p>
+                {% endif %}
+                {% if program.application_start and program.application_end %}
+                <p style="margin-bottom: var(--spacing-xs); color: var(--korea-crimson); font-weight: 600;">
+                    <strong>신청기간:</strong> {{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}
+                </p>
+                {% endif %}
+            </div>
+
+            {% if program.link %}
+            <div style="margin-top: var(--spacing-md);">
+                <a href="{{ program.link }}" target="_blank" class="btn btn-primary btn-small" style="width: 100%;">자세히 보기</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 프로그램이 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

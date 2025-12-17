@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}회칙 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <div class="flex-between">
+            <h1 style="font-size: 2rem; font-weight: 700;">회칙 관리</h1>
+            <a href="{{ url_for('admin_regulation_add') }}" class="btn btn-primary">➕ 회칙 추가</a>
+        </div>
+    </div>
+
+    <div class="admin-nav">
+        <ul>
+            <li><a href="{{ url_for('admin_dashboard') }}">대시보드</a></li>
+            <li><a href="{{ url_for('admin_schedules') }}">일정 관리</a></li>
+            <li><a href="{{ url_for('admin_organization') }}">조직도 관리</a></li>
+            <li><a href="{{ url_for('admin_promises') }}">공약 관리</a></li>
+            <li><a href="{{ url_for('admin_minutes') }}">회의록 관리</a></li>
+            <li><a href="{{ url_for('admin_regulations') }}" class="active">회칙 관리</a></li>
+            <li><a href="{{ url_for('admin_programs') }}">프로그램 관리</a></li>
+        </ul>
+    </div>
+
+    {% if regulations %}
+    <div class="content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>제목</th>
+                    <th>카테고리</th>
+                    <th>순서</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for regulation in regulations %}
+                <tr>
+                    <td><strong>{{ regulation.title }}</strong></td>
+                    <td>{{ regulation.category }}</td>
+                    <td>{{ regulation.order }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_regulation_edit', regulation_id=regulation.id) }}" class="btn btn-small btn-secondary">수정</a>
+                        <form method="POST" action="{{ url_for('admin_regulation_delete', regulation_id=regulation.id) }}" style="display: inline;" onsubmit="return confirmDelete()">
+                            <button type="submit" class="btn btn-small" style="background: #dc3545; color: white;">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">등록된 회칙이 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

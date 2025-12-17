@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ minute.title }} - 회의록 상세 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('minutes') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <!-- 회의록 헤더 -->
+        <div style="margin-bottom: var(--spacing-xl);">
+            <div class="flex-between" style="margin-bottom: var(--spacing-md); flex-wrap: wrap; gap: var(--spacing-sm);">
+                <div>
+                    {% if minute.meeting_type %}
+                    <span class="badge badge-primary" style="margin-bottom: var(--spacing-xs);">{{ minute.meeting_type }}</span>
+                    {% endif %}
+                    <h1 class="section-title" style="margin-bottom: var(--spacing-xs);">{{ minute.title }}</h1>
+                    <p class="section-subtitle">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
+                </div>
+            </div>
+
+            <!-- 참석자 -->
+            {% if minute.attendees %}
+            <div style="padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--radius-sm); margin-bottom: var(--spacing-md);">
+                <p style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-xs);">참석자</p>
+                <p>{{ minute.attendees }}</p>
+            </div>
+            {% endif %}
+
+            <!-- 안건 -->
+            {% if minute.agenda %}
+            <div style="padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--radius-sm);">
+                <p style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-xs);">안건</p>
+                <p style="white-space: pre-wrap;">{{ minute.agenda }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 회의 내용 -->
+        <div style="margin-bottom: var(--spacing-xl);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">회의 내용</h2>
+            <div style="line-height: 1.8; white-space: pre-wrap;">{{ minute.content }}</div>
+        </div>
+
+        <!-- 결정사항 -->
+        {% if minute.decisions %}
+        <div style="margin-bottom: var(--spacing-xl); padding: var(--spacing-lg); background: var(--bg-tertiary); border-left: 4px solid var(--korea-crimson); border-radius: var(--radius-sm);">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">결정사항</h2>
+            <div style="line-height: 1.8; white-space: pre-wrap;">{{ minute.decisions }}</div>
+        </div>
+        {% endif %}
+
+        <!-- 첨부파일 -->
+        {% if minute.file_url %}
+        <div>
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: var(--spacing-md);">첨부파일</h2>
+            <a href="{{ minute.file_url }}" target="_blank" class="btn btn-outline">📎 첨부파일 다운로드</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

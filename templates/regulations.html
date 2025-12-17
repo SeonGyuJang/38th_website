@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}회칙 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h1 class="section-title">회칙</h1>
+        <p class="section-subtitle">각 단위 회칙을 열람하실 수 있습니다</p>
+    </div>
+
+    {% if categories %}
+        {% for category, regulations_list in categories.items() %}
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title" style="font-size: 1.5rem;">{{ category }}</h2>
+            </div>
+
+            <div class="content">
+                {% for regulation in regulations_list %}
+                <div style="margin-bottom: var(--spacing-lg); {% if not loop.last %}padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--border-color);{% endif %}">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--spacing-md); color: var(--korea-crimson);">
+                        {{ regulation.title }}
+                    </h3>
+                    <div style="line-height: 1.8; white-space: pre-wrap; color: var(--text-primary);">
+                        {{ regulation.content }}
+                    </div>
+                    {% if regulation.file_url %}
+                    <div style="margin-top: var(--spacing-md);">
+                        <a href="{{ regulation.file_url }}" target="_blank" class="btn btn-outline btn-small">📄 전문 보기</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+            등록된 회칙이 없습니다.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
