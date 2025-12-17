@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization
+from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner
 from config import Config
 from datetime import datetime
 import os
@@ -24,9 +24,55 @@ def load_user(user_id):
 @app.route('/')
 def index():
     """홈페이지"""
-    recent_schedules = Schedule.query.order_by(Schedule.start_date.desc()).limit(3).all()
-    recent_programs = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).limit(4).all()
-    return render_template('index.html', schedules=recent_schedules, programs=recent_programs)
+    # 배너 가져오기 (이벤트 배너 우선, 없으면 기본 배너)
+    banner = Banner.query.filter_by(is_active=True, is_event_banner=True).order_by(Banner.order).first()
+    if not banner:
+        banner = Banner.query.filter_by(is_active=True, is_event_banner=False).order_by(Banner.order).first()
+
+    # 조직도 데이터 구조화
+    organization_data = None
+    all_members = Organization.query.order_by(Organization.order).all()
+    if all_members:
+        organization_data = {
+            'presidents': [],  # 총학생회장, 부총학생회장
+            'chairs': [],  # 위원장들
+            'departments': {}  # 부서별 그룹
+        }
+
+        for member in all_members:
+            position = member.position.lower()
+            if '총학생회장' in position or '회장' in position:
+                organization_data['presidents'].append(member)
+            elif '위원장' in position:
+                organization_data['chairs'].append(member)
+            elif member.department:
+                if member.department not in organization_data['departments']:
+                    organization_data['departments'][member.department] = []
+                organization_data['departments'][member.department].append(member)
+
+    # 공약 이행률 계산
+    promises_list = Promise.query.all()
+    promise_rate = 0
+    if promises_list:
+        total_progress = sum(p.progress_rate for p in promises_list)
+        promise_rate = total_progress / len(promises_list)
+
+    # 상위 공약 3개
+    top_promises = Promise.query.order_by(Promise.progress_rate.desc(), Promise.order).limit(3).all()
+
+    # 최근 회의록 3개
+    recent_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).limit(3).all()
+
+    # 최근 회칙 3개
+    recent_regulations = Regulation.query.order_by(Regulation.order).limit(3).all()
+
+    return render_template('index.html',
+                         banner=banner,
+                         organization_data=organization_data,
+                         promise_rate=promise_rate,
+                         top_promises=top_promises,
+                         recent_minutes=recent_minutes,
+                         recent_regulations=recent_regulations)
 
 
 @app.route('/schedule')
@@ -443,6 +489,68 @@ def admin_program_delete(program_id):
     db.session.commit()
     flash('프로그램이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_programs'))
+
+
+# ============ Admin Banner Management ============
+
+@app.route('/admin/banners')
+@login_required
+def admin_banners():
+    """관리자 배너 관리"""
+    banners = Banner.query.order_by(Banner.order).all()
+    return render_template('admin/banners.html', banners=banners)
+
+
+@app.route('/admin/banners/add', methods=['GET', 'POST'])
+@login_required
+def admin_banner_add():
+    """배너 추가"""
+    if request.method == 'POST':
+        banner = Banner(
+            title=request.form['title'],
+            image_url=request.form['image_url'],
+            link=request.form.get('link'),
+            is_active=request.form.get('is_active') == 'on',
+            is_event_banner=request.form.get('is_event_banner') == 'on',
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(banner)
+        db.session.commit()
+        flash('배너가 추가되었습니다.', 'success')
+        return redirect(url_for('admin_banners'))
+
+    return render_template('admin/banner_form.html')
+
+
+@app.route('/admin/banners/edit/<int:banner_id>', methods=['GET', 'POST'])
+@login_required
+def admin_banner_edit(banner_id):
+    """배너 수정"""
+    banner = Banner.query.get_or_404(banner_id)
+
+    if request.method == 'POST':
+        banner.title = request.form['title']
+        banner.image_url = request.form['image_url']
+        banner.link = request.form.get('link')
+        banner.is_active = request.form.get('is_active') == 'on'
+        banner.is_event_banner = request.form.get('is_event_banner') == 'on'
+        banner.order = int(request.form.get('order', 0))
+        db.session.commit()
+        flash('배너가 수정되었습니다.', 'success')
+        return redirect(url_for('admin_banners'))
+
+    return render_template('admin/banner_form.html', banner=banner)
+
+
+@app.route('/admin/banners/delete/<int:banner_id>', methods=['POST'])
+@login_required
+def admin_banner_delete(banner_id):
+    """배너 삭제"""
+    banner = Banner.query.get_or_404(banner_id)
+    db.session.delete(banner)
+    db.session.commit()
+    flash('배너가 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_banners'))
 
 
 # ============ Admin Organization Management ============

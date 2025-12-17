@@ -3,58 +3,122 @@
 {% block title %}고려대학교 38대 총학생회 - 홈{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-content">
-        <h1 class="hero-title">고려대학교 38대 총학생회</h1>
-        <p class="hero-subtitle">학우 여러분과 함께 만들어가는 더 나은 캠퍼스</p>
+<!-- Banner Section -->
+{% if banner %}
+<section class="main-banner">
+    {% if banner.link %}
+    <a href="{{ banner.link }}" {% if banner.link.startswith('http') %}target="_blank"{% endif %}>
+        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" class="banner-image">
+    </a>
+    {% else %}
+    <img src="{{ banner.image_url }}" alt="{{ banner.title }}" class="banner-image">
+    {% endif %}
+</section>
+{% endif %}
+
+<!-- Slogan Section -->
+<section class="slogan-section">
+    <div class="slogan-container">
+        <div class="slogan-badge">고려대학교 제38대 총학생회</div>
+        <h1 class="slogan-title">非凡</h1>
+        <p class="slogan-text">여러분의 평범한 하루를, 비범한 순간으로!</p>
     </div>
 </section>
 
 <div class="container">
-    <!-- 최근 일정 Section -->
+    <!-- Organization Chart Section -->
     <section class="section">
         <div class="section-header">
-            <h2 class="section-title">다가오는 일정</h2>
-            <p class="section-subtitle">학생회의 주요 일정을 확인하세요</p>
+            <h2 class="section-title">조직도</h2>
+            <p class="section-subtitle">38대 총학생회 임원진을 소개합니다</p>
         </div>
 
-        {% if schedules %}
-        <div class="card-grid">
-            {% for schedule in schedules %}
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">{{ schedule.title }}</h3>
-                        <p class="card-subtitle">
-                            {{ schedule.start_date.strftime('%Y.%m.%d') }}
-                            {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
-                            {{ schedule.start_date.strftime('%H:%M') }}
-                            {% endif %}
-                        </p>
+        {% if organization_data %}
+        <div class="org-chart">
+            <!-- Row 1: 총학생회장, 부총학생회장 -->
+            {% if organization_data.presidents %}
+            <div class="org-row org-row-presidents">
+                {% for member in organization_data.presidents %}
+                <div class="org-card org-card-president">
+                    {% if member.photo_url %}
+                    <div class="org-photo">
+                        <img src="{{ member.photo_url }}" alt="{{ member.name }}">
                     </div>
-                    {% if schedule.category %}
-                    <span class="badge badge-primary">{{ schedule.category }}</span>
+                    {% else %}
+                    <div class="org-photo org-photo-placeholder">
+                        <span>👤</span>
+                    </div>
                     {% endif %}
+                    <div class="org-info">
+                        <div class="org-position">{{ member.position }}</div>
+                        <div class="org-name">{{ member.name }}</div>
+                        {% if member.major %}<div class="org-detail">{{ member.major }}</div>{% endif %}
+                    </div>
                 </div>
-                {% if schedule.description %}
-                <p class="card-content">{{ schedule.description }}</p>
-                {% endif %}
-                {% if schedule.location %}
-                <div class="card-footer">
-                    <span>📍 {{ schedule.location }}</span>
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% endif %}
+
+            <!-- Row 2: 위원장들 -->
+            {% if organization_data.chairs %}
+            <div class="org-row org-row-chairs">
+                {% for member in organization_data.chairs %}
+                <div class="org-card org-card-chair">
+                    {% if member.photo_url %}
+                    <div class="org-photo org-photo-small">
+                        <img src="{{ member.photo_url }}" alt="{{ member.name }}">
+                    </div>
+                    {% else %}
+                    <div class="org-photo org-photo-small org-photo-placeholder">
+                        <span>👤</span>
+                    </div>
+                    {% endif %}
+                    <div class="org-info">
+                        <div class="org-position">{{ member.position }}</div>
+                        <div class="org-name">{{ member.name }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Row 3+: 국별 부서들 -->
+            {% if organization_data.departments %}
+            <div class="org-departments">
+                {% for dept_name, members in organization_data.departments.items() %}
+                <div class="org-department-group">
+                    <h3 class="org-department-title">{{ dept_name }}</h3>
+                    <div class="org-department-members">
+                        {% for member in members %}
+                        <div class="org-card org-card-member">
+                            {% if member.photo_url %}
+                            <div class="org-photo org-photo-tiny">
+                                <img src="{{ member.photo_url }}" alt="{{ member.name }}">
+                            </div>
+                            {% else %}
+                            <div class="org-photo org-photo-tiny org-photo-placeholder">
+                                <span>👤</span>
+                            </div>
+                            {% endif %}
+                            <div class="org-info">
+                                <div class="org-position">{{ member.position }}</div>
+                                <div class="org-name">{{ member.name }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('schedule') }}" class="btn btn-primary">전체 일정 보기</a>
+            <a href="{{ url_for('organization') }}" class="btn btn-outline">전체 조직도 보기</a>
         </div>
         {% else %}
         <div class="content">
-            <p class="text-center" style="color: var(--text-secondary);">등록된 일정이 없습니다.</p>
+            <p class="text-center" style="color: var(--text-secondary);">조직도 정보가 준비 중입니다.</p>
         </div>
         {% endif %}
     </section>
@@ -71,89 +135,104 @@
                 <div class="progress-container">
                     <div class="progress-header">
                         <span class="progress-label">전체 공약 이행률</span>
-                        <span class="progress-value">--%</span>
+                        <span class="progress-value">{{ '%.1f'|format(promise_rate) }}%</span>
                     </div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: 0%"></div>
+                        <div class="progress-bar-fill" style="width: {{ promise_rate }}%"></div>
                     </div>
                 </div>
             </a>
 
+            {% if top_promises %}
+            <div class="card-grid" style="margin-top: var(--spacing-lg);">
+                {% for promise in top_promises %}
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">{{ promise.title }}</h3>
+                            <p class="card-subtitle">{{ promise.category }}</p>
+                        </div>
+                        <span class="badge {% if promise.status == '완료' %}badge-success{% elif promise.status == '진행중' %}badge-primary{% else %}badge-secondary{% endif %}">
+                            {{ promise.status }}
+                        </span>
+                    </div>
+                    <p class="card-content">{{ promise.description[:80] }}{% if promise.description|length > 80 %}...{% endif %}</p>
+                    <div class="card-footer">
+                        <div class="progress-bar-bg" style="height: 6px;">
+                            <div class="progress-bar-fill" style="width: {{ promise.progress_rate }}%; height: 6px;"></div>
+                        </div>
+                        <span style="font-size: 0.8125rem; margin-top: 0.25rem; display: block;">{{ promise.progress_rate }}% 이행</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="text-center mt-4">
-                <a href="{{ url_for('promises') }}" class="btn btn-outline">공약 자세히 보기</a>
+                <a href="{{ url_for('promises') }}" class="btn btn-primary">공약 자세히 보기</a>
             </div>
         </div>
     </section>
 
-    <!-- 교내 프로그램 Section -->
-    {% if programs %}
+    <!-- 회의록 Section -->
+    {% if recent_minutes %}
     <section class="section">
         <div class="section-header">
-            <h2 class="section-title">교내 프로그램</h2>
-            <p class="section-subtitle">다양한 교내 프로그램에 참여해보세요</p>
+            <h2 class="section-title">회의록</h2>
+            <p class="section-subtitle">학생회 회의 내용을 투명하게 공개합니다</p>
         </div>
 
         <div class="card-grid">
-            {% for program in programs[:4] %}
-            <div class="card">
-                {% if program.image_url %}
-                <img src="{{ program.image_url }}" alt="{{ program.title }}" style="width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
-                {% endif %}
+            {% for minute in recent_minutes %}
+            <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="card" style="text-decoration: none;">
                 <div class="card-header">
                     <div>
-                        <h3 class="card-title">{{ program.title }}</h3>
-                        {% if program.organizer %}
-                        <p class="card-subtitle">{{ program.organizer }}</p>
-                        {% endif %}
+                        <h3 class="card-title">{{ minute.title }}</h3>
+                        <p class="card-subtitle">{{ minute.meeting_date.strftime('%Y.%m.%d') }}</p>
                     </div>
-                    {% if program.category %}
-                    <span class="badge badge-info">{{ program.category }}</span>
+                    {% if minute.meeting_type %}
+                    <span class="badge badge-info">{{ minute.meeting_type }}</span>
                     {% endif %}
                 </div>
-                <p class="card-content">{{ program.description[:100] }}{% if program.description|length > 100 %}...{% endif %}</p>
-                <div class="card-footer">
-                    {% if program.application_end %}
-                    <span style="font-size: 0.8125rem;">신청마감: {{ program.application_end.strftime('%m.%d') }}</span>
-                    {% endif %}
-                    {% if program.link %}
-                    <a href="{{ program.link }}" target="_blank" class="btn btn-small btn-primary">자세히 보기</a>
-                    {% endif %}
-                </div>
-            </div>
+                {% if minute.agenda %}
+                <p class="card-content">{{ minute.agenda[:100] }}{% if minute.agenda|length > 100 %}...{% endif %}</p>
+                {% endif %}
+            </a>
             {% endfor %}
         </div>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('programs') }}" class="btn btn-primary">전체 프로그램 보기</a>
+            <a href="{{ url_for('minutes') }}" class="btn btn-outline">전체 회의록 보기</a>
         </div>
     </section>
     {% endif %}
 
-    <!-- Quick Links -->
+    <!-- 회칙 Section -->
+    {% if recent_regulations %}
     <section class="section">
         <div class="section-header">
-            <h2 class="section-title">바로가기</h2>
+            <h2 class="section-title">회칙</h2>
+            <p class="section-subtitle">각 단위 회칙을 열람하실 수 있습니다</p>
         </div>
 
         <div class="card-grid">
-            <a href="{{ url_for('organization') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">👥</div>
-                <h3 class="card-title">조직도</h3>
-                <p class="card-content">학생회 임원진을 소개합니다</p>
-            </a>
-
-            <a href="{{ url_for('minutes') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">📋</div>
-                <h3 class="card-title">회의록</h3>
-                <p class="card-content">학생회 회의 내용을 확인하세요</p>
-            </a>
-
+            {% for regulation in recent_regulations %}
             <a href="{{ url_for('regulations') }}" class="card" style="text-decoration: none;">
                 <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">📜</div>
-                <h3 class="card-title">회칙</h3>
-                <p class="card-content">각 단위 회칙을 열람하세요</p>
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">{{ regulation.title }}</h3>
+                        <p class="card-subtitle">{{ regulation.category }}</p>
+                    </div>
+                </div>
             </a>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('regulations') }}" class="btn btn-outline">전체 회칙 보기</a>
         </div>
     </section>
+    {% endif %}
 </div>
 {% endblock %}

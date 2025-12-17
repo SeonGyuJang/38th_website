@@ -125,3 +125,16 @@ class Organization(db.Model):
 
     # 하위 조직 관계
     children = db.relationship('Organization', backref=db.backref('parent', remote_side=[id]))
+
+
+class Banner(db.Model):
+    """메인 페이지 배너 모델"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)  # 배너 이미지 URL
+    link = db.Column(db.String(500))  # 배너 클릭 시 이동할 링크
+    is_active = db.Column(db.Boolean, default=True)  # 활성화 여부
+    is_event_banner = db.Column(db.Boolean, default=False)  # True: 이벤트 배너, False: 기본 배너
+    order = db.Column(db.Integer, default=0)  # 정렬 순서
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

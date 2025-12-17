@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{% if banner %}배너 수정{% else %}배너 추가{% endif %} - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1 style="font-size: 2rem; font-weight: 700;">{% if banner %}배너 수정{% else %}배너 추가{% endif %}</h1>
+    </div>
+
+    <div style="margin-bottom: var(--spacing-md);">
+        <a href="{{ url_for('admin_banners') }}" class="btn btn-secondary btn-small">← 목록으로</a>
+    </div>
+
+    <div class="content">
+        <form method="POST" data-validate>
+            <div class="form-group">
+                <label class="form-label" for="title">배너 제목 *</label>
+                <input type="text" class="form-input" id="title" name="title" value="{{ banner.title if banner else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="image_url">이미지 URL *</label>
+                <input type="url" class="form-input" id="image_url" name="image_url" value="{{ banner.image_url if banner else '' }}" required placeholder="https://...">
+                <small style="color: var(--text-secondary); font-size: 0.875rem;">권장 비율: 1920x600 (PC), 모바일 대응 권장</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="link">링크 URL</label>
+                <input type="url" class="form-input" id="link" name="link" value="{{ banner.link if banner else '' }}" placeholder="https://...">
+                <small style="color: var(--text-secondary); font-size: 0.875rem;">배너 클릭 시 이동할 URL (선택사항)</small>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" name="is_active" {% if not banner or banner.is_active %}checked{% endif %} style="margin-right: 8px; width: 18px; height: 18px;">
+                    <span>활성화</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" name="is_event_banner" {% if banner and banner.is_event_banner %}checked{% endif %} style="margin-right: 8px; width: 18px; height: 18px;">
+                    <span>이벤트 배너 (체크하면 이벤트 배너, 미체크시 기본 배너)</span>
+                </label>
+                <small style="color: var(--text-secondary); font-size: 0.875rem;">이벤트 배너가 활성화되어 있으면 기본 배너 대신 표시됩니다</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="order">정렬 순서</label>
+                <input type="number" class="form-input" id="order" name="order" value="{{ banner.order if banner else 0 }}">
+                <small style="color: var(--text-secondary); font-size: 0.875rem;">숫자가 작을수록 우선 표시</small>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">{% if banner %}수정{% else %}추가{% endif %}</button>
+                <a href="{{ url_for('admin_banners') }}" class="btn btn-secondary">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

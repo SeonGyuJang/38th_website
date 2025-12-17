@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}배너 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <div class="flex-between">
+            <h1 style="font-size: 2rem; font-weight: 700;">배너 관리</h1>
+            <a href="{{ url_for('admin_banner_add') }}" class="btn btn-primary">➕ 배너 추가</a>
+        </div>
+    </div>
+
+    <div class="admin-nav">
+        <ul>
+            <li><a href="{{ url_for('admin_dashboard') }}">대시보드</a></li>
+            <li><a href="{{ url_for('admin_schedules') }}">일정 관리</a></li>
+            <li><a href="{{ url_for('admin_organization') }}">조직도 관리</a></li>
+            <li><a href="{{ url_for('admin_promises') }}">공약 관리</a></li>
+            <li><a href="{{ url_for('admin_minutes') }}">회의록 관리</a></li>
+            <li><a href="{{ url_for('admin_regulations') }}">회칙 관리</a></li>
+            <li><a href="{{ url_for('admin_programs') }}">프로그램 관리</a></li>
+            <li><a href="{{ url_for('admin_banners') }}" class="active">배너 관리</a></li>
+        </ul>
+    </div>
+
+    {% if banners %}
+    <div class="content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>미리보기</th>
+                    <th>제목</th>
+                    <th>타입</th>
+                    <th>활성화</th>
+                    <th>순서</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for banner in banners %}
+                <tr>
+                    <td>
+                        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100px; height: 50px; object-fit: cover; border-radius: 4px;">
+                    </td>
+                    <td><strong>{{ banner.title }}</strong></td>
+                    <td>
+                        {% if banner.is_event_banner %}
+                        <span class="badge badge-primary">이벤트</span>
+                        {% else %}
+                        <span class="badge badge-secondary">기본</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if banner.is_active %}
+                        <span class="badge badge-success">활성</span>
+                        {% else %}
+                        <span class="badge badge-secondary">비활성</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ banner.order }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_banner_edit', banner_id=banner.id) }}" class="btn btn-small btn-secondary">수정</a>
+                        <form method="POST" action="{{ url_for('admin_banner_delete', banner_id=banner.id) }}" style="display: inline;" onsubmit="return confirmDelete()">
+                            <button type="submit" class="btn btn-small" style="background: #dc3545; color: white;">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="content">
+        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">등록된 배너가 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
