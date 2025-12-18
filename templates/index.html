@@ -3,14 +3,15 @@
 {% block content %}
 <section style="padding-top: 52px;">
     {% if banner %}
-    <div style="width: 100%; height: clamp(300px, 60vw, 500px); background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url('{{ banner.image_url }}') center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: white;">
-        <div style="text-align: center; padding: 0 20px;">
-            <h1 style="font-size: clamp(1.8rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em;">{{ banner.title }}</h1>
-            {% if banner.link %}
-            <a href="{{ banner.link }}" class="btn-ku" style="background: white; color: var(--ku-crimson);">자세히 보기</a>
-            {% endif %}
-        </div>
+    {% if banner.link %}
+    <a href="{{ banner.link }}" style="display: block; width: 100%; background: var(--bg-secondary); cursor: pointer;">
+        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: auto; max-width: 100%; display: block; object-fit: contain;">
+    </a>
+    {% else %}
+    <div style="width: 100%; background: var(--bg-secondary);">
+        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: auto; max-width: 100%; display: block; object-fit: contain;">
     </div>
+    {% endif %}
     {% else %}
     <div style="padding: clamp(60px, 15vw, 120px) 24px; text-align: center; background: var(--bg-secondary);">
         <h1 style="font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--ku-crimson); letter-spacing: -0.03em;">비범한 순간을 위해</h1>
