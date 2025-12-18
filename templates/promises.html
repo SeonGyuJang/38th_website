@@ -88,11 +88,11 @@
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% set category_colors = {
-            0: {'gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'solid': '#667eea', 'light': '#f0f0ff', 'glow': 'rgba(102, 126, 234, 0.25)'},
-            1: {'gradient': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 'solid': '#f5576c', 'light': '#fff0f5', 'glow': 'rgba(245, 87, 108, 0.25)'},
-            2: {'gradient': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'solid': '#4facfe', 'light': '#f0faff', 'glow': 'rgba(79, 172, 254, 0.25)'},
-            3: {'gradient': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'solid': '#43e97b', 'light': '#f0fff8', 'glow': 'rgba(67, 233, 123, 0.25)'},
-            4: {'gradient': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'solid': '#fa709a', 'light': '#fff8f0', 'glow': 'rgba(250, 112, 154, 0.25)'}
+            0: {'solid': '#007AFF', 'light': 'rgba(0, 122, 255, 0.1)', 'glow': 'rgba(0, 122, 255, 0.25)'},
+            1: {'solid': '#34C759', 'light': 'rgba(52, 199, 89, 0.1)', 'glow': 'rgba(52, 199, 89, 0.25)'},
+            2: {'solid': '#FF9500', 'light': 'rgba(255, 149, 0, 0.1)', 'glow': 'rgba(255, 149, 0, 0.25)'},
+            3: {'solid': '#5856D6', 'light': 'rgba(88, 86, 214, 0.1)', 'glow': 'rgba(88, 86, 214, 0.25)'},
+            4: {'solid': '#FF3B30', 'light': 'rgba(255, 59, 48, 0.1)', 'glow': 'rgba(255, 59, 48, 0.25)'}
         } %}
 
         {% for category, promises_list in categories.items() %}
@@ -102,9 +102,7 @@
 
         <section class="promise-section" data-category="{{ category }}" style="margin-bottom: 100px;">
             <!-- 카테고리 헤더 카드 -->
-            <div style="background: white; border-radius: 24px; padding: clamp(32px, 6vw, 48px); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06); border: 2px solid {{ colors.light }}; margin-bottom: 36px; position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0, 0, 0, 0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 24px rgba(0, 0, 0, 0.06)';">
-                <!-- 배경 그라데이션 -->
-                <div style="position: absolute; top: -100px; right: -100px; width: 250px; height: 250px; background: {{ colors.gradient }}; opacity: 0.05; border-radius: 50%; filter: blur(60px);"></div>
+            <div style="background: white; border-radius: 24px; padding: clamp(32px, 6vw, 48px); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06); border: 2px solid rgba(0, 0, 0, 0.06); margin-bottom: 36px; position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px {{ colors.glow }}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 24px rgba(0, 0, 0, 0.06)';">
 
                 <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
@@ -124,19 +122,13 @@
                     <div style="position: relative; width: 140px; height: 140px; flex-shrink: 0;">
                         <svg width="140" height="140" style="transform: rotate(-90deg);">
                             <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.light }}" stroke-width="12"/>
-                            <circle cx="70" cy="70" r="60" fill="none" stroke="url(#catGradient{{ category_index }})" stroke-width="12"
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.solid }}" stroke-width="12"
                                     stroke-dasharray="{{ (category_progress * 3.77)|round(2) }} 377"
                                     stroke-linecap="round"
                                     style="transition: stroke-dasharray 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); filter: drop-shadow(0 2px 8px {{ colors.glow }});"/>
-                            <defs>
-                                <linearGradient id="catGradient{{ category_index }}" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:{{ colors.solid }};stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:{{ colors.solid }};stop-opacity:0.6" />
-                                </linearGradient>
-                            </defs>
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                            <div style="font-size: 2.2rem; font-weight: 900; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">{{ category_progress }}</div>
+                            <div style="font-size: 2.2rem; font-weight: 900; color: {{ colors.solid }}; line-height: 1;">{{ category_progress }}</div>
                             <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; margin-top: 2px;">%</div>
                         </div>
                     </div>
@@ -151,7 +143,7 @@
                    onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
 
                     <!-- 상단 색상 인디케이터 -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.gradient }};"></div>
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.solid }};"></div>
 
                     <div style="padding-top: 8px; display: flex; flex-direction: column; height: 100%;">
                         <!-- 헤더 -->
@@ -174,10 +166,10 @@
                         <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-light);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">이행률</span>
-                                <span style="font-size: 1.3rem; font-weight: 800; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ promise.progress_rate }}%</span>
+                                <span style="font-size: 1.3rem; font-weight: 800; color: {{ colors.solid }};">{{ promise.progress_rate }}%</span>
                             </div>
                             <div style="background: {{ colors.light }}; border-radius: 100px; height: 10px; overflow: hidden; position: relative;">
-                                <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.gradient }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
+                                <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.solid }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
                             </div>
                         </div>
                     </div>

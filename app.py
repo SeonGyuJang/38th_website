@@ -57,8 +57,18 @@ def index():
 
 @app.route('/schedule')
 def schedule():
-    schedules = Schedule.query.order_by(Schedule.start_date.desc()).all()
-    return render_template('schedule.html', schedules=schedules)
+    schedules_query = Schedule.query.order_by(Schedule.start_date.desc()).all()
+    # Serialize Schedule objects for JSON compatibility
+    schedules = [{
+        'id': s.id,
+        'title': s.title,
+        'description': s.description,
+        'start_date': s.start_date.isoformat() if s.start_date else None,
+        'end_date': s.end_date.isoformat() if s.end_date else None,
+        'location': s.location,
+        'category': s.category
+    } for s in schedules_query]
+    return render_template('schedule.html', schedules=schedules, schedules_raw=schedules_query)
 
 @app.route('/organization')
 def organization():

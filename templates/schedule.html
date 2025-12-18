@@ -84,7 +84,7 @@
         </div>
     </div>
 
-    {% if schedules %}
+    {% if schedules_raw %}
     <!-- 캘린더 뷰 -->
     <div id="calendar-view" style="max-width: 1000px; margin: 0 auto;">
         <!-- 월 네비게이션 -->
@@ -130,7 +130,7 @@
     <!-- 리스트 뷰 -->
     <div id="list-view" style="display: none; max-width: 900px; margin: 0 auto;">
         <div style="display: grid; gap: 24px;">
-            {% for schedule in schedules %}
+            {% for schedule in schedules_raw %}
             <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; position: relative;"
                  onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.boxShadow='0 8px 32px rgba(0, 122, 255, 0.15)'; this.style.transform='translateY(-4px)';"
                  onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 16px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
