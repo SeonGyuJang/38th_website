@@ -12,7 +12,7 @@
                     관리자 대시보드
                 </h1>
                 <p style="font-size: 1rem; color: var(--text-secondary);">
-                    <span style="font-weight: 600; color: var(--korea-crimson);">{{ current_user.name }}</span>님, 환영합니다!
+                    <span style="font-weight: 600; color: var(--apple-blue);">{{ current_user.name }}</span>님, 환영합니다!
                 </p>
             </div>
         </div>
@@ -61,7 +61,7 @@
     <div style="margin-bottom: 60px;">
         <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 24px;">콘텐츠 관리</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-            <a href="{{ url_for('admin_schedules') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_schedules') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     📅
                 </div>
@@ -71,8 +71,8 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_organization') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
-                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+            <a href="{{ url_for('admin_organization') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     👥
                 </div>
                 <div>
@@ -81,7 +81,7 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_promises') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_promises') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     📋
                 </div>
@@ -91,7 +91,7 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_minutes') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_minutes') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     📝
                 </div>
@@ -101,7 +101,7 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_regulations') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_regulations') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     📜
                 </div>
@@ -111,7 +111,7 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_programs') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_programs') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     🎯
                 </div>
@@ -121,7 +121,7 @@
                 </div>
             </a>
 
-            <a href="{{ url_for('admin_banners') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+            <a href="{{ url_for('admin_banners') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
                 <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
                     🖼️
                 </div>
@@ -137,22 +137,22 @@
     <div>
         <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 24px;">빠른 작업</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
-            <a href="{{ url_for('admin_schedule_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <a href="{{ url_for('admin_schedule_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
                 <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">일정 추가</div>
             </a>
 
-            <a href="{{ url_for('admin_promise_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <a href="{{ url_for('admin_promise_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
                 <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">공약 추가</div>
             </a>
 
-            <a href="{{ url_for('admin_minute_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <a href="{{ url_for('admin_minute_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
                 <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">회의록 추가</div>
             </a>
 
-            <a href="{{ url_for('admin_program_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <a href="{{ url_for('admin_program_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
                 <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">프로그램 추가</div>
             </a>

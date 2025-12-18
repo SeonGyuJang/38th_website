@@ -7,7 +7,7 @@
     <div style="max-width: 800px; margin: 0 auto;">
         <!-- 헤더 -->
         <div style="margin-bottom: 40px;">
-            <a href="{{ url_for('admin_banners') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+            <a href="{{ url_for('admin_banners') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
@@ -23,7 +23,7 @@
             <form method="POST" enctype="multipart/form-data">
                 <div style="margin-bottom: 28px;">
                     <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
-                        배너 제목 <span style="color: var(--korea-crimson);">*</span>
+                        배너 제목 <span style="color: var(--apple-blue);">*</span>
                     </label>
                     <input
                         type="text"
@@ -32,7 +32,7 @@
                         value="{{ banner.title if banner else '' }}"
                         required
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="배너 제목을 입력하세요"
                     >
@@ -48,7 +48,7 @@
                         name="link"
                         value="{{ banner.link if banner else '' }}"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="https://..."
                     >
@@ -79,7 +79,7 @@
                             name="image_url_text"
                             value="{{ banner.image_url if banner and banner.image_url.startswith('http') and not banner.image_url.startswith('/') else '' }}"
                             style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
-                            onfocus="this.style.borderColor='var(--korea-crimson)';"
+                            onfocus="this.style.borderColor='var(--apple-blue)';"
                             onblur="this.style.borderColor='var(--border-color)';"
                             placeholder="https://..."
                         >
@@ -91,12 +91,12 @@
                         옵션
                     </label>
                     <div style="display: flex; flex-direction: column; gap: 14px;">
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: white; border-radius: var(--radius-md); border: 2px solid var(--border-color); transition: var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)';" onmouseout="this.style.borderColor='var(--border-color)';">
-                            <input type="checkbox" name="is_active" {% if not banner or banner.is_active %}checked{% endif %} style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--korea-crimson);">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: white; border-radius: var(--radius-md); border: 2px solid var(--border-color); transition: var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)';" onmouseout="this.style.borderColor='var(--border-color)';">
+                            <input type="checkbox" name="is_active" {% if not banner or banner.is_active %}checked{% endif %} style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--apple-blue);">
                             <span style="font-weight: 600; font-size: 0.95rem;">활성화</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: white; border-radius: var(--radius-md); border: 2px solid var(--border-color); transition: var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)';" onmouseout="this.style.borderColor='var(--border-color)';">
-                            <input type="checkbox" name="is_event_banner" {% if banner and banner.is_event_banner %}checked{% endif %} style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--korea-crimson);">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px; background: white; border-radius: var(--radius-md); border: 2px solid var(--border-color); transition: var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)';" onmouseout="this.style.borderColor='var(--border-color)';">
+                            <input type="checkbox" name="is_event_banner" {% if banner and banner.is_event_banner %}checked{% endif %} style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--apple-blue);">
                             <span style="font-weight: 600; font-size: 0.95rem;">이벤트 배너 (우선 노출)</span>
                         </label>
                     </div>
@@ -112,7 +112,7 @@
                         name="order"
                         value="{{ banner.order if banner else 0 }}"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="작을수록 먼저 표시됩니다"
                     >
@@ -121,7 +121,7 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <button
                         type="submit"
-                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
                     >

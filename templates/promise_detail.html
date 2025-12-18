@@ -6,7 +6,7 @@
 <div class="container" style="padding-top: 100px; padding-bottom: 80px;">
     <div style="max-width: 900px; margin: 0 auto;">
         <!-- 뒤로 가기 -->
-        <a href="{{ url_for('promises') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 32px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+        <a href="{{ url_for('promises') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 32px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -36,7 +36,7 @@
             </div>
 
             <!-- 이행률 카드 -->
-            <div style="background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 48px; color: white; position: relative; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 48px; color: white; position: relative; overflow: hidden;">
                 <div style="position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; filter: blur(40px);"></div>
                 <div style="position: relative; z-index: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
@@ -63,7 +63,7 @@
                 <div style="background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border-light);">
                     <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke="var(--korea-crimson)" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke="var(--apple-blue)" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                         상세 설명
                     </h2>
@@ -77,18 +77,18 @@
             <div>
                 <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 32px; display: flex; align-items: center; gap: 10px;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="var(--korea-crimson)" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="var(--apple-blue)" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                     진행 상황
                 </h2>
                 <div style="position: relative; padding-left: 32px;">
                     <!-- 타임라인 라인 -->
-                    <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--korea-crimson) 0%, var(--korea-crimson-light) 100%);"></div>
+                    <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--apple-blue) 0%, var(--apple-blue-light) 100%);"></div>
 
                     {% for update in progress_updates %}
                     <div style="position: relative; margin-bottom: 32px; padding-left: 28px;">
                         <!-- 타임라인 도트 -->
-                        <div style="position: absolute; left: 0; top: 4px; width: 24px; height: 24px; background: white; border: 4px solid var(--korea-crimson); border-radius: 50%; box-shadow: 0 2px 8px rgba(150, 26, 50, 0.3);"></div>
+                        <div style="position: absolute; left: 0; top: 4px; width: 24px; height: 24px; background: white; border: 4px solid var(--apple-blue); border-radius: 50%; box-shadow: 0 2px 8px rgba(150, 26, 50, 0.3);"></div>
 
                         <!-- 콘텐츠 -->
                         <div style="background: white; border-radius: var(--radius-md); padding: 20px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);">

@@ -3,107 +3,134 @@
 {% block title %}공약 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 100px;">
-    <div style="margin-bottom: 60px; text-align: center;">
-        <h1 style="font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">공약</h1>
-        <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">학우 여러분과의 약속을 지켜나가겠습니다</p>
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    <!-- 헤더 -->
+    <div style="margin-bottom: 70px; text-align: center;">
+        <p style="color: var(--apple-blue); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">공약 이행 현황</h1>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">학우 여러분과의 약속을 투명하게 공개하고, 지켜나가겠습니다</p>
     </div>
 
-    <!-- 전체 이행률 카드 -->
-    <div style="background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); border-radius: var(--radius-xl); padding: clamp(40px, 7vw, 60px); text-align: center; color: white; box-shadow: var(--shadow-xl); margin-bottom: 60px; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.1); filter: blur(40px);"></div>
-        <div style="position: absolute; bottom: -80px; left: -80px; width: 250px; height: 250px; border-radius: 50%; background: rgba(0,0,0,0.1); filter: blur(60px);"></div>
+    <!-- 전체 이행률 히어로 카드 -->
+    <div style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-2xl); padding: clamp(50px, 8vw, 80px) clamp(30px, 6vw, 60px); text-align: center; color: white; box-shadow: 0 20px 60px rgba(0, 122, 255, 0.35); margin-bottom: 80px; position: relative; overflow: hidden;">
+        <!-- 배경 장식 -->
+        <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.08); filter: blur(60px);"></div>
+        <div style="position: absolute; bottom: -120px; left: -120px; width: 350px; height: 350px; border-radius: 50%; background: rgba(0,0,0,0.08); filter: blur(80px);"></div>
+        <div style="position: absolute; top: 50%; right: 15%; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.06); filter: blur(40px);"></div>
 
         <div style="position: relative; z-index: 1;">
-            <p style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; margin-bottom: 20px;">Overall Progress</p>
-            <div style="font-size: clamp(5rem, 15vw, 7rem); font-weight: 800; line-height: 1; margin-bottom: 12px;">
-                {{ total_progress }}<span style="font-size: 0.45em; opacity: 0.9;">%</span>
+            <div style="display: inline-block; padding: 8px 20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.2);">
+                <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;">Overall Achievement</span>
             </div>
-            <p style="font-size: 1.15rem; opacity: 0.95; font-weight: 500;">전체 공약 이행률</p>
+
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: clamp(6rem, 18vw, 9rem); font-weight: 900; line-height: 0.9; margin-bottom: 8px; text-shadow: 0 4px 30px rgba(0,0,0,0.15);">
+                    {{ total_progress }}<span style="font-size: 0.4em; font-weight: 700; opacity: 0.85;">%</span>
+                </div>
+            </div>
+
+            <p style="font-size: clamp(1.1rem, 2.2vw, 1.35rem); opacity: 0.95; font-weight: 600; letter-spacing: -0.01em;">전체 공약 이행률</p>
+
+            <!-- 진행 바 -->
+            <div style="max-width: 400px; margin: 32px auto 0; background: rgba(255,255,255,0.2); border-radius: 100px; height: 12px; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);">
+                <div style="background: white; height: 100%; width: {{ total_progress }}%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 10px rgba(255,255,255,0.5);"></div>
+            </div>
         </div>
     </div>
 
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% set category_colors = {
-            0: {'bg': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'light': 'rgba(102, 126, 234, 0.1)', 'color': '#667eea'},
-            1: {'bg': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 'light': 'rgba(245, 87, 108, 0.1)', 'color': '#f5576c'},
-            2: {'bg': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'light': 'rgba(79, 172, 254, 0.1)', 'color': '#4facfe'},
-            3: {'bg': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'light': 'rgba(67, 233, 123, 0.1)', 'color': '#43e97b'},
-            4: {'bg': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'light': 'rgba(250, 112, 154, 0.1)', 'color': '#fa709a'}
+            0: {'gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'solid': '#667eea', 'light': '#f0f0ff', 'glow': 'rgba(102, 126, 234, 0.25)'},
+            1: {'gradient': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 'solid': '#f5576c', 'light': '#fff0f5', 'glow': 'rgba(245, 87, 108, 0.25)'},
+            2: {'gradient': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'solid': '#4facfe', 'light': '#f0faff', 'glow': 'rgba(79, 172, 254, 0.25)'},
+            3: {'gradient': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'solid': '#43e97b', 'light': '#f0fff8', 'glow': 'rgba(67, 233, 123, 0.25)'},
+            4: {'gradient': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'solid': '#fa709a', 'light': '#fff8f0', 'glow': 'rgba(250, 112, 154, 0.25)'}
         } %}
 
         {% for category, promises_list in categories.items() %}
         {% set category_index = loop.index0 % 5 %}
         {% set colors = category_colors[category_index] %}
-
-        <!-- 카테고리 평균 이행률 계산 -->
         {% set category_progress = (promises_list|sum(attribute='progress_rate') / promises_list|length)|int if promises_list else 0 %}
 
-        <section style="margin-bottom: 80px;">
-            <!-- 카테고리 헤더 -->
-            <div style="background: white; border-radius: var(--radius-xl); padding: clamp(24px, 5vw, 32px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); margin-bottom: 32px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <h2 style="font-size: clamp(1.5rem, 3.5vw, 1.9rem); font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">{{ category }}</h2>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">{{ promises_list|length }}개 공약</p>
+        <section style="margin-bottom: 100px;">
+            <!-- 카테고리 헤더 카드 -->
+            <div style="background: white; border-radius: var(--radius-2xl); padding: clamp(32px, 6vw, 48px); box-shadow: var(--shadow-lg); border: 2px solid {{ colors.light }}; margin-bottom: 36px; position: relative; overflow: hidden;">
+                <!-- 배경 그라데이션 -->
+                <div style="position: absolute; top: -100px; right: -100px; width: 250px; height: 250px; background: {{ colors.gradient }}; opacity: 0.05; border-radius: 50%; filter: blur(60px);"></div>
+
+                <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="display: inline-block; padding: 6px 18px; background: {{ colors.light }}; border-radius: 100px; margin-bottom: 20px;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: {{ colors.solid }}; text-transform: uppercase; letter-spacing: 0.08em;">Category {{ loop.index }}</span>
+                        </div>
+                        <h2 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 800; margin-bottom: 12px; color: var(--text-primary); letter-spacing: -0.02em;">{{ category }}</h2>
+                        <p style="font-size: 1rem; color: var(--text-secondary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span style="font-weight: 600;">{{ promises_list|length }}개</span> 공약
+                        </p>
                     </div>
 
-                    <!-- 카테고리별 이행률 차트 -->
-                    <div style="position: relative; width: 120px; height: 120px;">
-                        <svg width="120" height="120" style="transform: rotate(-90deg);">
-                            <!-- 배경 원 -->
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="{{ colors.light }}" stroke-width="10"/>
-                            <!-- 진행률 원 -->
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gradient{{ category_index }})" stroke-width="10"
-                                    stroke-dasharray="{{ (category_progress * 3.27)|round(2) }} 327"
+                    <!-- 원형 프로그레스 -->
+                    <div style="position: relative; width: 140px; height: 140px; flex-shrink: 0;">
+                        <svg width="140" height="140" style="transform: rotate(-90deg);">
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.light }}" stroke-width="12"/>
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="url(#catGradient{{ category_index }})" stroke-width="12"
+                                    stroke-dasharray="{{ (category_progress * 3.77)|round(2) }} 377"
                                     stroke-linecap="round"
-                                    style="transition: stroke-dasharray 0.8s ease-out"/>
+                                    style="transition: stroke-dasharray 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); filter: drop-shadow(0 2px 8px {{ colors.glow }});"/>
                             <defs>
-                                <linearGradient id="gradient{{ category_index }}" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:{{ colors.color }};stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:{{ colors.color }};stop-opacity:0.7" />
+                                <linearGradient id="catGradient{{ category_index }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:{{ colors.solid }};stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:{{ colors.solid }};stop-opacity:0.6" />
                                 </linearGradient>
                             </defs>
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary);">{{ category_progress }}</div>
-                            <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">%</div>
+                            <div style="font-size: 2.2rem; font-weight: 900; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">{{ category_progress }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; margin-top: 2px;">%</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 공약 카드 그리드 -->
-            <div class="card-grid">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 24px;">
                 {% for promise in promises_list %}
-                <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" class="card" style="text-decoration: none; display: flex; flex-direction: column; position: relative; overflow: hidden;">
-                    <!-- 상단 색상 바 -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: {{ colors.bg }};"></div>
+                <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" style="background: white; border-radius: var(--radius-xl); padding: 28px; text-decoration: none; border: 2px solid var(--border-light); box-shadow: var(--shadow-sm); transition: all var(--transition-base); display: flex; flex-direction: column; position: relative; overflow: hidden;"
+                   onmouseover="this.style.borderColor='{{ colors.solid }}'; this.style.boxShadow='0 12px 40px {{ colors.glow }}'; this.style.transform='translateY(-4px)';"
+                   onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
 
-                    <div style="padding-top: 12px;">
-                        <div class="card-header" style="align-items: flex-start;">
-                            <div style="flex: 1;">
-                                <h3 class="card-title" style="font-size: 1.15rem; line-height: 1.4;">{{ promise.title }}</h3>
-                            </div>
+                    <!-- 상단 색상 인디케이터 -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.gradient }};"></div>
+
+                    <div style="padding-top: 8px; display: flex; flex-direction: column; height: 100%;">
+                        <!-- 헤더 -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                            <h3 style="font-size: 1.2rem; font-weight: 700; line-height: 1.4; color: var(--text-primary); margin: 0; flex: 1;">{{ promise.title }}</h3>
                             <span class="badge
                                 {% if promise.status == '완료' %}badge-success
                                 {% elif promise.status == '진행중' %}badge-info
                                 {% elif promise.status == '보류' %}badge-warning
-                                {% else %}badge-secondary{% endif %}" style="flex-shrink: 0;">
+                                {% else %}badge-secondary{% endif %}"
+                                style="flex-shrink: 0; font-size: 0.75rem; padding: 6px 14px;">
                                 {{ promise.status }}
                             </span>
                         </div>
-                        <p class="card-content" style="font-size: 0.9rem; line-height: 1.65; margin-top: 12px;">{{ promise.description }}</p>
 
-                        <!-- 이행률 바 -->
-                        <div style="margin-top: auto; padding-top: var(--spacing-md);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Progress</span>
-                                <span style="font-size: 1.05rem; font-weight: 700; background: {{ colors.bg }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ promise.progress_rate }}%</span>
+                        <!-- 설명 -->
+                        <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 24px; flex: 1;">{{ promise.description }}</p>
+
+                        <!-- 이행률 섹션 -->
+                        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-light);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">이행률</span>
+                                <span style="font-size: 1.3rem; font-weight: 800; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ promise.progress_rate }}%</span>
                             </div>
-                            <div style="background: {{ colors.light }}; border-radius: 100px; height: 8px; overflow: hidden;">
-                                <div style="background: {{ colors.bg }}; height: 100%; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px;"></div>
+                            <div style="background: {{ colors.light }}; border-radius: 100px; height: 10px; overflow: hidden; position: relative;">
+                                <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.gradient }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
                             </div>
                         </div>
                     </div>
@@ -113,13 +140,14 @@
         </section>
         {% endfor %}
     {% else %}
-    <div style="text-align: center; padding: 80px 20px;">
-        <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+    <!-- 빈 상태 -->
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: var(--radius-2xl); box-shadow: var(--shadow-sm);">
+        <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
         </div>
-        <p style="color: var(--text-secondary); font-size: 1rem;">등록된 공약이 없습니다.</p>
+        <p style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 600;">아직 등록된 공약이 없습니다</p>
     </div>
     {% endif %}
 </div>

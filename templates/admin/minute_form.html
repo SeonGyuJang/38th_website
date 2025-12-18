@@ -7,7 +7,7 @@
     <div style="max-width: 800px; margin: 0 auto;">
         <!-- 헤더 -->
         <div style="margin-bottom: 40px;">
-            <a href="{{ url_for('admin_minutes') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+            <a href="{{ url_for('admin_minutes') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
@@ -23,7 +23,7 @@
             <form method="POST" enctype="multipart/form-data">
                 <div style="margin-bottom: 28px;">
                     <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
-                        제목 <span style="color: var(--korea-crimson);">*</span>
+                        제목 <span style="color: var(--apple-blue);">*</span>
                     </label>
                     <input
                         type="text"
@@ -32,7 +32,7 @@
                         value="{{ minute.title if minute else '' }}"
                         required
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="회의록 제목을 입력하세요"
                     >
@@ -49,7 +49,7 @@
                             name="meeting_type"
                             value="{{ minute.meeting_type if minute else '' }}"
                             style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                             onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                             placeholder="예: 정기회의, 임시회의"
                         >
@@ -57,7 +57,7 @@
 
                     <div>
                         <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="meeting_date">
-                            회의 날짜 <span style="color: var(--korea-crimson);">*</span>
+                            회의 날짜 <span style="color: var(--apple-blue);">*</span>
                         </label>
                         <input
                             type="date"
@@ -66,7 +66,7 @@
                             value="{{ minute.meeting_date.strftime('%Y-%m-%d') if minute else '' }}"
                             required
                             style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                             onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         >
                     </div>
@@ -82,7 +82,7 @@
                         name="attendees"
                         value="{{ minute.attendees if minute else '' }}"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="이름을 쉼표로 구분하여 입력하세요"
                     >
@@ -97,7 +97,7 @@
                         name="agenda"
                         rows="4"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="회의 안건을 입력하세요"
                     >{{ minute.agenda if minute else '' }}</textarea>
@@ -105,7 +105,7 @@
 
                 <div style="margin-bottom: 28px;">
                     <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="content">
-                        회의 내용 <span style="color: var(--korea-crimson);">*</span>
+                        회의 내용 <span style="color: var(--apple-blue);">*</span>
                     </label>
                     <textarea
                         id="content"
@@ -113,7 +113,7 @@
                         rows="10"
                         required
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="회의 내용을 상세히 입력하세요"
                     >{{ minute.content if minute else '' }}</textarea>
@@ -128,7 +128,7 @@
                         name="decisions"
                         rows="4"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
-                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="회의 결정사항을 입력하세요"
                     >{{ minute.decisions if minute else '' }}</textarea>
@@ -145,7 +145,7 @@
                     >
                     {% if minute and minute.file_url %}
                     <div style="margin-top: 14px; padding: 12px; background: white; border-radius: var(--radius-md); font-size: 0.9rem;">
-                        현재 파일: <a href="{{ minute.file_url }}" target="_blank" style="color: var(--korea-crimson); font-weight: 600; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">다운로드</a>
+                        현재 파일: <a href="{{ minute.file_url }}" target="_blank" style="color: var(--apple-blue); font-weight: 600; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">다운로드</a>
                     </div>
                     {% endif %}
 
@@ -158,7 +158,7 @@
                             name="file_url_text"
                             value="{{ minute.file_url if minute and minute.file_url.startswith('http') and not minute.file_url.startswith('/') else '' }}"
                             style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
-                            onfocus="this.style.borderColor='var(--korea-crimson)';"
+                            onfocus="this.style.borderColor='var(--apple-blue)';"
                             onblur="this.style.borderColor='var(--border-color)';"
                             placeholder="https://..."
                         >
@@ -168,7 +168,7 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <button
                         type="submit"
-                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
                     >
