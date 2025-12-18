@@ -1,14 +1,14 @@
 /* ============================================
-   고려대학교 38대 총학생회 - Apple Inspired Design
-   Mobile-First Responsive Design
+   Apple Design System - Mobile-First Responsive
+   Pure Apple Aesthetic with SF Colors
    ============================================ */
 
 :root {
-    /* 고려대학교 브랜드 컬러 */
-    --korea-crimson: #961A32;
-    --korea-crimson-dark: #7a1528;
-    --korea-crimson-light: #c44569;
-    --korea-crimson-lighter: #f5e6e9;
+    /* Apple 시그니처 컬러 (SF Blue) */
+    --apple-blue: #007AFF;
+    --apple-blue-dark: #0051D5;
+    --apple-blue-light: #5AC8FA;
+    --apple-blue-lighter: #E5F3FF;
 
     /* 배경 컬러 */
     --bg-primary: #ffffff;
@@ -327,12 +327,12 @@ button {
 
 .nav-menu a:active {
     background: var(--bg-secondary);
-    color: var(--korea-crimson);
+    color: var(--apple-blue);
 }
 
 .nav-menu a.active {
-    color: var(--korea-crimson);
-    background: var(--korea-crimson-lighter);
+    color: var(--apple-blue);
+    background: var(--apple-blue-lighter);
 }
 
 /* 데스크톱 네비게이션 */
@@ -377,13 +377,13 @@ button {
         left: 0;
         width: 0;
         height: 2px;
-        background: var(--korea-crimson);
+        background: var(--apple-blue);
         transition: width var(--transition-base);
     }
 
     .nav-menu a:hover {
         opacity: 1;
-        color: var(--korea-crimson);
+        color: var(--apple-blue);
     }
 
     .nav-menu a:hover::after,
@@ -393,7 +393,7 @@ button {
 
     .nav-menu a.active {
         opacity: 1;
-        color: var(--korea-crimson);
+        color: var(--apple-blue);
         background: transparent;
     }
 }
@@ -432,7 +432,7 @@ button {
     letter-spacing: -0.03em;
     line-height: 1.1;
     margin-bottom: var(--spacing-lg);
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--korea-crimson) 60%, var(--text-primary) 100%);
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--apple-blue) 60%, var(--text-primary) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -563,7 +563,7 @@ button {
     .bento-item:hover {
         transform: translateY(-8px);
         box-shadow: var(--shadow-lg);
-        border-color: var(--korea-crimson);
+        border-color: var(--apple-blue);
     }
 }
 
@@ -614,7 +614,7 @@ button {
 }
 
 .badge-primary {
-    background: var(--korea-crimson);
+    background: var(--apple-blue);
     color: white;
 }
 
@@ -693,12 +693,12 @@ button {
 }
 
 .btn-primary {
-    background: var(--korea-crimson);
+    background: var(--apple-blue);
 }
 
 @media (hover: hover) {
     .btn-primary:hover {
-        background: var(--korea-crimson-dark);
+        background: var(--apple-blue-dark);
     }
 }
 
@@ -715,13 +715,13 @@ button {
 
 .btn-outline {
     background: transparent;
-    border: 2px solid var(--korea-crimson);
-    color: var(--korea-crimson);
+    border: 2px solid var(--apple-blue);
+    color: var(--apple-blue);
 }
 
 @media (hover: hover) {
     .btn-outline:hover {
-        background: var(--korea-crimson);
+        background: var(--apple-blue);
         color: white;
     }
 }
@@ -762,7 +762,7 @@ button {
     .card:hover {
         transform: translateY(-6px);
         box-shadow: var(--shadow-md);
-        border-color: var(--korea-crimson);
+        border-color: var(--apple-blue);
     }
 }
 
@@ -867,7 +867,7 @@ button {
 .form-textarea:focus,
 .form-select:focus {
     outline: none;
-    border-color: var(--korea-crimson);
+    border-color: var(--apple-blue);
     background: white;
     box-shadow: 0 0 0 3px rgba(150, 26, 50, 0.1);
 }
@@ -970,7 +970,7 @@ footer a {
 
 footer a:active,
 footer a:hover {
-    color: var(--korea-crimson);
+    color: var(--apple-blue);
 }
 
 /* ============================================
@@ -1019,7 +1019,7 @@ footer a:hover {
     .org-node:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
-        border-color: var(--korea-crimson);
+        border-color: var(--apple-blue);
     }
 }
 
@@ -1041,7 +1041,7 @@ footer a:hover {
 
 .org-role {
     font-size: 0.8rem;
-    color: var(--korea-crimson);
+    color: var(--apple-blue);
     font-weight: 600;
     margin-bottom: 2px;
 }

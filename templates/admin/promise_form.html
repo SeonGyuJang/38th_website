@@ -3,61 +3,163 @@
 {% block title %}{% if promise %}공약 수정{% else %}공약 추가{% endif %} - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700;">{% if promise %}공약 수정{% else %}공약 추가{% endif %}</h1>
-    </div>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('admin_promises') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                공약 관리로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">
+                {% if promise %}공약 수정{% else %}공약 추가{% endif %}
+            </h1>
+        </div>
 
-    <div style="margin-bottom: var(--spacing-md);">
-        <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary btn-small">← 목록으로</a>
-    </div>
+        <!-- 폼 카드 -->
+        <div style="background: white; border-radius: var(--radius-xl); padding: clamp(32px, 5vw, 48px); box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+            <form method="POST">
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="category">
+                        카테고리 <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        value="{{ promise.category if promise else '' }}"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="예: 학술, 복지, 문화"
+                    >
+                </div>
 
-    <div class="content">
-        <form method="POST" data-validate>
-            <div class="form-group">
-                <label class="form-label" for="category">카테고리 *</label>
-                <input type="text" class="form-input" id="category" name="category" value="{{ promise.category if promise else '' }}" required placeholder="예: 학술, 복지, 문화">
-            </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
+                        제목 <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ promise.title if promise else '' }}"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="공약 제목을 입력하세요"
+                    >
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="title">제목 *</label>
-                <input type="text" class="form-input" id="title" name="title" value="{{ promise.title if promise else '' }}" required>
-            </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="description">
+                        간단한 설명 <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="4"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="공약에 대한 간단한 설명을 입력하세요"
+                    >{{ promise.description if promise else '' }}</textarea>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="description">간단한 설명 *</label>
-                <textarea class="form-textarea" id="description" name="description" required>{{ promise.description if promise else '' }}</textarea>
-            </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="detailed_description">
+                        상세 설명
+                    </label>
+                    <textarea
+                        id="detailed_description"
+                        name="detailed_description"
+                        rows="8"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="공약에 대한 상세한 내용을 입력하세요"
+                    >{{ promise.detailed_description if promise else '' }}</textarea>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="detailed_description">상세 설명</label>
-                <textarea class="form-textarea" id="detailed_description" name="detailed_description" data-enhance>{{ promise.detailed_description if promise else '' }}</textarea>
-            </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="progress_rate">
+                            이행률 (0-100) <span style="color: var(--apple-blue);">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="progress_rate"
+                            name="progress_rate"
+                            min="0"
+                            max="100"
+                            value="{{ promise.progress_rate if promise else 0 }}"
+                            required
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                    </div>
 
-            <div class="form-group">
-                <label class="form-label" for="progress_rate">이행률 (0-100) *</label>
-                <input type="number" class="form-input" id="progress_rate" name="progress_rate" min="0" max="100" value="{{ promise.progress_rate if promise else 0 }}" required>
-            </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="status">
+                            상태 <span style="color: var(--apple-blue);">*</span>
+                        </label>
+                        <select
+                            id="status"
+                            name="status"
+                            required
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); cursor: pointer;"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                            <option value="진행중" {% if promise and promise.status == '진행중' %}selected{% endif %}>진행중</option>
+                            <option value="완료" {% if promise and promise.status == '완료' %}selected{% endif %}>완료</option>
+                            <option value="보류" {% if promise and promise.status == '보류' %}selected{% endif %}>보류</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="status">상태 *</label>
-                <select class="form-select" id="status" name="status" required>
-                    <option value="진행중" {% if promise and promise.status == '진행중' %}selected{% endif %}>진행중</option>
-                    <option value="완료" {% if promise and promise.status == '완료' %}selected{% endif %}>완료</option>
-                    <option value="보류" {% if promise and promise.status == '보류' %}selected{% endif %}>보류</option>
-                </select>
-            </div>
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="order">
+                        정렬 순서
+                    </label>
+                    <input
+                        type="number"
+                        id="order"
+                        name="order"
+                        value="{{ promise.order if promise else 0 }}"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="작을수록 먼저 표시됩니다"
+                    >
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="order">정렬 순서</label>
-                <input type="number" class="form-input" id="order" name="order" value="{{ promise.order if promise else 0 }}">
-            </div>
-
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary">{% if promise %}수정{% else %}추가{% endif %}</button>
-                <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button
+                        type="submit"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
+                    >
+                        {% if promise %}수정하기{% else %}추가하기{% endif %}
+                    </button>
+                    <a
+                        href="{{ url_for('admin_promises') }}"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; text-align: center; text-decoration: none; transition: var(--transition-base); display: inline-block;"
+                        onmouseover="this.style.background='var(--border-color)';"
+                        onmouseout="this.style.background='var(--bg-secondary)';"
+                    >
+                        취소
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

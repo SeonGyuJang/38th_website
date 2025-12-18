@@ -3,49 +3,141 @@
 {% block title %}{% if regulation %}회칙 수정{% else %}회칙 추가{% endif %} - 관리자{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 100px;">
-    <h1 class="section-title">{% if regulation %}회칙 수정{% else %}회칙 추가{% endif %}</h1>
-
-    <form method="POST" enctype="multipart/form-data" style="max-width: 800px; margin: 0 auto;">
-        <div class="form-group">
-            <label class="form-label">카테고리</label>
-            <input type="text" class="form-input" name="category" value="{{ regulation.category if regulation else '' }}" required placeholder="예: 총학생회, 동아리연합회">
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('admin_regulations') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                회칙 관리로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">
+                {% if regulation %}회칙 수정{% else %}회칙 추가{% endif %}
+            </h1>
         </div>
 
-        <div class="form-group">
-            <label class="form-label">제목</label>
-            <input type="text" class="form-input" name="title" value="{{ regulation.title if regulation else '' }}" required>
-        </div>
+        <!-- 폼 카드 -->
+        <div style="background: white; border-radius: var(--radius-xl); padding: clamp(32px, 5vw, 48px); box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+            <form method="POST" enctype="multipart/form-data">
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="category">
+                        카테고리 <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        value="{{ regulation.category if regulation else '' }}"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="예: 총학생회, 동아리연합회"
+                    >
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">내용 (요약 또는 조항)</label>
-            <textarea class="form-textarea" name="content" rows="10" required>{{ regulation.content if regulation else '' }}</textarea>
-        </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
+                        제목 <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ regulation.title if regulation else '' }}"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="회칙 제목을 입력하세요"
+                    >
+                </div>
 
-        <div class="form-group" style="background: var(--bg-secondary); padding: 24px; border-radius: 16px;">
-            <label class="form-label">전문 파일 (PDF 권장)</label>
-            <input type="file" name="file" class="file-input">
-            {% if regulation and regulation.file_url %}
-            <div style="margin-top: 10px; font-size: 0.9rem;">
-                현재 파일: <a href="{{ regulation.file_url }}" target="_blank" style="color: var(--korea-crimson); font-weight: 600;">다운로드</a>
-            </div>
-            {% endif %}
-            
-            <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">또는 외부 URL 직접 입력</label>
-                <input type="url" class="form-input" name="file_url_text" value="{{ regulation.file_url if regulation and regulation.file_url.startswith('http') and not regulation.file_url.startswith('/') else '' }}" placeholder="https://...">
-            </div>
-        </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="content">
+                        내용 (요약 또는 조항) <span style="color: var(--apple-blue);">*</span>
+                    </label>
+                    <textarea
+                        id="content"
+                        name="content"
+                        rows="10"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="회칙 내용 또는 주요 조항을 입력하세요"
+                    >{{ regulation.content if regulation else '' }}</textarea>
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">정렬 순서</label>
-            <input type="number" class="form-input" name="order" value="{{ regulation.order if regulation else 0 }}">
-        </div>
+                <div style="background: var(--bg-secondary); padding: clamp(20px, 4vw, 28px); border-radius: var(--radius-lg); margin-bottom: 28px; border: 2px dashed var(--border-color);">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 14px;">
+                        전문 파일 (PDF 권장)
+                    </label>
+                    <input
+                        type="file"
+                        name="file"
+                        style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: white; cursor: pointer; font-family: 'Pretendard', -apple-system, sans-serif;"
+                    >
+                    {% if regulation and regulation.file_url %}
+                    <div style="margin-top: 14px; padding: 12px; background: white; border-radius: var(--radius-md); font-size: 0.9rem;">
+                        현재 파일: <a href="{{ regulation.file_url }}" target="_blank" style="color: var(--apple-blue); font-weight: 600; text-decoration: none;" onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">다운로드</a>
+                    </div>
+                    {% endif %}
 
-        <div style="margin-top: 40px; display: flex; gap: 15px;">
-            <button type="submit" class="btn btn-primary">저장하기</button>
-            <a href="{{ url_for('admin_regulations') }}" class="btn btn-secondary">취소</a>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--border-color);">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">
+                            또는 외부 URL 직접 입력
+                        </label>
+                        <input
+                            type="url"
+                            name="file_url_text"
+                            value="{{ regulation.file_url if regulation and regulation.file_url.startswith('http') and not regulation.file_url.startswith('/') else '' }}"
+                            style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
+                            onfocus="this.style.borderColor='var(--apple-blue)';"
+                            onblur="this.style.borderColor='var(--border-color)';"
+                            placeholder="https://..."
+                        >
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="order">
+                        정렬 순서
+                    </label>
+                    <input
+                        type="number"
+                        id="order"
+                        name="order"
+                        value="{{ regulation.order if regulation else 0 }}"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="작을수록 먼저 표시됩니다"
+                    >
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button
+                        type="submit"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
+                    >
+                        {% if regulation %}수정하기{% else %}추가하기{% endif %}
+                    </button>
+                    <a
+                        href="{{ url_for('admin_regulations') }}"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; text-align: center; text-decoration: none; transition: var(--transition-base); display: inline-block;"
+                        onmouseover="this.style.background='var(--border-color)';"
+                        onmouseout="this.style.background='var(--bg-secondary)';"
+                    >
+                        취소
+                    </a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

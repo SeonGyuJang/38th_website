@@ -3,97 +3,101 @@
 {% block title %}일정 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 80px;">
-    <div style="margin-bottom: var(--spacing-xl); animation: slideInUp 0.8s ease-out;">
-        <h1 class="section-title" style="opacity: 1; transform: none;">일정</h1>
-        <p class="section-subtitle" style="opacity: 1; transform: none;">학생회의 모든 일정을 확인하세요</p>
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    <!-- 헤더 -->
+    <div style="text-align: center; margin-bottom: 70px;">
+        <p style="color: var(--apple-blue); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Schedule & Events</p>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">학생회 일정</h1>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7;">다가오는 행사와 주요 일정을 한눈에 확인하세요</p>
     </div>
 
     {% if schedules %}
-    <div style="display: grid; gap: var(--spacing-md);">
+    <div style="display: grid; gap: 24px; max-width: 900px; margin: 0 auto;">
         {% for schedule in schedules %}
-        <div class="card" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
-            <!-- 모바일 레이아웃 -->
-            <div class="hide-desktop">
-                <div style="display: flex; gap: var(--spacing-md); align-items: center;">
-                    <div style="text-align: center; min-width: 70px;">
-                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--korea-crimson); line-height: 1;">
-                            {{ schedule.start_date.strftime('%m') }}<span style="font-size: 1rem; color: var(--text-secondary);">월</span>
-                        </div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
-                            {{ schedule.start_date.strftime('%d') }}
-                        </div>
-                        {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
-                            {{ schedule.start_date.strftime('%H:%M') }}
-                        </div>
-                        {% endif %}
+        <div style="background: white; border-radius: var(--radius-xl); padding: clamp(24px, 4vw, 32px); box-shadow: var(--shadow-sm); border: 2px solid var(--border-light); transition: all var(--transition-base); overflow: hidden; position: relative;"
+             onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-4px)';"
+             onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+
+            <!-- 상단 색상 인디케이터 -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-light) 100%);"></div>
+
+            <div style="padding-top: 8px; display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
+                <!-- 날짜 박스 -->
+                <div style="text-align: center; min-width: clamp(90px, 15vw, 120px); padding: clamp(16px, 3vw, 24px); background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-lg); color: white; flex-shrink: 0; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);">
+                    <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 8px;">
+                        {{ schedule.start_date.strftime('%Y') }}
                     </div>
-
-                    <div style="flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
-                            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.3;">{{ schedule.title }}</h3>
-                            {% if schedule.category %}
-                            <span class="badge badge-primary" style="flex-shrink: 0;">{{ schedule.category }}</span>
-                            {% endif %}
-                        </div>
-
-                        {% if schedule.description %}
-                        <p style="color: var(--text-secondary); margin: 6px 0 0 0; line-height: 1.5; font-size: 0.9rem;">{{ schedule.description }}</p>
-                        {% endif %}
-
-                        {% if schedule.location %}
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 6px 0 0 0;">
-                            <strong>📍</strong> {{ schedule.location }}
-                        </p>
-                        {% endif %}
+                    <div style="font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 800; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 4px;">
+                        {{ schedule.start_date.strftime('%m') }}월
                     </div>
-                </div>
-            </div>
-
-            <!-- 데스크톱 레이아웃 -->
-            <div class="hide-mobile" style="display: grid; grid-template-columns: 120px 1fr; gap: var(--spacing-xl); align-items: start;">
-                <div style="text-align: center;">
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--korea-crimson); line-height: 1;">
-                        {{ schedule.start_date.strftime('%m') }}<span style="font-size: 1.5rem; color: var(--text-secondary);">월</span>
-                    </div>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+                    <div style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 900; line-height: 1; margin-bottom: 8px;">
                         {{ schedule.start_date.strftime('%d') }}
                     </div>
                     {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">
+                    <div style="font-size: clamp(0.8rem, 1.5vw, 0.9rem); font-weight: 600; opacity: 0.9; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
                         {{ schedule.start_date.strftime('%H:%M') }}
+                        {% if schedule.end_date and schedule.end_date != schedule.start_date %}
+                        <br><span style="font-size: 0.7em; opacity: 0.8;">~ {{ schedule.end_date.strftime('%H:%M') }}</span>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
 
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ schedule.title }}</h3>
+                <!-- 내용 -->
+                <div style="flex: 1; min-width: 250px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <h3 style="font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.3; flex: 1;">
+                            {{ schedule.title }}
+                        </h3>
                         {% if schedule.category %}
-                        <span class="badge badge-primary">{{ schedule.category }}</span>
+                        <span style="flex-shrink: 0; padding: 6px 16px; background: var(--apple-blue-lighter); color: var(--apple-blue); border-radius: 100px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                            {{ schedule.category }}
+                        </span>
                         {% endif %}
                     </div>
 
                     {% if schedule.description %}
-                    <p style="color: var(--text-secondary); margin: 8px 0 0 0; line-height: 1.6;">{{ schedule.description }}</p>
-                    {% endif %}
-
-                    {% if schedule.location %}
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 0 0;">
-                        <strong>📍 장소:</strong> {{ schedule.location }}
+                    <p style="color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.7; font-size: clamp(0.95rem, 2vw, 1.05rem);">
+                        {{ schedule.description }}
                     </p>
                     {% endif %}
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid var(--border-light);">
+                        {% if schedule.location %}
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.95rem;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 8.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C5.2-.5 2.5 2.2 2.5 5.5 2.5 9.5 8 14.5 8 14.5s5.5-5 5.5-9C13.5 2.2 10.8-.5 8-.5z" fill="currentColor"/>
+                            </svg>
+                            <span style="font-weight: 500;">{{ schedule.location }}</span>
+                        </div>
+                        {% endif %}
+                        {% if schedule.end_date and schedule.end_date.date() != schedule.start_date.date() %}
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.95rem;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <path d="M8 4v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span style="font-weight: 500;">~ {{ schedule.end_date.strftime('%Y.%m.%d') }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div style="text-align: center; padding: var(--spacing-4xl) var(--spacing-lg);">
-        <p style="color: var(--text-secondary); font-size: 1rem;">
-            등록된 일정이 없습니다.
-        </p>
+    <!-- 빈 상태 -->
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: var(--radius-2xl); box-shadow: var(--shadow-sm); max-width: 600px; margin: 0 auto;">
+        <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <p style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 600; margin: 0;">아직 등록된 일정이 없습니다</p>
     </div>
     {% endif %}
 </div>
