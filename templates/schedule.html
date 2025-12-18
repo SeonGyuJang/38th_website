@@ -4,46 +4,55 @@
 
 {% block content %}
 <div class="container">
-    <div class="section-header" style="margin-top: var(--spacing-lg);">
-        <h1 class="section-title">일정</h1>
-        <p class="section-subtitle">학생회의 모든 일정을 확인하세요</p>
+    <div class="section-header" style="margin-top: var(--spacing-lg); animation: slideInUp 0.8s ease-out;">
+        <h1 class="section-title" style="opacity: 1; transform: none;">일정</h1>
+        <p class="section-subtitle" style="opacity: 1; transform: none;">학생회의 모든 일정을 확인하세요</p>
     </div>
 
     {% if schedules %}
-    <div class="content">
-        <div class="timeline">
+    <div class="content" style="padding: 0;">
+        <div style="display: grid; gap: 20px;">
             {% for schedule in schedules %}
-            <div class="timeline-item">
-                <div class="timeline-date">
-                    {{ schedule.start_date.strftime('%Y년 %m월 %d일') }}
+            <div class="card" style="display: grid; grid-template-columns: 120px 1fr; gap: 24px; align-items: start;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--korea-crimson); line-height: 1;">
+                        {{ schedule.start_date.strftime('%m') }}<span style="font-size: 1.5rem; color: var(--text-secondary);">월</span>
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+                        {{ schedule.start_date.strftime('%d') }}
+                    </div>
                     {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
-                    {{ schedule.start_date.strftime('%H:%M') }}
-                    {% endif %}
-                    {% if schedule.end_date %}
-                    - {{ schedule.end_date.strftime('%m월 %d일 %H:%M') }}
-                    {% endif %}
-                </div>
-                <div class="flex-between" style="align-items: flex-start; margin-bottom: var(--spacing-xs);">
-                    <h3 class="timeline-title">{{ schedule.title }}</h3>
-                    {% if schedule.category %}
-                    <span class="badge badge-primary">{{ schedule.category }}</span>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">
+                        {{ schedule.start_date.strftime('%H:%M') }}
+                    </div>
                     {% endif %}
                 </div>
-                {% if schedule.description %}
-                <p class="timeline-content">{{ schedule.description }}</p>
-                {% endif %}
-                {% if schedule.location %}
-                <p class="timeline-content" style="margin-top: var(--spacing-xs);">
-                    <strong>장소:</strong> {{ schedule.location }}
-                </p>
-                {% endif %}
+                
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ schedule.title }}</h3>
+                        {% if schedule.category %}
+                        <span class="badge badge-primary">{{ schedule.category }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if schedule.description %}
+                    <p style="color: var(--text-secondary); margin: 8px 0 0 0; line-height: 1.6;">{{ schedule.description }}</p>
+                    {% endif %}
+                    
+                    {% if schedule.location %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 0 0;">
+                        <strong>📍 장소:</strong> {{ schedule.location }}
+                    </p>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
     {% else %}
-    <div class="content">
-        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
+    <div class="content" style="text-align: center; padding: var(--spacing-xl);">
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">
             등록된 일정이 없습니다.
         </p>
     </div>

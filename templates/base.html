@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="고려대학교 38대 총학생회 공식 웹사이트">
+    <meta name="theme-color" content="#961A32">
     <title>{% block title %}고려대학교 38대 총학생회{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -11,7 +13,7 @@
     <header class="header">
         <nav class="nav">
             <a href="{{ url_for('index') }}" class="logo">
-                <span style="font-size: 1.2rem;">🐯</span>
+                <span style="font-size: 1.4rem;">🐯</span>
                 <span>KOREA UNIV. SC</span>
             </a>
             <div class="nav-menu">
@@ -23,7 +25,7 @@
                 <a href="{{ url_for('schedule') }}">일정</a>
                 <a href="{{ url_for('programs') }}">프로그램</a>
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('admin_dashboard') }}" style="color: var(--korea-crimson); font-weight: 600;">관리자</a>
+                <a href="{{ url_for('admin_dashboard') }}" style="color: var(--korea-crimson); font-weight: 700;">관리자</a>
                 <a href="{{ url_for('admin_logout') }}">로그아웃</a>
                 {% endif %}
             </div>
@@ -33,27 +35,27 @@
     <main>
         {% set messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="container" style="margin-top: 80px;">
+            <div class="container" style="margin-top: 100px;">
                 {% for category, message in messages %}
                     <div class="flash {{ 'flash-error' if category == 'error' else 'flash-success' }}">
                         {{ message }}
                     </div>
-                {% endfor %} 
+                {% endfor %}
             </div>
         {% endif %}
         
         {% block content %}{% endblock %}
     </main>
 
-    <footer style="background: var(--bg-secondary); padding: 80px 0; margin-top: 100px; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+    <footer style="background: var(--bg-secondary); padding: 80px 0; margin-top: 100px; text-align: center; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid var(--border-color);">
         <div class="container">
-            <h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem;">고려대학교 제38대 총학생회</h3>
-            <p>서울특별시 성북구 안암로 145 학생회관</p>
-            <p>Email: student@korea.ac.kr</p>
+            <h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem; font-weight: 700;">고려대학교 제38대 총학생회</h3>
+            <p style="margin: 4px 0;">서울특별시 성북구 안암로 145 학생회관</p>
+            <p style="margin: 4px 0;">Email: student@korea.ac.kr</p>
             <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 40px;">
-                <p>© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
+                <p style="margin: 0;">© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
                 {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('admin_login') }}" style="display: inline-block; margin-top: 20px; color: inherit; opacity: 0.5;">관리자 로그인</a>
+                <a href="{{ url_for('admin_login') }}" style="display: inline-block; margin-top: 20px; color: inherit; opacity: 0.5; transition: var(--transition-smooth);">관리자 로그인</a>
                 {% endif %}
             </div>
         </div>
