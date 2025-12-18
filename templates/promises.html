@@ -3,13 +3,60 @@
 {% block title %}공약 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .category-filter-btn {
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .category-filter-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .category-filter-btn.active {
+        background: var(--apple-blue) !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3) !important;
+    }
+
+    .promise-section {
+        animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+</style>
+
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
-    <div style="margin-bottom: 70px; text-align: center;">
+    <div style="margin-bottom: 50px; text-align: center;">
         <p style="color: var(--apple-blue); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
         <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">공약 이행 현황</h1>
         <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">학우 여러분과의 약속을 투명하게 공개하고, 지켜나가겠습니다</p>
     </div>
+
+    <!-- 카테고리 필터 -->
+    {% if categories %}
+    <div style="margin-bottom: 50px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
+            <button onclick="filterCategory('all')" class="category-filter-btn active" data-category="all" style="padding: 12px 24px; background: var(--apple-blue); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);">
+                전체
+            </button>
+            {% for category in categories.keys() %}
+            <button onclick="filterCategory('{{ category }}')" class="category-filter-btn" data-category="{{ category }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                {{ category }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- 전체 이행률 히어로 카드 -->
     <div style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-2xl); padding: clamp(50px, 8vw, 80px) clamp(30px, 6vw, 60px); text-align: center; color: white; box-shadow: 0 20px 60px rgba(0, 122, 255, 0.35); margin-bottom: 80px; position: relative; overflow: hidden;">
@@ -41,11 +88,11 @@
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% set category_colors = {
-            0: {'gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'solid': '#667eea', 'light': '#f0f0ff', 'glow': 'rgba(102, 126, 234, 0.25)'},
-            1: {'gradient': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 'solid': '#f5576c', 'light': '#fff0f5', 'glow': 'rgba(245, 87, 108, 0.25)'},
-            2: {'gradient': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'solid': '#4facfe', 'light': '#f0faff', 'glow': 'rgba(79, 172, 254, 0.25)'},
-            3: {'gradient': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'solid': '#43e97b', 'light': '#f0fff8', 'glow': 'rgba(67, 233, 123, 0.25)'},
-            4: {'gradient': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'solid': '#fa709a', 'light': '#fff8f0', 'glow': 'rgba(250, 112, 154, 0.25)'}
+            0: {'solid': '#007AFF', 'light': 'rgba(0, 122, 255, 0.1)', 'glow': 'rgba(0, 122, 255, 0.25)'},
+            1: {'solid': '#34C759', 'light': 'rgba(52, 199, 89, 0.1)', 'glow': 'rgba(52, 199, 89, 0.25)'},
+            2: {'solid': '#FF9500', 'light': 'rgba(255, 149, 0, 0.1)', 'glow': 'rgba(255, 149, 0, 0.25)'},
+            3: {'solid': '#5856D6', 'light': 'rgba(88, 86, 214, 0.1)', 'glow': 'rgba(88, 86, 214, 0.25)'},
+            4: {'solid': '#FF3B30', 'light': 'rgba(255, 59, 48, 0.1)', 'glow': 'rgba(255, 59, 48, 0.25)'}
         } %}
 
         {% for category, promises_list in categories.items() %}
@@ -53,11 +100,9 @@
         {% set colors = category_colors[category_index] %}
         {% set category_progress = (promises_list|sum(attribute='progress_rate') / promises_list|length)|int if promises_list else 0 %}
 
-        <section style="margin-bottom: 100px;">
+        <section class="promise-section" data-category="{{ category }}" style="margin-bottom: 100px;">
             <!-- 카테고리 헤더 카드 -->
-            <div style="background: white; border-radius: var(--radius-2xl); padding: clamp(32px, 6vw, 48px); box-shadow: var(--shadow-lg); border: 2px solid {{ colors.light }}; margin-bottom: 36px; position: relative; overflow: hidden;">
-                <!-- 배경 그라데이션 -->
-                <div style="position: absolute; top: -100px; right: -100px; width: 250px; height: 250px; background: {{ colors.gradient }}; opacity: 0.05; border-radius: 50%; filter: blur(60px);"></div>
+            <div style="background: white; border-radius: 24px; padding: clamp(32px, 6vw, 48px); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06); border: 2px solid rgba(0, 0, 0, 0.06); margin-bottom: 36px; position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px {{ colors.glow }}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 24px rgba(0, 0, 0, 0.06)';">
 
                 <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
@@ -77,19 +122,13 @@
                     <div style="position: relative; width: 140px; height: 140px; flex-shrink: 0;">
                         <svg width="140" height="140" style="transform: rotate(-90deg);">
                             <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.light }}" stroke-width="12"/>
-                            <circle cx="70" cy="70" r="60" fill="none" stroke="url(#catGradient{{ category_index }})" stroke-width="12"
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.solid }}" stroke-width="12"
                                     stroke-dasharray="{{ (category_progress * 3.77)|round(2) }} 377"
                                     stroke-linecap="round"
                                     style="transition: stroke-dasharray 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); filter: drop-shadow(0 2px 8px {{ colors.glow }});"/>
-                            <defs>
-                                <linearGradient id="catGradient{{ category_index }}" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:{{ colors.solid }};stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:{{ colors.solid }};stop-opacity:0.6" />
-                                </linearGradient>
-                            </defs>
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                            <div style="font-size: 2.2rem; font-weight: 900; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">{{ category_progress }}</div>
+                            <div style="font-size: 2.2rem; font-weight: 900; color: {{ colors.solid }}; line-height: 1;">{{ category_progress }}</div>
                             <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; margin-top: 2px;">%</div>
                         </div>
                     </div>
@@ -104,7 +143,7 @@
                    onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
 
                     <!-- 상단 색상 인디케이터 -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.gradient }};"></div>
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.solid }};"></div>
 
                     <div style="padding-top: 8px; display: flex; flex-direction: column; height: 100%;">
                         <!-- 헤더 -->
@@ -127,10 +166,10 @@
                         <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-light);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em;">이행률</span>
-                                <span style="font-size: 1.3rem; font-weight: 800; background: {{ colors.gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ promise.progress_rate }}%</span>
+                                <span style="font-size: 1.3rem; font-weight: 800; color: {{ colors.solid }};">{{ promise.progress_rate }}%</span>
                             </div>
                             <div style="background: {{ colors.light }}; border-radius: 100px; height: 10px; overflow: hidden; position: relative;">
-                                <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.gradient }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
+                                <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.solid }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
                             </div>
                         </div>
                     </div>
@@ -151,4 +190,43 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    function filterCategory(category) {
+        // 모든 버튼의 active 클래스 제거
+        document.querySelectorAll('.category-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#F5F5F7';
+            btn.style.color = 'var(--text-primary)';
+            btn.style.boxShadow = 'none';
+        });
+
+        // 클릭된 버튼에 active 클래스 추가
+        const clickedBtn = document.querySelector(`[data-category="${category}"]`);
+        if (clickedBtn) {
+            clickedBtn.classList.add('active');
+        }
+
+        // 섹션 필터링
+        const sections = document.querySelectorAll('.promise-section');
+        sections.forEach(section => {
+            if (category === 'all' || section.dataset.category === category) {
+                section.style.display = 'block';
+                // 페이드인 애니메이션 재실행
+                section.style.animation = 'none';
+                setTimeout(() => {
+                    section.style.animation = 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                }, 10);
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // 부드러운 스크롤
+        window.scrollTo({
+            top: document.querySelector('.promise-section[style*="display: block"]')?.offsetTop - 120 || 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
 {% endblock %}

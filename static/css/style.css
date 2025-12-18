@@ -10,6 +10,16 @@
     --ku-crimson-light: #b02a44;
     --ku-crimson-lighter: #f9ecee;
 
+    /* Apple System Colors */
+    --apple-blue: #007AFF;
+    --apple-blue-dark: #0051D5;
+    --apple-blue-light: #5AC8FA;
+    --apple-blue-lighter: rgba(0, 122, 255, 0.1);
+    --apple-green: #34C759;
+    --apple-red: #FF3B30;
+    --apple-orange: #FF9500;
+    --apple-purple: #5856D6;
+
     /* 배경 컬러 */
     --bg-primary: #ffffff;
     --bg-secondary: #f5f5f7;

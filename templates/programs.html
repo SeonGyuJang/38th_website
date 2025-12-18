@@ -3,70 +3,206 @@
 {% block title %}교내 프로그램 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 80px;">
-    <div style="margin-bottom: var(--spacing-xl); animation: slideInUp 0.8s ease-out;">
-        <h1 class="section-title" style="opacity: 1; transform: none;">교내 프로그램</h1>
-        <p class="section-subtitle" style="opacity: 1; transform: none;">다양한 교내 프로그램 정보를 확인하세요</p>
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .program-card {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .program-card:nth-child(3n+1) { animation-delay: 0.05s; }
+    .program-card:nth-child(3n+2) { animation-delay: 0.1s; }
+    .program-card:nth-child(3n) { animation-delay: 0.15s; }
+
+    .category-filter {
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .category-filter:hover {
+        transform: translateY(-2px);
+    }
+
+    .category-filter.active {
+        background: var(--apple-blue) !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3) !important;
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    <!-- 헤더 -->
+    <div style="margin-bottom: 50px; text-align: center;">
+        <p style="color: var(--apple-blue); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Programs & Events</p>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">교내 프로그램</h1>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">다양한 교내 프로그램 정보를 확인하세요</p>
     </div>
 
     {% if programs %}
-    <div class="card-grid">
+    <!-- 카테고리 필터 -->
+    {% set categories = programs | map(attribute='category') | select | unique | list %}
+    {% if categories %}
+    <div style="margin-bottom: 50px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
+            <button onclick="filterPrograms('all')" class="category-filter active" data-category="all" style="padding: 12px 24px; background: var(--apple-blue); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);">
+                전체
+            </button>
+            {% for category in categories %}
+            <button onclick="filterPrograms('{{ category }}')" class="category-filter" data-category="{{ category }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                {{ category }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 프로그램 그리드 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 28px;">
         {% for program in programs %}
-        <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="program-card" data-category="{{ program.category if program.category else 'uncategorized' }}" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1.5px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 40px rgba(0, 122, 255, 0.15)'; this.style.borderColor='var(--apple-blue)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 16px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
+
+            <!-- 이미지 -->
             {% if program.image_url %}
-            <img src="{{ program.image_url }}" alt="{{ program.title }}"
-                 style="width: 100%; height: 180px; object-fit: cover;">
+            <div style="position: relative; width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
+                <img src="{{ program.image_url }}" alt="{{ program.title }}"
+                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);"
+                     onmouseover="this.style.transform='scale(1.05)';"
+                     onmouseout="this.style.transform='scale(1)';">
+                {% if program.category %}
+                <div style="position: absolute; top: 16px; right: 16px; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
+                    {{ program.category }}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            {% if program.category %}
+            <div style="padding: 20px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);">
+                <span style="padding: 8px 18px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; display: inline-block;">
+                    {{ program.category }}
+                </span>
+            </div>
+            {% endif %}
             {% endif %}
 
-            <div style="padding: var(--spacing-lg);">
-                <div class="card-header" style="margin-bottom: var(--spacing-md);">
-                    <div style="flex: 1;">
-                        <h3 class="card-title" style="font-size: 1.15rem;">{{ program.title }}</h3>
-                        {% if program.organizer %}
-                        <p class="card-subtitle" style="margin-top: 4px;">{{ program.organizer }}</p>
-                        {% endif %}
-                    </div>
-                    {% if program.category %}
-                    <span class="badge badge-info" style="flex-shrink: 0;">{{ program.category }}</span>
-                    {% endif %}
-                </div>
-
-                <p class="card-content" style="font-size: 0.9rem; line-height: 1.6;">{{ program.description }}</p>
-
-                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-light); font-size: 0.85rem; color: var(--text-secondary);">
-                    {% if program.target %}
-                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">대상:</strong> {{ program.target }}</p>
-                    {% endif %}
-                    {% if program.location %}
-                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">장소:</strong> {{ program.location }}</p>
-                    {% endif %}
-                    {% if program.start_date and program.end_date %}
-                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">기간:</strong> {{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</p>
-                    {% elif program.start_date %}
-                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">일시:</strong> {{ program.start_date.strftime('%Y.%m.%d') }}</p>
-                    {% endif %}
-                    {% if program.application_start and program.application_end %}
-                    <p style="margin: 6px 0; color: var(--apple-blue); font-weight: 600;">
-                        <strong>신청기간:</strong> {{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}
+            <!-- 콘텐츠 -->
+            <div style="padding: 28px; display: flex; flex-direction: column; flex: 1;">
+                <!-- 제목 및 주최자 -->
+                <div style="margin-bottom: 16px;">
+                    <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; line-height: 1.4; letter-spacing: -0.01em;">
+                        {{ program.title }}
+                    </h3>
+                    {% if program.organizer %}
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 600;">
+                        {{ program.organizer }}
                     </p>
                     {% endif %}
                 </div>
 
-                {% if program.link %}
-                <div style="margin-top: var(--spacing-md);">
-                    <a href="{{ program.link }}" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center;">더 알아보기</a>
+                <!-- 설명 -->
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; flex: 1;">
+                    {{ program.description }}
+                </p>
+
+                <!-- 정보 섹션 -->
+                <div style="padding: 20px; background: #F5F5F7; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem;">
+                    {% if program.target %}
+                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">대상:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.target }}</span>
+                    </div>
+                    {% endif %}
+                    {% if program.location %}
+                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">장소:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.location }}</span>
+                    </div>
+                    {% endif %}
+                    {% if program.start_date and program.end_date %}
+                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">기간:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</span>
+                    </div>
+                    {% elif program.start_date %}
+                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">일시:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.start_date.strftime('%Y.%m.%d') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if program.application_start and program.application_end %}
+                    <div style="margin: 0; display: flex; align-items: start; gap: 8px;">
+                        <span style="color: var(--apple-blue); font-weight: 700; min-width: 60px;">신청:</span>
+                        <span style="color: var(--apple-blue); font-weight: 700;">{{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}</span>
+                    </div>
+                    {% endif %}
                 </div>
+
+                <!-- 더 알아보기 버튼 -->
+                {% if program.link %}
+                <a href="{{ program.link }}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; text-decoration: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25); margin-top: auto;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 122, 255, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(0, 122, 255, 0.25)';">
+                    더 알아보기
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </a>
                 {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div style="text-align: center; padding: var(--spacing-4xl) var(--spacing-lg);">
-        <p style="color: var(--text-secondary); font-size: 1rem;">
-            등록된 프로그램이 없습니다.
-        </p>
+    <!-- 빈 상태 -->
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);">
+        <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 3v18m6-18v18M3 9h18M3 15h18"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.15rem; font-weight: 600;">등록된 프로그램이 없습니다.</p>
     </div>
     {% endif %}
 </div>
+
+<script>
+    function filterPrograms(category) {
+        // 모든 버튼의 active 클래스 제거
+        document.querySelectorAll('.category-filter').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#F5F5F7';
+            btn.style.color = 'var(--text-primary)';
+            btn.style.boxShadow = 'none';
+        });
+
+        // 클릭된 버튼에 active 클래스 추가
+        const clickedBtn = document.querySelector(`.category-filter[data-category="${category}"]`);
+        if (clickedBtn) {
+            clickedBtn.classList.add('active');
+        }
+
+        // 카드 필터링
+        const cards = document.querySelectorAll('.program-card');
+        cards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'flex';
+                // 페이드인 애니메이션 재실행
+                card.style.animation = 'none';
+                setTimeout(() => {
+                    card.style.animation = 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                }, 10);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
 {% endblock %}

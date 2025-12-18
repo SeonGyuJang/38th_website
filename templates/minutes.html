@@ -43,12 +43,12 @@
                             {{ minute.title }}
                         </h3>
                         {% if minute.meeting_type %}
-                        <span style="flex-shrink: 0; padding: 6px 16px;
-                            {% if '정기' in minute.meeting_type %}background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-                            {% elif '간담회' in minute.meeting_type %}background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-                            {% else %}background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);{% endif %}
-                            color: white; border-radius: 100px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <span style="flex-shrink: 0; padding: 8px 18px;
+                            {% if '정기' in minute.meeting_type %}background: #007AFF; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #FF3B30; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
+                            {% elif '간담회' in minute.meeting_type %}background: #34C759; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25);
+                            {% else %}background: #5856D6; box-shadow: 0 4px 12px rgba(88, 86, 214, 0.25);{% endif %}
+                            color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
                             {{ minute.meeting_type }}
                         </span>
                         {% endif %}
