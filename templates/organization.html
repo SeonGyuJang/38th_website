@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container" style="padding-top: 120px; padding-bottom: 100px;">
-    <div style="text-align: center; margin-bottom: 80px;">
-        <h1 style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 32px;">조직도</h1>
-        
+<div class="container" style="padding-top: clamp(80px, 15vw, 120px); padding-bottom: clamp(60px, 12vw, 100px);">
+    <div style="text-align: center; margin-bottom: clamp(50px, 10vw, 80px);">
+        <h1 style="font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: clamp(24px, 5vw, 32px);">조직도</h1>
+
         <div class="tab-container">
             <button onclick="switchView('simple')" id="tab-simple" class="tab-btn active">간략하게 보기</button>
             <button onclick="switchView('detail')" id="tab-detail" class="tab-btn">상세하게 보기</button>
@@ -12,27 +12,27 @@
     </div>
 
     <div id="view-simple">
-        <div style="margin-bottom: 60px;">
-            <h2 style="text-align: center; font-size: 1.5rem; color: var(--ku-crimson); margin-bottom: 40px;">회장단</h2>
-            <div style="display: flex; justify-content: center; gap: 32px;">
+        <div style="margin-bottom: clamp(40px, 8vw, 60px);">
+            <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">회장단</h2>
+            <div style="display: flex; justify-content: center; gap: clamp(20px, 4vw, 32px); flex-wrap: wrap;">
                 {% for p in presidents %}
-                <div class="apple-card" style="width: 320px; text-align: center;">
-                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.9rem; margin-bottom: 12px;">{{ p.position }}</div>
-                    <div style="font-size: 1.75rem; font-weight: 800; margin-bottom: 8px;">{{ p.name }}</div>
-                    <div style="color: var(--text-secondary); font-size: 1rem;">{{ p.major }}</div>
+                <div class="apple-card" style="width: 100%; max-width: 320px; text-align: center; padding: clamp(24px, 5vw, 32px);">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.8rem, 1.8vw, 0.9rem); margin-bottom: 12px;">{{ p.position }}</div>
+                    <div style="font-size: clamp(1.4rem, 3.5vw, 1.75rem); font-weight: 800; margin-bottom: 8px;">{{ p.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: clamp(0.9rem, 2vw, 1rem);">{{ p.major }}</div>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <div>
-            <h2 style="text-align: center; font-size: 1.5rem; color: var(--ku-crimson); margin-bottom: 40px;">중앙 집행 위원장단</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+            <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">중앙 집행 위원장단</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px);">
                 {% for h in heads %}
-                <div class="apple-card" style="text-align: center; padding: 24px;">
-                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.85rem; margin-bottom: 10px;">{{ h.position }}</div>
-                    <div style="font-size: 1.4rem; font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ h.major }}</div>
+                <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px);">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
+                    <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem);">{{ h.major }}</div>
                 </div>
                 {% endfor %}
             </div>
@@ -41,16 +41,16 @@
 
     <div id="view-detail" style="display: none;">
         {% for dept, members in departments.items() %}
-        <div style="margin-bottom: 80px;">
-            <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 32px; padding-left: 16px; border-left: 6px solid var(--ku-crimson);">{{ dept }}</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
+        <div style="margin-bottom: clamp(50px, 10vw, 80px);">
+            <h2 style="font-size: clamp(1.35rem, 3.5vw, 1.75rem); font-weight: 800; margin-bottom: clamp(24px, 5vw, 32px); padding-left: clamp(12px, 2.5vw, 16px); border-left: clamp(4px, 1vw, 6px) solid var(--ku-crimson);">{{ dept }}</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 20px);">
                 {% for m in members %}
-                <div class="apple-card" style="padding: 24px;">
-                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.8rem; margin-bottom: 8px;">{{ m.position }}</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px;">{{ m.name }}</div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ m.major }}</div>
+                <div class="apple-card" style="padding: clamp(20px, 4vw, 24px);">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.8rem); margin-bottom: 8px;">{{ m.position }}</div>
+                    <div style="font-size: clamp(1.1rem, 2.5vw, 1.25rem); font-weight: 800; margin-bottom: 4px;">{{ m.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem);">{{ m.major }}</div>
                     {% if m.email %}
-                    <div style="margin-top: 12px; font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px;">{{ m.email }}</div>
+                    <div style="margin-top: 12px; font-size: clamp(0.75rem, 1.7vw, 0.8rem); color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px; word-break: break-all;">{{ m.email }}</div>
                     {% endif %}
                 </div>
                 {% endfor %}
