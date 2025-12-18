@@ -3,93 +3,262 @@
 {% block title %}{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %} - 관리자{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 100px;">
-    <h1 class="section-title">{% if program %}프로그램 수정{% else %}프로그램 추가{% endif %}</h1>
-
-    <form method="POST" enctype="multipart/form-data" style="max-width: 800px; margin: 0 auto;">
-        <div class="form-group">
-            <label class="form-label">프로그램명</label>
-            <input type="text" class="form-input" name="title" value="{{ program.title if program else '' }}" required>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('admin_programs') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                프로그램 관리로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">
+                {% if program %}프로그램 수정{% else %}프로그램 추가{% endif %}
+            </h1>
         </div>
 
-        <div class="form-group">
-            <label class="form-label">카테고리</label>
-            <input type="text" class="form-input" name="category" value="{{ program.category if program else '' }}" placeholder="예: 학술, 문화, 복지">
-        </div>
+        <!-- 폼 카드 -->
+        <div style="background: white; border-radius: var(--radius-xl); padding: clamp(32px, 5vw, 48px); box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+            <form method="POST" enctype="multipart/form-data">
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
+                        프로그램명 <span style="color: var(--korea-crimson);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ program.title if program else '' }}"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="프로그램명을 입력하세요"
+                    >
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">설명</label>
-            <textarea class="form-textarea" name="description" rows="5" required>{{ program.description if program else '' }}</textarea>
-        </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="category">
+                        카테고리
+                    </label>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        value="{{ program.category if program else '' }}"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="예: 학술, 문화, 복지"
+                    >
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">주최</label>
-            <input type="text" class="form-input" name="organizer" value="{{ program.organizer if program else '' }}">
-        </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="description">
+                        설명 <span style="color: var(--korea-crimson);">*</span>
+                    </label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="프로그램에 대한 설명을 입력하세요"
+                    >{{ program.description if program else '' }}</textarea>
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">대상</label>
-            <input type="text" class="form-input" name="target" value="{{ program.target if program else '' }}">
-        </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="organizer">
+                            주최
+                        </label>
+                        <input
+                            type="text"
+                            id="organizer"
+                            name="organizer"
+                            value="{{ program.organizer if program else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                            placeholder="예: 총학생회"
+                        >
+                    </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div class="form-group">
-                <label class="form-label">시작일</label>
-                <input type="date" class="form-input" name="start_date" value="{{ program.start_date.strftime('%Y-%m-%d') if program and program.start_date else '' }}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">종료일</label>
-                <input type="date" class="form-input" name="end_date" value="{{ program.end_date.strftime('%Y-%m-%d') if program and program.end_date else '' }}">
-            </div>
-        </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="target">
+                            대상
+                        </label>
+                        <input
+                            type="text"
+                            id="target"
+                            name="target"
+                            value="{{ program.target if program else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                            placeholder="예: 전교생"
+                        >
+                    </div>
+                </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div class="form-group">
-                <label class="form-label">신청 시작일</label>
-                <input type="date" class="form-input" name="application_start" value="{{ program.application_start.strftime('%Y-%m-%d') if program and program.application_start else '' }}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">신청 마감일</label>
-                <input type="date" class="form-input" name="application_end" value="{{ program.application_end.strftime('%Y-%m-%d') if program and program.application_end else '' }}">
-            </div>
-        </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="start_date">
+                            시작일
+                        </label>
+                        <input
+                            type="date"
+                            id="start_date"
+                            name="start_date"
+                            value="{{ program.start_date.strftime('%Y-%m-%d') if program and program.start_date else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                    </div>
 
-        <div class="form-group">
-            <label class="form-label">장소</label>
-            <input type="text" class="form-input" name="location" value="{{ program.location if program else '' }}">
-        </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="end_date">
+                            종료일
+                        </label>
+                        <input
+                            type="date"
+                            id="end_date"
+                            name="end_date"
+                            value="{{ program.end_date.strftime('%Y-%m-%d') if program and program.end_date else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">신청/관련 링크</label>
-            <input type="url" class="form-input" name="link" value="{{ program.link if program else '' }}" placeholder="https://...">
-        </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="application_start">
+                            신청 시작일
+                        </label>
+                        <input
+                            type="date"
+                            id="application_start"
+                            name="application_start"
+                            value="{{ program.application_start.strftime('%Y-%m-%d') if program and program.application_start else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                    </div>
 
-        <div class="form-group" style="background: var(--bg-secondary); padding: 24px; border-radius: 16px;">
-            <label class="form-label">대표 이미지</label>
-            <input type="file" name="image" class="file-input" accept="image/*">
-            {% if program and program.image_url %}
-            <div style="margin-top: 15px;">
-                <img src="{{ program.image_url }}" style="width: 100%; max-width: 300px; border-radius: 8px; box-shadow: var(--shadow-sm);">
-            </div>
-            {% endif %}
-            
-            <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">또는 이미지 URL 직접 입력</label>
-                <input type="url" class="form-input" name="image_url_text" value="{{ program.image_url if program and program.image_url.startswith('http') and not program.image_url.startswith('/') else '' }}">
-            </div>
-        </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="application_end">
+                            신청 마감일
+                        </label>
+                        <input
+                            type="date"
+                            id="application_end"
+                            name="application_end"
+                            value="{{ program.application_end.strftime('%Y-%m-%d') if program and program.application_end else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <input type="checkbox" name="is_active" {% if not program or program.is_active %}checked{% endif %} style="width: 20px; height: 20px;">
-                <span style="font-weight: 600;">활성화 (공개)</span>
-            </label>
-        </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="location">
+                        장소
+                    </label>
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        value="{{ program.location if program else '' }}"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="예: 학생회관 2층"
+                    >
+                </div>
 
-        <div style="margin-top: 40px; display: flex; gap: 15px;">
-            <button type="submit" class="btn btn-primary">저장하기</button>
-            <a href="{{ url_for('admin_programs') }}" class="btn btn-secondary">취소</a>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="link">
+                        신청/관련 링크
+                    </label>
+                    <input
+                        type="url"
+                        id="link"
+                        name="link"
+                        value="{{ program.link if program else '' }}"
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="https://..."
+                    >
+                </div>
+
+                <div style="background: var(--bg-secondary); padding: clamp(20px, 4vw, 28px); border-radius: var(--radius-lg); margin-bottom: 28px; border: 2px dashed var(--border-color);">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 14px;">
+                        대표 이미지
+                    </label>
+                    <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: white; cursor: pointer; font-family: 'Pretendard', -apple-system, sans-serif;"
+                    >
+                    {% if program and program.image_url %}
+                    <div style="margin-top: 16px;">
+                        <img src="{{ program.image_url }}" style="width: 100%; max-width: 400px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                    </div>
+                    {% endif %}
+
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--border-color);">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">
+                            또는 이미지 URL 직접 입력
+                        </label>
+                        <input
+                            type="url"
+                            name="image_url_text"
+                            value="{{ program.image_url if program and program.image_url.startswith('http') and not program.image_url.startswith('/') else '' }}"
+                            style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
+                            onfocus="this.style.borderColor='var(--korea-crimson)';"
+                            onblur="this.style.borderColor='var(--border-color)';"
+                            placeholder="https://..."
+                        >
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 2px solid var(--border-color); transition: var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)';" onmouseout="this.style.borderColor='var(--border-color)';">
+                        <input type="checkbox" name="is_active" {% if not program or program.is_active %}checked{% endif %} style="width: 22px; height: 22px; cursor: pointer; accent-color: var(--korea-crimson);">
+                        <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">활성화 (공개)</span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button
+                        type="submit"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
+                    >
+                        {% if program %}수정하기{% else %}추가하기{% endif %}
+                    </button>
+                    <a
+                        href="{{ url_for('admin_programs') }}"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; text-align: center; text-decoration: none; transition: var(--transition-base); display: inline-block;"
+                        onmouseover="this.style.background='var(--border-color)';"
+                        onmouseout="this.style.background='var(--bg-secondary)';"
+                    >
+                        취소
+                    </a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

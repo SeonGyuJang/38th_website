@@ -3,62 +3,116 @@
 {% block title %}공약 관리 - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <div class="flex-between">
-            <h1 style="font-size: 2rem; font-weight: 700;">공약 관리</h1>
-            <a href="{{ url_for('admin_promise_add') }}" class="btn btn-primary">➕ 공약 추가</a>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- 헤더 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
+        <div>
+            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 12px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                대시보드로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">공약 관리</h1>
         </div>
-    </div>
-
-    <div class="admin-nav">
-        <ul>
-            <li><a href="{{ url_for('admin_dashboard') }}">대시보드</a></li>
-            <li><a href="{{ url_for('admin_schedules') }}">일정 관리</a></li>
-            <li><a href="{{ url_for('admin_organization') }}">조직도 관리</a></li>
-            <li><a href="{{ url_for('admin_promises') }}" class="active">공약 관리</a></li>
-            <li><a href="{{ url_for('admin_minutes') }}">회의록 관리</a></li>
-            <li><a href="{{ url_for('admin_regulations') }}">회칙 관리</a></li>
-            <li><a href="{{ url_for('admin_programs') }}">프로그램 관리</a></li>
-        </ul>
+        <a href="{{ url_for('admin_promise_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            공약 추가
+        </a>
     </div>
 
     {% if promises %}
-    <div class="content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>제목</th>
-                    <th>카테고리</th>
-                    <th>이행률</th>
-                    <th>상태</th>
-                    <th>순서</th>
-                    <th>관리</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for promise in promises %}
-                <tr>
-                    <td><strong>{{ promise.title }}</strong></td>
-                    <td>{{ promise.category }}</td>
-                    <td>{{ promise.progress_rate }}%</td>
-                    <td><span class="badge badge-{% if promise.status == '완료' %}success{% elif promise.status == '진행중' %}info{% else %}warning{% endif %}">{{ promise.status }}</span></td>
-                    <td>{{ promise.order }}</td>
-                    <td>
-                        <a href="{{ url_for('admin_promise_edit', promise_id=promise.id) }}" class="btn btn-small btn-secondary">수정</a>
-                        <a href="{{ url_for('admin_promise_progress_add', promise_id=promise.id) }}" class="btn btn-small btn-info">진행상황</a>
-                        <form method="POST" action="{{ url_for('admin_promise_delete', promise_id=promise.id) }}" style="display: inline;" onsubmit="return confirmDelete()">
-                            <button type="submit" class="btn btn-small" style="background: #dc3545; color: white;">삭제</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="display: grid; gap: 16px;">
+        {% for promise in promises %}
+        <div style="background: white; border-radius: var(--radius-lg); padding: clamp(20px, 4vw, 28px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: all var(--transition-base);" onmouseover="this.style.boxShadow='var(--shadow-md)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+            <div style="display: flex; gap: 20px; align-items: start; flex-wrap: wrap;">
+                <!-- 순서 섹션 -->
+                <div style="text-align: center; min-width: 80px;">
+                    <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--korea-crimson), var(--korea-crimson-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        {{ promise.order }}
+                    </div>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">
+                        순서
+                    </div>
+                </div>
+
+                <!-- 내용 섹션 -->
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: var(--text-primary); margin: 0;">
+                            {{ promise.title }}
+                        </h3>
+                        <span style="padding: 4px 12px; background: var(--korea-crimson-lighter); color: var(--korea-crimson); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ promise.category }}
+                        </span>
+                        {% if promise.status == '완료' %}
+                        <span style="padding: 4px 12px; background: #d4edda; color: #28a745; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ promise.status }}
+                        </span>
+                        {% elif promise.status == '진행중' %}
+                        <span style="padding: 4px 12px; background: #d1ecf1; color: #17a2b8; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ promise.status }}
+                        </span>
+                        {% else %}
+                        <span style="padding: 4px 12px; background: #fff3cd; color: #ffc107; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ promise.status }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if promise.description %}
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 16px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ promise.description }}
+                    </p>
+                    {% endif %}
+
+                    <!-- 진행률 -->
+                    <div style="margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">이행률</span>
+                            <span style="font-size: 0.9rem; font-weight: 700; color: var(--korea-crimson);">{{ promise.progress_rate }}%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden;">
+                            <div style="width: {{ promise.progress_rate }}%; height: 100%; background: linear-gradient(90deg, var(--korea-crimson), var(--korea-crimson-light)); transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 관리 버튼 -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto;">
+                    <a href="{{ url_for('admin_promise_progress_add', promise_id=promise.id) }}" style="padding: 10px 20px; background: var(--korea-crimson-lighter); color: var(--korea-crimson); text-decoration: none; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; transition: var(--transition-base); border: 1px solid var(--korea-crimson-light);" onmouseover="this.style.background='var(--korea-crimson-light)';" onmouseout="this.style.background='var(--korea-crimson-lighter)';">
+                        진행상황
+                    </a>
+                    <a href="{{ url_for('admin_promise_edit', promise_id=promise.id) }}" style="padding: 10px 20px; background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; transition: var(--transition-base); border: 1px solid var(--border-color);" onmouseover="this.style.background='var(--border-color)';" onmouseout="this.style.background='var(--bg-secondary)';">
+                        수정
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_promise_delete', promise_id=promise.id) }}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                        <button type="submit" style="padding: 10px 20px; background: #fee; color: #dc3545; border: 1px solid #fcc; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: var(--transition-base);" onmouseover="this.style.background='#fdd'; this.style.borderColor='#fbb';" onmouseout="this.style.background='#fee'; this.style.borderColor='#fcc';">
+                            삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
-    <div class="content">
-        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">등록된 공약이 없습니다.</p>
+    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 24px;">등록된 공약이 없습니다.</p>
+        <a href="{{ url_for('admin_promise_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            첫 공약 추가하기
+        </a>
     </div>
     {% endif %}
 </div>

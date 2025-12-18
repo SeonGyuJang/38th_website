@@ -3,38 +3,94 @@
 {% block title %}공약 진행상황 추가 - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700;">공약 진행상황 추가</h1>
-        <p style="opacity: 0.9;">{{ promise.title }}</p>
-    </div>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('admin_promises') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                공약 관리로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">
+                공약 진행상황 추가
+            </h1>
+            <p style="color: var(--text-secondary); margin-top: 12px; font-size: 1rem;">
+                {{ promise.title }}
+            </p>
+        </div>
 
-    <div style="margin-bottom: var(--spacing-md);">
-        <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary btn-small">← 목록으로</a>
-    </div>
+        <!-- 폼 카드 -->
+        <div style="background: white; border-radius: var(--radius-xl); padding: clamp(32px, 5vw, 48px); box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+            <form method="POST">
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="title">
+                        제목 <span style="color: var(--korea-crimson);">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="진행상황 제목을 입력하세요"
+                    >
+                </div>
 
-    <div class="content">
-        <form method="POST" data-validate>
-            <div class="form-group">
-                <label class="form-label" for="title">제목 *</label>
-                <input type="text" class="form-input" id="title" name="title" required>
-            </div>
+                <div style="margin-bottom: 28px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="date">
+                        날짜 <span style="color: var(--korea-crimson);">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                    >
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="date">날짜 *</label>
-                <input type="date" class="form-input" id="date" name="date" required>
-            </div>
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="content">
+                        내용 <span style="color: var(--korea-crimson);">*</span>
+                    </label>
+                    <textarea
+                        id="content"
+                        name="content"
+                        rows="8"
+                        required
+                        style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); resize: vertical; font-family: 'Pretendard', -apple-system, sans-serif;"
+                        onfocus="this.style.borderColor='var(--korea-crimson)'; this.style.background='white';"
+                        onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        placeholder="진행상황에 대한 상세 내용을 입력하세요"
+                    ></textarea>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label" for="content">내용 *</label>
-                <textarea class="form-textarea" id="content" name="content" required data-enhance></textarea>
-            </div>
-
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-primary">추가</button>
-                <a href="{{ url_for('admin_promises') }}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button
+                        type="submit"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-base); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
+                    >
+                        추가하기
+                    </button>
+                    <a
+                        href="{{ url_for('admin_promises') }}"
+                        style="flex: 1; min-width: 140px; padding: 16px 32px; background: var(--bg-secondary); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; text-align: center; text-decoration: none; transition: var(--transition-base); display: inline-block;"
+                        onmouseover="this.style.background='var(--border-color)';"
+                        onmouseout="this.style.background='var(--bg-secondary)';"
+                    >
+                        취소
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
