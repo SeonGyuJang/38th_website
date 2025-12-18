@@ -65,7 +65,7 @@
 <div class="container" style="padding-top: 100px; padding-bottom: 80px;">
     <div style="max-width: 900px; margin: 0 auto;">
         <!-- 뒤로 가기 -->
-        <a href="{{ url_for('promises') }}" class="back-btn" style="display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 32px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 8px 12px; border-radius: 8px;" onmouseover="this.style.color='var(--apple-blue)'; this.style.backgroundColor='rgba(0, 122, 255, 0.08)'; this.style.transform='translateX(-4px)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'; this.style.transform='translateX(0)';">
+        <a href="{{ url_for('promises') }}" class="back-btn" style="display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 32px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 8px 12px; border-radius: 8px;" onmouseover="this.style.color='var(--ku-crimson)'; this.style.backgroundColor='rgba(150, 26, 50, 0.08)'; this.style.transform='translateX(-4px)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'; this.style.transform='translateX(0)';">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="transition: transform 0.3s;">
                 <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -77,7 +77,7 @@
             <!-- 헤더 -->
             <div style="margin-bottom: 40px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <span style="padding: 10px 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3); transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(102, 126, 234, 0.3)';">
+                    <span style="padding: 10px 18px; background: var(--ku-crimson); color: white; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;">
                         {{ promise.category }}
                     </span>
                     <span class="badge
@@ -85,7 +85,7 @@
                         {% elif promise.status == '진행중' %}badge-info
                         {% elif promise.status == '보류' %}badge-warning
                         {% else %}badge-secondary{% endif %}"
-                        style="font-size: 0.9rem; padding: 10px 18px; border-radius: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                        style="font-size: 0.9rem; padding: 10px 18px; border-radius: 12px; font-weight: 700;">
                         {{ promise.status }}
                     </span>
                 </div>
@@ -95,9 +95,9 @@
             </div>
 
             <!-- 이행률 카드 -->
-            <div style="background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%); border-radius: 18px; padding: 36px; margin-bottom: 48px; color: white; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 122, 255, 0.3);">
+            <div style="background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 18px; padding: 36px; margin-bottom: 48px; color: white; position: relative; overflow: hidden;">
                 <!-- 배경 장식 -->
-                <div style="position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.12); border-radius: 50%; filter: blur(50px);"></div>
+                <div style="position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; filter: blur(50px);"></div>
                 <div style="position: absolute; bottom: -80px; left: -80px; width: 250px; height: 250px; background: rgba(0,0,0,0.08); border-radius: 50%; filter: blur(60px);"></div>
 
                 <div style="position: relative; z-index: 1;">
@@ -106,17 +106,17 @@
                             <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; display: block; margin-bottom: 4px;">공약 이행률</span>
                             <span style="font-size: 0.8rem; opacity: 0.75;">Promise Achievement</span>
                         </div>
-                        <span style="font-size: 3.5rem; font-weight: 900; line-height: 1; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);">{{ promise.progress_rate }}<span style="font-size: 0.45em; opacity: 0.9; font-weight: 800;">%</span></span>
+                        <span style="font-size: 3.5rem; font-weight: 900; line-height: 1;">{{ promise.progress_rate }}<span style="font-size: 0.45em; opacity: 0.9; font-weight: 800;">%</span></span>
                     </div>
-                    <div style="background: rgba(255,255,255,0.25); border-radius: 100px; height: 14px; overflow: hidden; backdrop-filter: blur(10px); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);">
-                        <div id="progressBar" style="background: white; height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 100px; box-shadow: 0 2px 12px rgba(255, 255, 255, 0.4); animation: progressFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;" data-progress="{{ promise.progress_rate }}"></div>
+                    <div style="background: rgba(255,255,255,0.25); border-radius: 100px; height: 14px; overflow: hidden; backdrop-filter: blur(10px);">
+                        <div id="progressBar" style="background: white; height: 100%; width: 0%; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 100px; animation: progressFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;" data-progress="{{ promise.progress_rate }}"></div>
                     </div>
                 </div>
             </div>
 
             <!-- 공약 내용 -->
             <div style="margin-bottom: 48px;">
-                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 3px solid var(--apple-blue); letter-spacing: -0.01em;">
+                <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 3px solid var(--ku-crimson); letter-spacing: -0.01em;">
                     공약 내용
                 </h2>
                 <p style="font-size: 1.05rem; line-height: 1.85; color: var(--text-primary); white-space: pre-wrap;">{{ promise.description }}</p>
@@ -125,9 +125,9 @@
             <!-- 상세 설명 -->
             {% if promise.detailed_description %}
             <div style="margin-bottom: 48px;">
-                <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: 36px; border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: 36px; border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
                     <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: var(--apple-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                                 <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke="white" stroke-width="2" stroke-linecap="round"/>
                             </svg>
@@ -143,7 +143,7 @@
             {% if progress_updates %}
             <div>
                 <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 36px; display: flex; align-items: center; gap: 12px; letter-spacing: -0.01em;">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);">
+                    <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -152,16 +152,16 @@
                 </h2>
                 <div style="position: relative; padding-left: 32px;">
                     <!-- 타임라인 라인 -->
-                    <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--apple-blue) 0%, rgba(0, 122, 255, 0.3) 100%); border-radius: 2px;"></div>
+                    <div style="position: absolute; left: 11px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--ku-crimson) 0%, rgba(150, 26, 50, 0.3) 100%); border-radius: 2px;"></div>
 
                     {% for update in progress_updates %}
                     <div class="timeline-item" style="position: relative; margin-bottom: 32px; padding-left: 32px;">
                         <!-- 타임라인 도트 -->
-                        <div style="position: absolute; left: 0; top: 6px; width: 26px; height: 26px; background: white; border: 5px solid var(--apple-blue); border-radius: 50%; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35), 0 0 0 4px rgba(0, 122, 255, 0.1); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+                        <div style="position: absolute; left: 0; top: 6px; width: 26px; height: 26px; background: white; border: 5px solid var(--ku-crimson); border-radius: 50%;"></div>
 
                         <!-- 콘텐츠 -->
-                        <div style="background: white; border-radius: 16px; padding: 24px; border: 1.5px solid rgba(0, 0, 0, 0.08); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.boxShadow='0 8px 24px rgba(0, 122, 255, 0.15)'; this.style.transform='translateY(-2px)'; this.previousElementSibling.style.transform='scale(1.15)'; this.previousElementSibling.style.boxShadow='0 6px 16px rgba(0, 122, 255, 0.45), 0 0 0 6px rgba(0, 122, 255, 0.15)';" onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.08)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)'; this.previousElementSibling.style.transform='scale(1)'; this.previousElementSibling.style.boxShadow='0 4px 12px rgba(0, 122, 255, 0.35), 0 0 0 4px rgba(0, 122, 255, 0.1)';">
-                            <div style="font-size: 0.85rem; color: var(--apple-blue); margin-bottom: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        <div style="background: white; border-radius: 16px; padding: 24px; border: 1.5px solid rgba(0, 0, 0, 0.08); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.previousElementSibling.style.transform='scale(1.15)';" onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.08)'; this.style.transform='translateY(0)'; this.previousElementSibling.style.transform='scale(1)';">
+                            <div style="font-size: 0.85rem; color: var(--ku-crimson); margin-bottom: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                                 {{ update.date.strftime('%Y년 %m월 %d일') }}
                             </div>
                             <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; letter-spacing: -0.01em;">

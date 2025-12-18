@@ -93,7 +93,7 @@
                         <input
                             type="url"
                             name="file_url_text"
-                            value="{{ regulation.file_url if regulation and regulation.file_url.startswith('http') and not regulation.file_url.startswith('/') else '' }}"
+                            value="{{ regulation.file_url if regulation and regulation.file_url and regulation.file_url.startswith('http') and not regulation.file_url.startswith('/') else '' }}"
                             style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
                             onfocus="this.style.borderColor='var(--apple-blue)';"
                             onblur="this.style.borderColor='var(--border-color)';"
