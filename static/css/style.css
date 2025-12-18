@@ -631,18 +631,18 @@ button {
 }
 
 .badge-success {
-    background: #f0fdf4;
-    color: #16a34a;
+    background: var(--ku-crimson-lighter);
+    color: var(--ku-crimson);
 }
 
 .badge-info {
-    background: #eff6ff;
-    color: #2563eb;
+    background: #fef2f2;
+    color: var(--ku-crimson);
 }
 
 .badge-warning {
-    background: #fffbeb;
-    color: #d97706;
+    background: var(--ku-crimson-lighter);
+    color: var(--ku-crimson);
 }
 
 .badge-secondary {

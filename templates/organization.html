@@ -25,16 +25,103 @@
             </div>
         </div>
 
-        <div>
-            <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">본부</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px);">
-                {% for h in heads %}
-                <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px);">
-                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
-                    <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
-                    <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem);">{{ h.major }}</div>
+        <div style="display: flex; gap: clamp(40px, 8vw, 60px); align-items: flex-start; flex-wrap: wrap;">
+            <!-- 본부 섹션 -->
+            <div style="flex: 1; min-width: 300px;">
+                <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">본부</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px);">
+                    {% for h in heads %}
+                    {% if '중앙집행위원장' in h.position or '기획정책위원장' in h.position %}
+                    <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px);">
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
+                        <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                        <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem); margin-bottom: 16px;">{{ h.major }}</div>
+                        
+                        <!-- 해당 위원장의 국서들 표시 -->
+                        {% if '중앙집행위원장' in h.position %}
+                            {% for dept_name in ['중앙집행위원회 미디어소통국', '중앙집행위원회 사무국', '중앙집행위원회 재정국'] %}
+                            {% if departments.get(dept_name) %}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
+                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                    {% for member in departments[dept_name] %}
+                                        {% if member.position in ['국장', '차장', '국원'] %}
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        {% elif '기획정책위원장' in h.position %}
+                            {% for dept_name in ['기획정책위원회 문화기획국', '기획정책위원회 대외협력국', '기획정책위원회 정책국'] %}
+                            {% if departments.get(dept_name) %}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
+                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                    {% for member in departments[dept_name] %}
+                                        {% if member.position in ['국장', '차장', '국원'] %}
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
+
+            <!-- 산하위원회 섹션 -->
+            <div style="flex: 1; min-width: 300px;">
+                <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">산하위원회</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px);">
+                    {% for h in heads %}
+                    {% if '인권복지위원장' in h.position or '교육복지위원장' in h.position %}
+                    <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px);">
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
+                        <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                        <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem); margin-bottom: 16px;">{{ h.major }}</div>
+                        
+                        <!-- 해당 위원장의 국서들 표시 -->
+                        {% if '인권복지위원장' in h.position %}
+                            {% for dept_name in ['인권복지위원회 홍보국', '인권복지위원회 기획국', '인권복지위원회 사무재정국'] %}
+                            {% if departments.get(dept_name) %}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
+                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                    {% for member in departments[dept_name] %}
+                                        {% if member.position in ['국장', '차장', '국원'] %}
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        {% elif '교육복지위원장' in h.position %}
+                            {% for dept_name in ['교육복지위원회 홍보국', '교육복지위원회 기획국', '교육복지위원회 사무재정국'] %}
+                            {% if departments.get(dept_name) %}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
+                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                    {% for member in departments[dept_name] %}
+                                        {% if member.position in ['국장', '차장', '국원'] %}
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -49,8 +136,19 @@
                     <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.8rem); margin-bottom: 8px;">{{ m.position }}</div>
                     <div style="font-size: clamp(1.1rem, 2.5vw, 1.25rem); font-weight: 800; margin-bottom: 4px;">{{ m.name }}</div>
                     <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem);">{{ m.major }}</div>
-                    {% if m.email %}
-                    <div style="margin-top: 12px; font-size: clamp(0.75rem, 1.7vw, 0.8rem); color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px; word-break: break-all;">{{ m.email }}</div>
+                    {% if m.position in ['국장'] or '회장' in m.position or '위원장' in m.position %}
+                        {% if m.email %}
+                        <div style="margin-top: 12px; font-size: clamp(0.75rem, 1.7vw, 0.8rem); color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px; word-break: break-all;">
+                            <div>{{ m.email }}</div>
+                            {% if m.phone %}
+                            <div style="margin-top: 4px;">{{ m.phone }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        {% if m.email %}
+                        <div style="margin-top: 12px; font-size: clamp(0.75rem, 1.7vw, 0.8rem); color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px; word-break: break-all;">{{ m.email }}</div>
+                        {% endif %}
                     {% endif %}
                 </div>
                 {% endfor %}

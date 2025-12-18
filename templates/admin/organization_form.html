@@ -60,15 +60,46 @@
                         <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="department">
                             부서
                         </label>
-                        <input
-                            type="text"
+                        <select
                             id="department"
                             name="department"
-                            value="{{ member.department if member else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); cursor: pointer;"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                        >
+                            <option value="">선택하세요</option>
+                            <option value="회장단" {% if member and member.department == '회장단' %}selected{% endif %}>회장단</option>
+                            <option value="본부" {% if member and member.department == '본부' %}selected{% endif %}>본부</option>
+                            <option value="산하위원회" {% if member and member.department == '산하위원회' %}selected{% endif %}>산하위원회</option>
+                            <option value="중집위_미디어소통국" {% if member and member.department == '중집위_미디어소통국' %}selected{% endif %}>중집위_미디어소통국</option>
+                            <option value="중집위_사무국" {% if member and member.department == '중집위_사무국' %}selected{% endif %}>중집위_사무국</option>
+                            <option value="중집위_재정국" {% if member and member.department == '중집위_재정국' %}selected{% endif %}>중집위_재정국</option>
+                            <option value="기정위_문화기획국" {% if member and member.department == '기정위_문화기획국' %}selected{% endif %}>기정위_문화기획국</option>
+                            <option value="기정위_대외협력국" {% if member and member.department == '기정위_대외협력국' %}selected{% endif %}>기정위_대외협력국</option>
+                            <option value="기정위_정책국" {% if member and member.department == '기정위_정책국' %}selected{% endif %}>기정위_정책국</option>
+                            <option value="인복위_홍보국" {% if member and member.department == '인복위_홍보국' %}selected{% endif %}>인복위_홍보국</option>
+                            <option value="인복위_기획국" {% if member and member.department == '인복위_기획국' %}selected{% endif %}>인복위_기획국</option>
+                            <option value="인복위_사무재정국" {% if member and member.department == '인복위_사무재정국' %}selected{% endif %}>인복위_사무재정국</option>
+                            <option value="교복위_홍보국" {% if member and member.department == '교복위_홍보국' %}selected{% endif %}>교복위_홍보국</option>
+                            <option value="교복위_기획국" {% if member and member.department == '교복위_기획국' %}selected{% endif %}>교복위_기획국</option>
+                            <option value="교복위_사무재정국" {% if member and member.department == '교복위_사무재정국' %}selected{% endif %}>교복위_사무재정국</option>
+                        </select>
+                    </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="student_id">
+                            학번
+                        </label>
+                        <input
+                            type="text"
+                            id="student_id"
+                            name="student_id"
+                            value="{{ member.student_id if member else '' }}"
                             style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
                             onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                             onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
-                            placeholder="예: 기획국 (회장단은 비워두세요)"
+                            placeholder="예: 2020123456"
                         >
                     </div>
 
@@ -85,6 +116,41 @@
                             onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                             onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                             placeholder="예: 컴퓨터공학과"
+                        >
+                    </div>
+                </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 28px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="phone">
+                            전화번호
+                        </label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            value="{{ member.phone if member else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                            placeholder="예: 010-1234-5678"
+                        >
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="email">
+                            이메일
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ member.email if member else '' }}"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
+                            onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
+                            placeholder="예: example@ku.edu"
                         >
                     </div>
                 </div>
@@ -112,7 +178,7 @@
                         <input
                             type="url"
                             name="photo_url_text"
-                            value="{{ member.photo_url if member and member.photo_url.startswith('http') else '' }}"
+                            value="{{ member.photo_url if member and member.photo_url and member.photo_url.startswith('http') else '' }}"
                             style="width: 100%; padding: 12px 14px; font-size: 0.95rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: white;"
                             onfocus="this.style.borderColor='var(--apple-blue)';"
                             onblur="this.style.borderColor='var(--border-color)';"

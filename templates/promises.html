@@ -24,9 +24,9 @@
     }
 
     .category-filter-btn.active {
-        background: var(--apple-blue) !important;
+        background: var(--ku-crimson) !important;
         color: white !important;
-        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3) !important;
+        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
     }
 
     .promise-section {
@@ -37,7 +37,7 @@
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
     <div style="margin-bottom: 50px; text-align: center;">
-        <p style="color: var(--apple-blue); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
+        <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
         <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">공약 이행 현황</h1>
         <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">학우 여러분과의 약속을 투명하게 공개하고, 지켜나가겠습니다</p>
     </div>
@@ -46,7 +46,7 @@
     {% if categories %}
     <div style="margin-bottom: 50px;">
         <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
-            <button onclick="filterCategory('all')" class="category-filter-btn active" data-category="all" style="padding: 12px 24px; background: var(--apple-blue); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);">
+            <button onclick="filterCategory('all')" class="category-filter-btn active" data-category="all" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
                 전체
             </button>
             {% for category in categories.keys() %}
@@ -59,7 +59,7 @@
     {% endif %}
 
     <!-- 전체 이행률 히어로 카드 -->
-    <div style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-2xl); padding: clamp(50px, 8vw, 80px) clamp(30px, 6vw, 60px); text-align: center; color: white; box-shadow: 0 20px 60px rgba(0, 122, 255, 0.35); margin-bottom: 80px; position: relative; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: var(--radius-2xl); padding: clamp(50px, 8vw, 80px) clamp(30px, 6vw, 60px); text-align: center; color: white; box-shadow: 0 20px 60px rgba(150, 26, 50, 0.35); margin-bottom: 80px; position: relative; overflow: hidden;">
         <!-- 배경 장식 -->
         <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.08); filter: blur(60px);"></div>
         <div style="position: absolute; bottom: -120px; left: -120px; width: 350px; height: 350px; border-radius: 50%; background: rgba(0,0,0,0.08); filter: blur(80px);"></div>
