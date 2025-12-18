@@ -3,43 +3,58 @@
 {% block title %}회칙 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="section-header" style="margin-top: var(--spacing-lg);">
-        <h1 class="section-title">회칙</h1>
-        <p class="section-subtitle">각 단위 회칙을 열람하실 수 있습니다</p>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- 헤더 -->
+    <div style="text-align: center; margin-bottom: 60px;">
+        <p style="color: var(--korea-crimson); font-weight: 600; letter-spacing: 0.1em; margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem;">Regulations</p>
+        <h1 style="font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">회칙</h1>
+        <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">각 단위 회칙을 열람하실 수 있습니다</p>
     </div>
 
     {% if categories %}
         {% for category, regulations_list in categories.items() %}
-        <section class="section">
-            <div class="section-header">
-                <h2 class="section-title" style="font-size: 1.5rem;">{{ category }}</h2>
+        <section style="margin-bottom: 80px;">
+            <!-- 카테고리 헤더 -->
+            <div style="background: white; border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); margin-bottom: 24px;">
+                <h2 style="font-size: clamp(1.4rem, 3vw, 1.75rem); font-weight: 700; color: var(--text-primary); margin: 0;">{{ category }}</h2>
             </div>
 
-            <div class="content">
+            <!-- 회칙 목록 -->
+            <div style="display: grid; gap: 20px;">
                 {% for regulation in regulations_list %}
-                <div style="margin-bottom: var(--spacing-lg); {% if not loop.last %}padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--border-color);{% endif %}">
-                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--spacing-md); color: var(--korea-crimson);">
-                        {{ regulation.title }}
-                    </h3>
-                    <div style="line-height: 1.8; white-space: pre-wrap; color: var(--text-primary);">
+                <div style="background: white; border-radius: var(--radius-lg); padding: clamp(28px, 5vw, 36px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: all var(--transition-base);" onmouseover="this.style.boxShadow='var(--shadow-md)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+                    <!-- 제목 -->
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <h3 style="font-size: clamp(1.15rem, 2.5vw, 1.35rem); font-weight: 700; color: var(--korea-crimson); margin: 0;">
+                            {{ regulation.title }}
+                        </h3>
+                        {% if regulation.file_url %}
+                        <a href="{{ regulation.file_url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--korea-crimson-lighter); color: var(--korea-crimson); text-decoration: none; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 600; transition: var(--transition-base); flex-shrink: 0;" onmouseover="this.style.background='var(--korea-crimson)'; this.style.color='white';" onmouseout="this.style.background='var(--korea-crimson-lighter)'; this.style.color='var(--korea-crimson)';">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M14 9v2.67c0 .73-.6 1.33-1.33 1.33H3.33c-.73 0-1.33-.6-1.33-1.33V9m8-4L8 8m0 0L6 5m2 3V2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            전문 보기
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- 내용 -->
+                    <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap; padding: 24px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
                         {{ regulation.content }}
                     </div>
-                    {% if regulation.file_url %}
-                    <div style="margin-top: var(--spacing-md);">
-                        <a href="{{ regulation.file_url }}" target="_blank" class="btn btn-outline btn-small">📄 전문 보기</a>
-                    </div>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
         </section>
         {% endfor %}
     {% else %}
-    <div class="content">
-        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">
-            등록된 회칙이 없습니다.
-        </p>
+    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);">
+        <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1rem;">등록된 회칙이 없습니다.</p>
     </div>
     {% endif %}
 </div>

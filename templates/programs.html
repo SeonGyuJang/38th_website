@@ -3,8 +3,8 @@
 {% block title %}교내 프로그램 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="section-header" style="margin-top: var(--spacing-lg); animation: slideInUp 0.8s ease-out;">
+<div class="container" style="padding-top: 80px;">
+    <div style="margin-bottom: var(--spacing-xl); animation: slideInUp 0.8s ease-out;">
         <h1 class="section-title" style="opacity: 1; transform: none;">교내 프로그램</h1>
         <p class="section-subtitle" style="opacity: 1; transform: none;">다양한 교내 프로그램 정보를 확인하세요</p>
     </div>
@@ -12,62 +12,59 @@
     {% if programs %}
     <div class="card-grid">
         {% for program in programs %}
-        <div class="card">
+        <div class="card" style="padding: 0; overflow: hidden;">
             {% if program.image_url %}
             <img src="{{ program.image_url }}" alt="{{ program.title }}"
-                 style="width: calc(100% + 48px); height: 200px; object-fit: cover; border-radius: var(--radius-md); margin: -24px -24px 16px -24px; margin-bottom: var(--spacing-md);">
+                 style="width: 100%; height: 180px; object-fit: cover;">
             {% endif %}
 
-            <div class="card-header">
-                <div style="flex: 1;">
-                    <h3 class="card-title">{{ program.title }}</h3>
-                    {% if program.organizer %}
-                    <p class="card-subtitle">{{ program.organizer }}</p>
+            <div style="padding: var(--spacing-lg);">
+                <div class="card-header" style="margin-bottom: var(--spacing-md);">
+                    <div style="flex: 1;">
+                        <h3 class="card-title" style="font-size: 1.15rem;">{{ program.title }}</h3>
+                        {% if program.organizer %}
+                        <p class="card-subtitle" style="margin-top: 4px;">{{ program.organizer }}</p>
+                        {% endif %}
+                    </div>
+                    {% if program.category %}
+                    <span class="badge badge-info" style="flex-shrink: 0;">{{ program.category }}</span>
                     {% endif %}
                 </div>
-                {% if program.category %}
-                <span class="badge badge-info">{{ program.category }}</span>
+
+                <p class="card-content" style="font-size: 0.9rem; line-height: 1.6;">{{ program.description }}</p>
+
+                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-light); font-size: 0.85rem; color: var(--text-secondary);">
+                    {% if program.target %}
+                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">대상:</strong> {{ program.target }}</p>
+                    {% endif %}
+                    {% if program.location %}
+                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">장소:</strong> {{ program.location }}</p>
+                    {% endif %}
+                    {% if program.start_date and program.end_date %}
+                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">기간:</strong> {{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</p>
+                    {% elif program.start_date %}
+                    <p style="margin: 6px 0;"><strong style="color: var(--text-primary);">일시:</strong> {{ program.start_date.strftime('%Y.%m.%d') }}</p>
+                    {% endif %}
+                    {% if program.application_start and program.application_end %}
+                    <p style="margin: 6px 0; color: var(--korea-crimson); font-weight: 600;">
+                        <strong>신청기간:</strong> {{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                {% if program.link %}
+                <div style="margin-top: var(--spacing-md);">
+                    <a href="{{ program.link }}" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center;">더 알아보기</a>
+                </div>
                 {% endif %}
             </div>
-
-            <p class="card-content">{{ program.description }}</p>
-
-            <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);">
-                {% if program.target %}
-                <p style="margin: 8px 0;"><strong style="color: var(--text-primary);">대상:</strong> {{ program.target }}</p>
-                {% endif %}
-                {% if program.location %}
-                <p style="margin: 8px 0;"><strong style="color: var(--text-primary);">장소:</strong> {{ program.location }}</p>
-                {% endif %}
-                {% if program.start_date and program.end_date %}
-                <p style="margin: 8px 0;"><strong style="color: var(--text-primary);">기간:</strong> {{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</p>
-                {% elif program.start_date %}
-                <p style="margin: 8px 0;"><strong style="color: var(--text-primary);">일시:</strong> {{ program.start_date.strftime('%Y.%m.%d') }}</p>
-                {% endif %}
-                {% if program.application_start and program.application_end %}
-                <p style="margin: 8px 0; color: var(--korea-crimson); font-weight: 600;">
-                    <strong>신청기간:</strong> {{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}
-                </p>
-                {% endif %}
-            </div>
-
-            {% if program.link %}
-            <div style="margin-top: var(--spacing-md);">
-                <a href="{{ program.link }}" target="_blank" class="btn btn-primary btn-small" style="width: 100%; text-align: center;">더 알아보기</a>
-            </div>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="content" style="text-align: center; padding: var(--spacing-xl);">
-        <p style="color: var(--text-secondary); font-size: 1.1rem;">
+    <div style="text-align: center; padding: var(--spacing-4xl) var(--spacing-lg);">
+        <p style="color: var(--text-secondary); font-size: 1rem;">
             등록된 프로그램이 없습니다.
-        </p>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
         </p>
     </div>
     {% endif %}
