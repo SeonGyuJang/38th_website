@@ -8,9 +8,8 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-Config.init_app(app)  # 업로드 폴더 초기화
+Config.init_app(app)
 
-# 확장 기능 초기화
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -20,11 +19,8 @@ login_manager.login_view = 'admin_login'
 def load_user(user_id):
     return Admin.query.get(int(user_id))
 
-# ============ 헬퍼 함수 ============
-
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 def save_file(file, subfolder='files'):
     if file and allowed_file(file.filename):
@@ -38,22 +34,34 @@ def save_file(file, subfolder='files'):
         return url_for('static', filename=f'uploads/{subfolder}/{filename}')
     return None
 
-# ============ 사용자용 라우트 ============
-
 @app.route('/')
 def index():
     banner = Banner.query.filter_by(is_active=True, is_event_banner=True).order_by(Banner.order).first()
     if not banner:
         banner = Banner.query.filter_by(is_active=True, is_event_banner=False).order_by(Banner.order).first()
+    
     promises_list = Promise.query.all()
     promise_rate = 0
     if promises_list:
         total_progress = sum(p.progress_rate for p in promises_list)
         promise_rate = total_progress / len(promises_list)
+
+    # 메인 화면용 조직 데이터 (이미지 1의 구조: 회장단 및 각 위원장)
+    presidents = Organization.query.filter(Organization.position.contains('회장')).order_by(Organization.order).all()
+    heads = Organization.query.filter(Organization.position.contains('위원장')).order_by(Organization.order).all()
+
     recent_schedule = Schedule.query.filter(Schedule.start_date >= datetime.now()).order_by(Schedule.start_date).first()
     recent_minute = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).first()
     active_program = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).first()
-    return render_template('index.html', banner=banner, promise_rate=int(promise_rate), recent_schedule=recent_schedule, recent_minute=recent_minute, active_program=active_program)
+    
+    return render_template('index.html', 
+                           banner=banner, 
+                           promise_rate=int(promise_rate), 
+                           recent_schedule=recent_schedule, 
+                           recent_minute=recent_minute, 
+                           active_program=active_program,
+                           presidents=presidents,
+                           heads=heads)
 
 @app.route('/schedule')
 def schedule():
@@ -62,18 +70,13 @@ def schedule():
 
 @app.route('/organization')
 def organization():
-    """이미지(image_a22cc7.png)의 3층 계층 구조를 반영한 조직도 데이터 처리"""
-    # 1. 최상단: 회장단 (총학생회장, 부총학생회장)
+    """상세 조직도: 이미지 2의 구조 (국장, 차장 포함 모든 멤버)"""
     presidents = Organization.query.filter(Organization.position == '총학생회장').order_by(Organization.order).all()
     vice_presidents = Organization.query.filter(Organization.position == '부총학생회장').order_by(Organization.order).all()
 
-    # 2. 중간: 위원장단 (본부 vs 산하위원회)
-    # 이미지처럼 '본부' 탭에 중앙집행위원장, 기획정책위원장이 있고, '산하위원회' 탭에 인권복지, 교육복지가 있음
     bonbu_heads = Organization.query.filter(Organization.department == '본부', Organization.position.contains('위원장')).order_by(Organization.order).all()
     sanha_heads = Organization.query.filter(Organization.department == '산하위원회', Organization.position.contains('위원장')).order_by(Organization.order).all()
 
-    # 3. 하단: 각 국별 멤버 (재정국, 사무국, 정책국, 문화기획국 등)
-    # 부서 이름으로 그룹화하여 전달
     all_members = Organization.query.filter(~Organization.position.contains('회장'), ~Organization.position.contains('위원장')).order_by(Organization.order).all()
     departments = {}
     for m in all_members:
@@ -82,7 +85,12 @@ def organization():
             departments[dept] = []
         departments[dept].append(m)
 
-    return render_template('organization.html', presidents=presidents, vice_presidents=vice_presidents, bonbu_heads=bonbu_heads, sanha_heads=sanha_heads, departments=departments)
+    return render_template('organization.html', 
+                           presidents=presidents, 
+                           vice_presidents=vice_presidents, 
+                           bonbu_heads=bonbu_heads, 
+                           sanha_heads=sanha_heads, 
+                           departments=departments)
 
 @app.route('/promises')
 def promises():
@@ -126,8 +134,6 @@ def programs():
     programs_list = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).all()
     return render_template('programs.html', programs=programs_list)
 
-# ============ 관리자 인증 라우트 ============
-
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if current_user.is_authenticated:
@@ -158,8 +164,6 @@ def admin_dashboard():
         'programs': Program.query.filter_by(is_active=True).count()
     }
     return render_template('admin/dashboard.html', stats=stats)
-
-# ============ 일정 관리 ============
 
 @app.route('/admin/schedules')
 @login_required
@@ -209,8 +213,6 @@ def admin_schedule_delete(schedule_id):
     db.session.commit()
     flash('일정이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_schedules'))
-
-# ============ 공약 관리 ============
 
 @app.route('/admin/promises')
 @login_required
@@ -280,8 +282,6 @@ def admin_promise_progress_add(promise_id):
         return redirect(url_for('admin_promises'))
     return render_template('admin/promise_progress_form.html', promise=promise)
 
-# ============ 회의록 관리 ============
-
 @app.route('/admin/minutes')
 @login_required
 def admin_minutes():
@@ -349,8 +349,6 @@ def admin_minute_delete(minute_id):
     flash('회의록이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_minutes'))
 
-# ============ 회칙 관리 ============
-
 @app.route('/admin/regulations')
 @login_required
 def admin_regulations():
@@ -410,8 +408,6 @@ def admin_regulation_delete(regulation_id):
     db.session.commit()
     flash('회칙이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_regulations'))
-
-# ============ 프로그램 관리 ============
 
 @app.route('/admin/programs')
 @login_required
@@ -489,8 +485,6 @@ def admin_program_delete(program_id):
     flash('프로그램이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_programs'))
 
-# ============ 배너 관리 ============
-
 @app.route('/admin/banners')
 @login_required
 def admin_banners():
@@ -551,8 +545,6 @@ def admin_banner_delete(banner_id):
     db.session.commit()
     flash('배너가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_banners'))
-
-# ============ 조직도 관리 ============
 
 @app.route('/admin/organization')
 @login_required
@@ -620,8 +612,6 @@ def admin_organization_delete(member_id):
     db.session.commit()
     flash('조직도 멤버가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_organization'))
-
-# ============ DB 초기화 명령 ============
 
 @app.cli.command()
 def init_db():
