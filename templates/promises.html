@@ -3,18 +3,18 @@
 {% block title %}공약 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="section-header" style="margin-top: var(--spacing-lg); animation: slideInUp 0.8s ease-out;">
+<div class="container" style="padding-top: 80px;">
+    <div style="margin-bottom: var(--spacing-xl); animation: slideInUp 0.8s ease-out;">
         <h1 class="section-title" style="opacity: 1; transform: none;">공약</h1>
         <p class="section-subtitle" style="opacity: 1; transform: none;">학우 여러분과의 약속을 지켜나가겠습니다</p>
     </div>
 
     <!-- 전체 이행률 -->
-    <div class="content" style="margin-bottom: var(--spacing-xl);">
-        <div style="background: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.04);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
-                <span style="font-size: 1rem; font-weight: 700; color: var(--text-primary);">전체 공약 이행률</span>
-                <span style="font-size: 2rem; font-weight: 800; color: var(--korea-crimson);">{{ total_progress }}%</span>
+    <div style="margin-bottom: var(--spacing-xl);">
+        <div style="background: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); gap: var(--spacing-md);">
+                <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">전체 공약 이행률</span>
+                <span style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--korea-crimson);">{{ total_progress }}%</span>
             </div>
             <div style="background: var(--bg-secondary); border-radius: 100px; height: 12px; overflow: hidden;">
                 <div style="background: linear-gradient(90deg, var(--korea-crimson), var(--korea-crimson-light)); height: 100%; width: {{ total_progress }}%; transition: width 0.8s ease-out; border-radius: 100px;"></div>
@@ -25,29 +25,29 @@
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% for category, promises_list in categories.items() %}
-        <section class="section">
-            <div class="section-header">
-                <h2 class="section-title" style="font-size: 1.8rem; opacity: 1; transform: none;">{{ category }}</h2>
+        <section style="margin-bottom: var(--spacing-4xl);">
+            <div style="margin-bottom: var(--spacing-xl);">
+                <h2 style="font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: var(--text-primary);">{{ category }}</h2>
             </div>
 
             <div class="card-grid">
                 {% for promise in promises_list %}
                 <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" class="card" style="text-decoration: none; display: flex; flex-direction: column;">
-                    <div class="card-header">
+                    <div class="card-header" style="align-items: flex-start;">
                         <div style="flex: 1;">
-                            <h3 class="card-title">{{ promise.title }}</h3>
+                            <h3 class="card-title" style="font-size: 1.1rem;">{{ promise.title }}</h3>
                         </div>
                         <span class="badge
                             {% if promise.status == '완료' %}badge-success
                             {% elif promise.status == '진행중' %}badge-info
                             {% elif promise.status == '보류' %}badge-warning
-                            {% else %}badge-secondary{% endif %}">
+                            {% else %}badge-secondary{% endif %}" style="flex-shrink: 0;">
                             {{ promise.status }}
                         </span>
                     </div>
-                    <p class="card-content">{{ promise.description }}</p>
+                    <p class="card-content" style="font-size: 0.9rem; line-height: 1.6;">{{ promise.description }}</p>
 
-                    <div style="margin-top: auto; padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
+                    <div style="margin-top: auto; padding-top: var(--spacing-md); border-top: 1px solid var(--border-light);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">이행률</span>
                             <span style="font-size: 1rem; font-weight: 700; color: var(--korea-crimson);">{{ promise.progress_rate }}%</span>
@@ -62,8 +62,8 @@
         </section>
         {% endfor %}
     {% else %}
-    <div class="content" style="text-align: center; padding: var(--spacing-xl);">
-        <p style="color: var(--text-secondary); font-size: 1.1rem;">
+    <div style="text-align: center; padding: var(--spacing-4xl) var(--spacing-lg);">
+        <p style="color: var(--text-secondary); font-size: 1rem;">
             등록된 공약이 없습니다.
         </p>
     </div>
