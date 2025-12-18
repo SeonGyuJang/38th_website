@@ -4,162 +4,135 @@
 
 {% block content %}
 <style>
-    /* 이미지 테마 기반 스타일 */
-    .org-section {
-        background-color: #f3e9dc; /* 이미지 배경색과 유사한 베이지 */
-        padding: 60px 0 100px;
-        font-family: 'Pretendard', sans-serif;
-    }
-    .org-title-main {
-        background-color: #7a1a28; /* 고려대 크림슨 */
-        color: white;
-        text-align: center;
-        padding: 25px;
-        margin-bottom: 50px;
-        border-radius: 8px;
-    }
-    .org-title-main h1 { font-size: 2.5rem; font-weight: 800; margin: 0; }
+    .org-section-full { background-color: #f3e9dc; padding: 120px 0 100px; font-family: 'Pretendard', sans-serif; }
+    .org-header-full { background-color: #7a1a28; color: white; text-align: center; padding: 30px; border-radius: 8px; margin-bottom: 60px; box-shadow: var(--shadow-md); }
     
-    /* 카드 공통 */
-    .member-card-v2 {
-        background: white;
-        border: 2px solid #7a1a28;
-        width: 260px;
-        padding: 20px;
-        text-align: center;
-        border-radius: 4px;
-        box-shadow: 4px 4px 15px rgba(0,0,0,0.1);
-        position: relative;
-    }
-    .card-pos-v2 {
-        background: #7a1a28;
-        color: white;
-        padding: 8px;
-        font-weight: 700;
-        margin: -20px -20px 15px -20px;
-        border-radius: 2px 2px 0 0;
-    }
-    .card-name-v2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; color: black; }
-    .card-major-v2 { font-size: 0.9rem; font-weight: 600; color: #333; }
-    .card-tel-v2 { font-size: 0.8rem; color: #666; margin-top: 10px; border-top: 1px dotted #ccc; padding-top: 10px; }
+    /* 인물 카드 스타일 */
+    .member-box-full { background: white; border: 2px solid #7a1a28; width: 100%; max-width: 250px; padding: 20px; text-align: center; border-radius: 4px; box-shadow: 4px 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
+    .member-box-full:hover { transform: translateY(-5px); }
+    .member-pos-full { background: #7a1a28; color: white; padding: 8px; font-weight: 700; margin: -20px -20px 15px -20px; border-radius: 2px 2px 0 0; font-size: 0.9rem; }
+    .member-name-full { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; color: #000; }
+    .member-info-full { font-size: 0.9rem; font-weight: 600; color: #333; }
+    .member-contact-full { font-size: 0.8rem; color: #666; margin-top: 10px; border-top: 1px dotted #ccc; padding-top: 10px; }
 
-    /* 이미지의 '본부', '산하위원회' 하늘색/연두색 바 스타일 */
-    .section-bar-v2 {
-        width: 100%;
-        max-width: 500px;
-        margin: 40px auto;
-        padding: 12px;
-        border: 4px solid;
-        border-radius: 50px;
-        text-align: center;
-        font-size: 1.8rem;
-        font-weight: 900;
-    }
-    .bar-bonbu-v2 { background-color: #e1f5fe; border-color: #81d4fa; color: #01579b; }
-    .bar-sanha-v2 { background-color: #f9fbe7; border-color: #dce775; color: #33691e; }
+    /* 국(Department) 계층 스타일 */
+    .dept-container-full { display: flex; flex-direction: column; width: 160px; gap: 10px; }
+    .dept-label-full { background: #7a1a28; color: white; padding: 6px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-align: center; letter-spacing: 0.05em; }
+    .dept-member-full { background: white; border: 1.5px solid #7a1a28; padding: 12px; font-size: 0.85rem; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; text-align: center; min-height: 70px; }
+    .member-role-tag { display: block; font-size: 0.7rem; color: #7a1a28; font-weight: 800; margin-bottom: 3px; border-bottom: 1px solid #f3e9dc; padding-bottom: 2px; }
 
-    /* 국(Department) 스타일 */
-    .dept-group-v2 { display: flex; flex-direction: column; width: 140px; gap: 8px; }
-    .dept-title-v2 { background: #7a1a28; color: white; padding: 5px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-align: center; }
-    .dept-box-v2 { background: white; border: 1.5px solid #7a1a28; padding: 10px; font-size: 0.85rem; height: 65px; display: flex; flex-direction: column; justify-content: center; text-align: center; }
-
-    /* 선 연결 (이미지의 점선 구현) */
-    .connector-line-v2 { border-top: 2px dotted #555; width: 100px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; }
+    /* 하늘색/연두색 구분 바 */
+    .type-bar-full { width: 100%; max-width: 500px; margin: 40px auto; padding: 12px; border: 4px solid; border-radius: 50px; text-align: center; font-size: 1.8rem; font-weight: 900; }
+    .bar-blue { background-color: #e1f5fe; border-color: #81d4fa; color: #01579b; }
+    .bar-green { background-color: #f9fbe7; border-color: #dce775; color: #33691e; }
 </style>
 
-<div class="org-section">
+<div class="org-section-full">
     <div class="container">
-        <div class="org-title-main">
-            <p style="margin:0 0 5px; font-size: 1rem;">고려대학교 세종캠퍼스</p>
-            <h1>제38대 총학생회 조직도</h1>
+        <div class="org-header-full">
+            <p style="margin:0 0 5px; font-size: 1rem; opacity: 0.9;">고려대학교 세종캠퍼스</p>
+            <h1 style="margin:0; font-size: 2.5rem; font-weight: 900;">제38대 총학생회 상세 조직도</h1>
         </div>
 
-        <div style="display: flex; justify-content: center; gap: 60px; margin-bottom: 60px; position: relative;">
-            <div class="connector-line-v2"></div>
-            {% for p in presidents %}
-            <div class="member-card-v2">
-                <div class="card-pos-v2">{{ p.position }}</div>
-                <div class="card-name-v2">{{ p.name }}</div>
-                <div class="card-major-v2">{{ p.major }} {{ p.student_id }}</div>
-                <div class="card-tel-v2">tel.{{ p.phone }}</div>
+        <div style="display: flex; justify-content: center; gap: 60px; margin-bottom: 80px; position: relative;">
+            <div class="member-box-full">
+                <div class="member-pos-full">총학생회장</div>
+                <div class="member-name-full">홍길동</div>
+                <div class="member-info-full">OO학과 21학번</div>
+                <div class="member-contact-full">tel.010-0000-0000</div>
             </div>
-            {% endfor %}
-            {% for vp in vice_presidents %}
-            <div class="member-card-v2">
-                <div class="card-pos-v2">{{ vp.position }}</div>
-                <div class="card-name-v2">{{ vp.name }}</div>
-                <div class="card-major-v2">{{ vp.major }} {{ vp.student_id }}</div>
-                <div class="card-tel-v2">tel.{{ vp.phone }}</div>
+            <div class="member-box-full">
+                <div class="member-pos-full">부총학생회장</div>
+                <div class="member-name-full">홍길동</div>
+                <div class="member-info-full">OO학과 23학번</div>
+                <div class="member-contact-full">tel.010-0000-0000</div>
             </div>
-            {% endfor %}
         </div>
 
-        <div style="display: flex; gap: 30px; align-items: flex-start;">
-            <div style="flex: 1.2;">
-                <div class="section-bar-v2 bar-bonbu-v2">본부</div>
-                <div style="display: flex; justify-content: space-around; gap: 20px;">
-                    {% for head in bonbu_heads %}
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                        <div class="member-card-v2" style="width: 180px;">
-                            <div class="card-pos-v2" style="font-size: 0.75rem;">{{ head.position }}</div>
-                            <div class="card-name-v2" style="font-size: 1.2rem;">{{ head.name }}</div>
-                            <div class="card-major-v2" style="font-size: 0.8rem;">{{ head.major }}</div>
-                            <div class="card-tel-v2" style="font-size: 0.7rem;">tel.{{ head.phone }}</div>
+        <div style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="flex: 1.2; min-width: 500px;">
+                <div class="type-bar-full bar-blue">본부</div>
+                <div style="display: flex; justify-content: center; gap: 30px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+                        <div class="member-box-full" style="max-width: 200px;">
+                            <div class="member-pos-full" style="font-size: 0.8rem;">중앙집행위원장</div>
+                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
+                            <div class="member-info-full" style="font-size: 0.8rem;">OO학과 23</div>
                         </div>
-
-                        <div style="display: flex; gap: 8px;">
-                            {% set dept_map = {
-                                '중앙집행위원장': ['재정국', '사무국'],
-                                '기획정책위원장': ['정책국', '문화기획국']
-                            } %}
-                            {% for d_name in dept_map.get(head.position, []) %}
-                            <div class="dept-group-v2">
-                                <div class="dept-title-v2">{{ d_name }}</div>
-                                {% for m in departments.get(d_name, []) %}
-                                <div class="dept-box-v2">
-                                    <strong>{{ m.name }}</strong>
-                                    <span style="font-size: 0.75rem; color: #7a1a28; margin-top:3px;">{{ m.position }}</span>
-                                </div>
-                                {% endfor %}
+                        <div style="display: flex; gap: 15px;">
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">재정국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
                             </div>
-                            {% endfor %}
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">사무국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+                        <div class="member-box-full" style="max-width: 200px;">
+                            <div class="member-pos-full" style="font-size: 0.8rem;">기획정책위원장</div>
+                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
+                            <div class="member-info-full" style="font-size: 0.8rem;">OO학과 23</div>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">정책국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">문화기획국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style="flex: 0.8;">
-                <div class="section-bar-v2 bar-sanha-v2">산하위원회</div>
-                <div style="display: flex; justify-content: space-around; gap: 20px;">
-                    {% for head in sanha_heads %}
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                        <div class="member-card-v2" style="width: 180px;">
-                            <div class="card-pos-v2" style="font-size: 0.75rem;">{{ head.position }}</div>
-                            <div class="card-name-v2" style="font-size: 1.2rem;">{{ head.name }}</div>
-                            <div class="card-major-v2" style="font-size: 0.8rem;">{{ head.major }}</div>
-                            <div class="card-tel-v2" style="font-size: 0.7rem;">tel.{{ head.phone }}</div>
+            <div style="flex: 0.8; min-width: 400px;">
+                <div class="type-bar-full bar-green">산하위원회</div>
+                <div style="display: flex; justify-content: center; gap: 30px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+                        <div class="member-box-full" style="max-width: 200px;">
+                            <div class="member-pos-full" style="font-size: 0.8rem;">인권복지위원장</div>
+                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
                         </div>
-
-                        <div style="display: flex; gap: 8px;">
-                            {% set dept_map_sanha = {
-                                '인권복지위원장': ['기획국', '사무행정국'],
-                                '교육복지위원장': ['기획국', '사무행정국']
-                            } %}
-                            {% for d_name in dept_map_sanha.get(head.position, []) %}
-                            <div class="dept-group-v2">
-                                <div class="dept-title-v2">{{ d_name }}</div>
-                                {% for m in departments.get(d_name, []) %}
-                                <div class="dept-box-v2">
-                                    <strong>{{ m.name }}</strong>
-                                    <span style="font-size: 0.75rem; color: #7a1a28; margin-top:3px;">{{ m.position }}</span>
-                                </div>
-                                {% endfor %}
+                        <div style="display: flex; gap: 15px;">
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">기획국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
                             </div>
-                            {% endfor %}
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">사무재정국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
+                        <div class="member-box-full" style="max-width: 200px;">
+                            <div class="member-pos-full" style="font-size: 0.8rem;">교육복지위원장</div>
+                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
+                        </div>
+                        <div style="display: flex; gap: 15px;">
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">기획국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
+                            <div class="dept-container-full">
+                                <div class="dept-label-full">사무재정국</div>
+                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
+                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
