@@ -2,16 +2,117 @@
 
 {% block content %}
 <section style="padding-top: 52px;">
-    {% if banner %}
-    {% if banner.link %}
-    <a href="{{ banner.link }}" style="display: flex; width: 100%; min-height: clamp(200px, 40vw, 400px); max-height: clamp(300px, 50vw, 600px); background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative;">
-        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; display: block; object-fit: contain;">
-    </a>
-    {% else %}
-    <div style="display: flex; width: 100%; min-height: clamp(200px, 40vw, 400px); max-height: clamp(300px, 50vw, 600px); background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); align-items: center; justify-content: center; overflow: hidden; position: relative;">
-        <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; display: block; object-fit: contain;">
+    {% if banners %}
+    <div class="banner-carousel" style="position: relative; width: 100%; height: clamp(180px, 30vw, 350px); background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); overflow: hidden;">
+        <!-- 배너 슬라이드 -->
+        <div class="banner-slides" style="display: flex; width: 100%; height: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+            {% for banner in banners %}
+            <div class="banner-slide" style="min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                {% if banner.link %}
+                <a href="{{ banner.link }}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                </a>
+                {% else %}
+                <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 좌우 네비게이션 버튼 -->
+        {% if banners|length > 1 %}
+        <button class="banner-prev" onclick="changeBanner(-1)" style="position: absolute; left: clamp(8px, 2vw, 16px); top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: clamp(32px, 6vw, 40px); height: clamp(32px, 6vw, 40px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; z-index: 10;">
+            <svg width="clamp(12px, 3vw, 16px)" height="clamp(12px, 3vw, 16px)" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="banner-next" onclick="changeBanner(1)" style="position: absolute; right: clamp(8px, 2vw, 16px); top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: clamp(32px, 6vw, 40px); height: clamp(32px, 6vw, 40px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; z-index: 10;">
+            <svg width="clamp(12px, 3vw, 16px)" height="clamp(12px, 3vw, 16px)" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12L10 8L6 4" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <!-- 인디케이터 점 -->
+        <div class="banner-indicators" style="position: absolute; bottom: clamp(12px, 2.5vw, 16px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
+            {% for banner in banners %}
+            <button class="banner-indicator {% if loop.first %}active{% endif %}" onclick="goToBanner({{ loop.index0 }})" style="width: 8px; height: 8px; border-radius: 50%; border: none; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; padding: 0;">
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
+
+    <script>
+    let currentBannerIndex = 0;
+    const totalBanners = {{ banners|length }};
+    let bannerAutoPlayInterval;
+
+    function changeBanner(direction) {
+        currentBannerIndex = (currentBannerIndex + direction + totalBanners) % totalBanners;
+        updateBannerDisplay();
+        resetBannerAutoPlay();
+    }
+
+    function goToBanner(index) {
+        currentBannerIndex = index;
+        updateBannerDisplay();
+        resetBannerAutoPlay();
+    }
+
+    function updateBannerDisplay() {
+        const slides = document.querySelector('.banner-slides');
+        const indicators = document.querySelectorAll('.banner-indicator');
+
+        slides.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+
+        indicators.forEach((indicator, index) => {
+            if (index === currentBannerIndex) {
+                indicator.classList.add('active');
+                indicator.style.background = 'rgba(255,255,255,0.9)';
+                indicator.style.width = '24px';
+            } else {
+                indicator.classList.remove('active');
+                indicator.style.background = 'rgba(255,255,255,0.5)';
+                indicator.style.width = '8px';
+            }
+        });
+    }
+
+    function startBannerAutoPlay() {
+        if (totalBanners > 1) {
+            bannerAutoPlayInterval = setInterval(() => {
+                changeBanner(1);
+            }, 5000);
+        }
+    }
+
+    function resetBannerAutoPlay() {
+        clearInterval(bannerAutoPlayInterval);
+        startBannerAutoPlay();
+    }
+
+    // 호버 시 자동재생 멈춤
+    document.querySelector('.banner-carousel')?.addEventListener('mouseenter', () => {
+        clearInterval(bannerAutoPlayInterval);
+    });
+
+    document.querySelector('.banner-carousel')?.addEventListener('mouseleave', () => {
+        startBannerAutoPlay();
+    });
+
+    // 페이지 로드 시 자동재생 시작
+    startBannerAutoPlay();
+    </script>
+
+    <style>
+    .banner-prev:hover, .banner-next:hover {
+        background: rgba(255,255,255,1);
+        transform: translateY(-50%) scale(1.1);
+    }
+    .banner-prev:active, .banner-next:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+    </style>
     {% else %}
     <div style="padding: clamp(60px, 15vw, 120px) 24px; text-align: center; background: var(--bg-secondary);">
         <h1 style="font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--ku-crimson); letter-spacing: -0.03em;">비범한 순간을 위해</h1>
