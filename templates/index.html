@@ -1,297 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %}고려대학교 38대 총학생회 비범{% endblock %}
-
 {% block content %}
-<!-- 히어로 섹션 - 애플 스타일 -->
-<section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%); padding: 100px 20px 60px;">
-    <div style="max-width: 1000px; width: 100%; text-align: center;">
-        <!-- 상단 라벨 -->
-        <div style="display: inline-block; padding: 8px 20px; background: rgba(0, 122, 255, 0.08); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 32px; border: 1px solid rgba(0, 122, 255, 0.15);">
-            <span style="font-size: 0.85rem; font-weight: 700; color: var(--apple-blue); text-transform: uppercase; letter-spacing: 0.12em;">The 38th Student Council</span>
-        </div>
-
-        <!-- 메인 헤드라인 -->
-        <h1 style="font-size: clamp(2.5rem, 8vw, 5.5rem); font-weight: 900; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 28px; color: var(--text-primary);">
-            여러분의 평범한 하루를,<br>
-            <span style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-light) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">비범한 순간</span>으로
-        </h1>
-
-        <!-- 서브 헤드라인 -->
-        <p style="font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-secondary); max-width: 750px; margin: 0 auto 48px; line-height: 1.5; font-weight: 500;">
-            학우 여러분과 함께 만들어가는 새로운 고려대학교.<br>
-            투명하고 공정한 학생사회, 실질적인 변화를 약속드립니다.
-        </p>
-
-        <!-- CTA 버튼들 -->
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 80px;">
-            <a href="{{ url_for('promises') }}" style="padding: 16px 36px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-full); font-size: 1.05rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3); transition: var(--transition-base); display: inline-block;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 32px rgba(0, 122, 255, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0, 122, 255, 0.3)';">
-                공약 이행 현황 보기
-            </a>
-            <a href="{{ url_for('organization') }}" style="padding: 16px 36px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); color: var(--apple-blue); text-decoration: none; border-radius: var(--radius-full); font-size: 1.05rem; font-weight: 600; border: 2px solid rgba(0, 122, 255, 0.2); transition: var(--transition-base); display: inline-block;" onmouseover="this.style.background='white'; this.style.borderColor='var(--apple-blue)';" onmouseout="this.style.background='rgba(255,255,255,0.8)'; this.style.borderColor='rgba(0, 122, 255, 0.2)';">
-                조직도 보기
-            </a>
-        </div>
-
-        <!-- 공약 이행률 통계 - 간단하게 -->
-        <div style="display: inline-flex; align-items: center; gap: 24px; padding: 24px 48px; background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border-radius: var(--radius-2xl); border: 1px solid rgba(0, 122, 255, 0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
-            <div style="text-align: center; padding: 0 24px; border-right: 1px solid var(--border-light);">
-                <div style="font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, var(--apple-blue), var(--apple-blue-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">
-                    {{ promise_rate }}<span style="font-size: 0.5em;">%</span>
-                </div>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px; font-weight: 600;">공약 이행률</div>
-            </div>
-            <div style="text-align: center; padding: 0 24px;">
-                <div style="font-size: 2.8rem; font-weight: 900; color: var(--text-primary); line-height: 1;">38<span style="font-size: 0.6em;">대</span></div>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px; font-weight: 600;">총학생회</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- 일정 섹션 - 애플 스타일 -->
-<section style="padding: clamp(80px, 12vw, 140px) 20px; background: #fbfbfd;">
-    <div style="max-width: 980px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 64px;">
-            <p style="color: var(--apple-blue); font-weight: 700; letter-spacing: 0.12em; margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem;">Upcoming Events</p>
-            <h2 style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 16px;">다가오는 일정</h2>
-            <p style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 500;">학생회의 주요 활동과 행사를 확인하세요</p>
-        </div>
-
-        {% if recent_schedule %}
-        <div style="background: white; border-radius: var(--radius-2xl); padding: clamp(40px, 6vw, 56px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); border: 1px solid var(--border-light); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 48px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.06)';">
-            <div style="display: grid; grid-template-columns: auto 1fr; gap: clamp(24px, 5vw, 40px); align-items: start;">
-                <!-- 날짜 박스 -->
-                <div style="text-align: center; min-width: 110px; padding: 24px 20px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-xl); color: white; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);">
-                    <div style="font-size: 3.5rem; font-weight: 900; line-height: 0.9; margin-bottom: 8px;">
-                        {{ recent_schedule.start_date.strftime('%d') }}
-                    </div>
-                    <div style="font-size: 0.95rem; font-weight: 700; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.08em;">
-                        {{ recent_schedule.start_date.strftime('%b') }}
-                    </div>
-                </div>
-
-                <!-- 내용 -->
-                <div style="flex: 1;">
-                    <h3 style="font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 800; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.01em; line-height: 1.25;">
-                        {{ recent_schedule.title }}
-                    </h3>
-
-                    {% if recent_schedule.description %}
-                    <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px;">
-                        {{ recent_schedule.description }}
-                    </p>
-                    {% endif %}
-
-                    <!-- 메타 정보 -->
-                    <div style="display: flex; gap: 24px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid var(--border-light);">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--apple-blue-lighter); display: flex; align-items: center; justify-content: center;">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                    <circle cx="9" cy="9" r="7" stroke="var(--apple-blue)" stroke-width="2"/>
-                                    <path d="M9 5V9L11.5 11.5" stroke="var(--apple-blue)" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">시간</div>
-                                <div style="font-size: 1rem; color: var(--text-primary); font-weight: 700;">{{ recent_schedule.start_date.strftime('%H:%M') }}</div>
-                            </div>
-                        </div>
-
-                        {% if recent_schedule.location %}
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--apple-blue-lighter); display: flex; align-items: center; justify-content: center;">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                    <path d="M9 16C9 16 14 11 14 7C14 4 11.5 2 9 2C6.5 2 4 4 4 7C4 11 9 16 9 16Z" stroke="var(--apple-blue)" stroke-width="2"/>
-                                    <circle cx="9" cy="7" r="2" stroke="var(--apple-blue)" stroke-width="2"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">장소</div>
-                                <div style="font-size: 1rem; color: var(--text-primary); font-weight: 700;">{{ recent_schedule.location }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <div style="text-align: center; padding: 100px 20px; background: white; border-radius: var(--radius-2xl); border: 2px dashed var(--border-color);">
-            <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-            </div>
-            <p style="font-size: 1.1rem; color: var(--text-secondary); font-weight: 600;">예정된 일정이 없습니다</p>
-        </div>
-        {% endif %}
-
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="{{ url_for('schedule') }}" style="color: var(--apple-blue); font-weight: 700; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: var(--transition-base);" onmouseover="this.style.gap='12px';" onmouseout="this.style.gap='8px';">
-                전체 일정 보기
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M6 13L11 9L6 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- 최근 회의록 섹션 -->
-<section style="padding: clamp(80px, 12vw, 140px) 20px; background: white;">
-    <div style="max-width: 980px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 64px;">
-            <p style="color: var(--apple-blue); font-weight: 700; letter-spacing: 0.12em; margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem;">Meeting Minutes</p>
-            <h2 style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 16px;">최근 회의록</h2>
-            <p style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 500;">투명한 학생사회를 위한 회의 기록</p>
-        </div>
-
-        {% if recent_minute %}
-        <div style="background: linear-gradient(135deg, #f5f5f7 0%, #fafafa 100%); border-radius: var(--radius-2xl); padding: clamp(40px, 6vw, 56px); border: 1px solid var(--border-light); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 48px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 250px;">
-                    <h3 style="font-size: clamp(1.4rem, 3vw, 1.75rem); font-weight: 800; margin-bottom: 12px; color: var(--text-primary); letter-spacing: -0.01em; line-height: 1.3;">
-                        {{ recent_minute.title }}
-                    </h3>
-                    <p style="font-size: 1rem; color: var(--text-secondary); font-weight: 600;">
-                        {{ recent_minute.meeting_date.strftime('%Y년 %m월 %d일') }}
-                    </p>
-                </div>
-
-                {% if recent_minute.meeting_type %}
-                <div style="padding: 10px 24px; background: white; border-radius: var(--radius-full); font-size: 0.9rem; font-weight: 700; color: var(--apple-blue); border: 2px solid var(--apple-blue-lighter); flex-shrink: 0;">
-                    {{ recent_minute.meeting_type }}
-                </div>
-                {% endif %}
-            </div>
-
-            <a href="{{ url_for('minute_detail', minute_id=recent_minute.id) }}" style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: var(--apple-blue); color: white; text-decoration: none; border-radius: var(--radius-full); font-weight: 700; font-size: 1rem; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 122, 255, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(0, 122, 255, 0.3)';">
-                회의록 자세히 보기
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M6 13L11 9L6 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-            </a>
-        </div>
-        {% else %}
-        <div style="text-align: center; padding: 100px 20px; background: var(--bg-secondary); border-radius: var(--radius-2xl); border: 2px dashed var(--border-color);">
-            <div style="width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
-                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-            </div>
-            <p style="font-size: 1.1rem; color: var(--text-secondary); font-weight: 600;">등록된 회의록이 없습니다</p>
-        </div>
-        {% endif %}
-
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="{{ url_for('minutes') }}" style="color: var(--apple-blue); font-weight: 700; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: var(--transition-base);" onmouseover="this.style.gap='12px';" onmouseout="this.style.gap='8px';">
-                전체 회의록 보기
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M6 13L11 9L6 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- 현재 모집 중인 프로그램 섹션 -->
-{% if active_program %}
-<section style="padding: clamp(80px, 12vw, 140px) 20px; background: linear-gradient(135deg, #f5f5f7 0%, #fafafa 100%);">
-    <div style="max-width: 980px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 64px;">
-            <p style="color: var(--apple-blue); font-weight: 700; letter-spacing: 0.12em; margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem;">Now Recruiting</p>
-            <h2 style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 16px;">현재 모집 중인 프로그램</h2>
-            <p style="font-size: 1.15rem; color: var(--text-secondary); font-weight: 500;">학생회와 함께하는 다양한 활동</p>
-        </div>
-
-        <div style="background: white; border-radius: var(--radius-2xl); overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid var(--border-light);">
-            {% if active_program.poster_url %}
-            <div style="width: 100%; height: 400px; background: linear-gradient(135deg, var(--apple-blue-lighter) 0%, var(--bg-secondary) 100%); background-image: url('{{ active_program.poster_url }}'); background-size: cover; background-position: center;"></div>
+<section style="padding-top: 52px;">
+    {% if banner %}
+    <div style="width: 100%; height: 500px; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url('{{ banner.image_url }}') center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: white;">
+        <div style="text-align: center;">
+            <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em;">{{ banner.title }}</h1>
+            {% if banner.link %}
+            <a href="{{ banner.link }}" class="btn-ku" style="background: white; color: var(--ku-crimson);">자세히 보기</a>
             {% endif %}
-
-            <div style="padding: clamp(32px, 6vw, 48px);">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                    {% if active_program.category %}
-                    <span style="padding: 6px 18px; background: var(--apple-blue-lighter); color: var(--apple-blue); border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 700;">{{ active_program.category }}</span>
-                    {% endif %}
-                    <span style="padding: 6px 18px; background: #e8f5e9; color: #2e7d32; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 700;">모집중</span>
-                </div>
-
-                <h3 style="font-size: clamp(1.6rem, 4vw, 2.25rem); font-weight: 800; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.25;">
-                    {{ active_program.title }}
-                </h3>
-
-                <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px;">
-                    {{ active_program.description }}
-                </p>
-
-                <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; padding-top: 24px; border-top: 1px solid var(--border-light);">
-                    {% if active_program.application_start and active_program.application_end %}
-                    <div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">신청 기간</div>
-                        <div style="font-size: 1rem; color: var(--text-primary); font-weight: 700;">
-                            {{ active_program.application_start.strftime('%m.%d') }} - {{ active_program.application_end.strftime('%m.%d') }}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if active_program.organizer %}
-                    <div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">주최</div>
-                        <div style="font-size: 1rem; color: var(--text-primary); font-weight: 700;">{{ active_program.organizer }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                {% if active_program.link %}
-                <a href="{{ active_program.link }}" target="_blank" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 32px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-full); font-weight: 700; font-size: 1.05rem; box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 30px rgba(0, 122, 255, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(0, 122, 255, 0.3)';">
-                    신청하기
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path d="M6 13L11 9L6 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                {% endif %}
-            </div>
         </div>
+    </div>
+    {% else %}
+    <div style="padding: 120px 24px; text-align: center; background: var(--bg-secondary);">
+        <h1 style="font-size: 3.5rem; font-weight: 800; color: var(--ku-crimson); letter-spacing: -0.03em;">비범한 순간을 위해</h1>
+        <p style="font-size: 1.25rem; color: var(--text-secondary); margin-top: 24px;">고려대학교 제38대 총학생회 '비범'</p>
+    </div>
+    {% endif %}
+</section>
 
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="{{ url_for('programs') }}" style="color: var(--apple-blue); font-weight: 700; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: var(--transition-base);" onmouseover="this.style.gap='12px';" onmouseout="this.style.gap='8px';">
-                모든 프로그램 보기
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M6 13L11 9L6 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+<section style="padding: 100px 0;">
+    <div class="container">
+        <div class="apple-card" style="display: flex; align-items: center; gap: 80px; padding: 60px;">
+            <div style="position: relative; width: 220px; height: 220px; flex-shrink: 0;">
+                <svg viewBox="0 0 36 36" style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f2f2f7" stroke-width="3" />
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ku-crimson)" stroke-width="3" stroke-dasharray="{{ promise_rate }}, 100" stroke-linecap="round" style="transition: stroke-dasharray 1s ease-out;" />
                 </svg>
-            </a>
+                <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <span style="font-size: 3rem; font-weight: 800; color: var(--ku-crimson);">{{ promise_rate }}%</span>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.05em;">ACHIEVED</span>
+                </div>
+            </div>
+            <div>
+                <h2 style="font-size: 2.25rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px;">학우들과의 약속,<br>실천으로 증명하겠습니다.</h2>
+                <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">비범 총학생회는 투명한 공약 이행 시스템을 통해<br>여러분의 평범한 하루를 특별하게 바꾸고 있습니다.</p>
+                <a href="{{ url_for('promises') }}" style="color: var(--ku-crimson); font-weight: 700; text-decoration: none; font-size: 1.1rem;">전체 공약 현황 확인 →</a>
+            </div>
         </div>
     </div>
 </section>
-{% endif %}
 
-<!-- Footer CTA -->
-<section style="padding: clamp(100px, 15vw, 160px) 20px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); text-align: center; color: white; position: relative; overflow: hidden;">
-    <!-- 배경 장식 -->
-    <div style="position: absolute; top: -150px; right: -150px; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(80px);"></div>
-    <div style="position: absolute; bottom: -200px; left: -200px; width: 500px; height: 500px; background: rgba(0,0,0,0.05); border-radius: 50%; filter: blur(100px);"></div>
+<section style="padding: 100px 0; background: var(--bg-secondary);">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+            <h2 style="font-size: 2rem; font-weight: 800;">다가오는 일정</h2>
+            <a href="{{ url_for('schedule') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">전체 일정 보기 →</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            {% for schedule in upcoming_schedules %}
+            <div class="apple-card" style="display: flex; gap: 24px; align-items: center; padding: 24px;">
+                <div style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); width: 80px; height: 80px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <span style="font-size: 1.6rem; font-weight: 800; line-height: 1;">{{ schedule.start_date.strftime('%d') }}</span>
+                    <span style="font-size: 0.85rem; font-weight: 700;">{{ schedule.start_date.strftime('%b') }}</span>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">{{ schedule.title }}</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">{{ schedule.location }} | {{ schedule.start_date.strftime('%H:%M') }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-    <div style="position: relative; z-index: 1; max-width: 800px; margin: 0 auto;">
-        <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 24px; line-height: 1.1;">
-            함께 만드는<br>더 나은 내일
-        </h2>
-        <p style="font-size: clamp(1.1rem, 2.5vw, 1.4rem); opacity: 0.95; margin-bottom: 48px; line-height: 1.6; font-weight: 500;">
-            여러분의 의견과 제안을 기다립니다.<br>
-            학생회는 항상 열려 있습니다.
-        </p>
-
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <a href="{{ url_for('promises') }}" style="padding: 18px 40px; background: white; color: var(--apple-blue); text-decoration: none; border-radius: var(--radius-full); font-size: 1.1rem; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.15); transition: var(--transition-base); display: inline-block;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)';">
-                공약 확인하기
+<section style="padding: 100px 0;">
+    <div class="container">
+        <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 40px; text-align: center;">투명한 학생 사회를 위한 기록</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            {% for minute in recent_minutes %}
+            <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="apple-card" style="text-decoration: none; color: inherit;">
+                <span style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); padding: 4px 12px; border-radius: 980px; font-size: 0.8rem; font-weight: 700;">{{ minute.meeting_type }}</span>
+                <h3 style="font-size: 1.4rem; font-weight: 700; margin: 16px 0 8px;">{{ minute.title }}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
             </a>
-            <a href="{{ url_for('minutes') }}" style="padding: 18px 40px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: white; text-decoration: none; border-radius: var(--radius-full); font-size: 1.1rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3); transition: var(--transition-base); display: inline-block;" onmouseover="this.style.background='rgba(255,255,255,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.15)';">
-                회의록 보기
-            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section style="padding: 120px 0; background: var(--ku-crimson); color: white; text-align: center; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(60px);"></div>
+    <div class="container" style="position: relative; z-index: 2;">
+        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 24px;">함께 만드는 더 나은 내일</h2>
+        <p style="font-size: 1.25rem; opacity: 0.8; margin-bottom: 48px;">학생회는 항상 학우 여러분의 목소리를 경청합니다.</p>
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <a href="#" class="btn-ku" style="background: #FEE500; color: #3C1E1E; padding: 16px 40px;">카카오톡 채널</a>
+            <a href="#" class="btn-ku" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; padding: 16px 40px;">인스타그램</a>
         </div>
     </div>
 </section>
