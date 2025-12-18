@@ -13,8 +13,8 @@
     <header class="header">
         <nav class="nav">
             <a href="{{ url_for('index') }}" class="logo">
-                <span style="font-size: 1.4rem;">🐯</span>
-                <span>KOREA UNIV. SC</span>
+                <img src="{{ url_for('static', filename='uploads/logo.png') }}" alt="고려대학교 제38대 총학생회 로고" class="logo-img">
+                <span>제38대 총학생회 비범</span>
             </a>
 
             <!-- 햄버거 메뉴 버튼 (모바일) -->
@@ -58,9 +58,9 @@
 
     <footer style="background: var(--bg-secondary); padding: 80px 0; margin-top: 100px; text-align: center; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid var(--border-color);">
         <div class="container">
-            <h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem; font-weight: 700;">고려대학교 제38대 총학생회</h3>
-            <p style="margin: 4px 0;">서울특별시 성북구 안암로 145 학생회관</p>
-            <p style="margin: 4px 0;">Email: student@korea.ac.kr</p>
+            <h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem; font-weight: 700;">고려대학교 제38대 총학생회 '비범'</h3>
+            <p style="margin: 4px 0;">세종시특별자치시 조치원읍 세종로 2511, 학술정보원 B105-C</p>
+            <p style="margin: 4px 0;">Email: dsng3419@korea.ac.kr</p>
             <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 40px;">
                 <p style="margin: 0;">© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
                 {% if not current_user.is_authenticated %}

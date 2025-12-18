@@ -244,6 +244,12 @@ button {
     transform: scale(0.97);
 }
 
+.logo-img {
+    height: 2rem;
+    width: auto;
+    display: block;
+}
+
 /* 햄버거 메뉴 버튼 (모바일) */
 .menu-toggle {
     display: flex;
