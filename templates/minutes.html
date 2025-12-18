@@ -3,48 +3,91 @@
 {% block title %}회의록 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="section-header" style="margin-top: var(--spacing-lg); animation: slideInUp 0.8s ease-out;">
-        <h1 class="section-title" style="opacity: 1; transform: none;">회의록</h1>
-        <p class="section-subtitle" style="opacity: 1; transform: none;">학생회 회의 내용을 투명하게 공개합니다</p>
+<div class="container" style="padding-top: 100px;">
+    <div style="margin-bottom: 60px; text-align: center;">
+        <h1 style="font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">회의록</h1>
+        <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">투명한 학생사회를 위한 회의 기록</p>
     </div>
 
     {% if minutes %}
-    <div class="card-grid">
+    <div style="display: grid; gap: 20px; max-width: 900px; margin: 0 auto;">
         {% for minute in minutes %}
-        <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="card" style="text-decoration: none; display: block;">
-            <div class="card-header">
-                <div style="flex: 1;">
-                    <h3 class="card-title">{{ minute.title }}</h3>
-                    <p class="card-subtitle">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
+        <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="card" style="text-decoration: none; transition: all var(--transition-base);">
+            <div style="display: flex; gap: 20px; align-items: start;">
+                <!-- 날짜 섹션 -->
+                <div style="text-align: center; min-width: 70px;">
+                    <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--korea-crimson), var(--korea-crimson-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        {{ minute.meeting_date.strftime('%d') }}
+                    </div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">
+                        {{ minute.meeting_date.strftime('%Y.%m') }}
+                    </div>
                 </div>
-                {% if minute.meeting_type %}
-                <span class="badge badge-primary">{{ minute.meeting_type }}</span>
-                {% endif %}
-            </div>
 
-            {% if minute.agenda %}
-            <div style="margin: var(--spacing-md) 0;">
-                <p style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-xs);">안건</p>
-                <p class="card-content">{{ minute.agenda[:100] }}{% if minute.agenda|length > 100 %}...{% endif %}</p>
-            </div>
-            {% endif %}
+                <!-- 내용 섹션 -->
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4;">
+                                {{ minute.title }}
+                            </h3>
+                        </div>
 
-            <div class="card-footer">
-                {% if minute.attendees %}
-                <span style="font-size: 0.85rem;">참석자: {{ minute.attendees.split(',')[0] }}{% if minute.attendees.split(',') | length > 1 %} 외 {{ minute.attendees.split(',') | length - 1 }}명{% endif %}</span>
-                {% endif %}
-                <span style="color: var(--korea-crimson); font-weight: 700;">자세히 보기 →</span>
+                        {% if minute.meeting_type %}
+                        <span class="badge
+                            {% if '전체학생대표자' in minute.meeting_type or '전학대회' in minute.meeting_type %}badge-primary
+                            {% elif '중앙운영위원' in minute.meeting_type or '중운위' in minute.meeting_type %}badge-info
+                            {% elif '집행부' in minute.meeting_type %}badge-success
+                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}badge-warning
+                            {% else %}badge-secondary{% endif %}"
+                            style="flex-shrink: 0;">
+                            {{ minute.meeting_type }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if minute.attendees %}
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M13 14v-1.5c0-1.38-1.12-2.5-2.5-2.5h-5C4.12 10 3 11.12 3 12.5V14M8 7c-1.38 0-2.5-1.12-2.5-2.5S6.62 2 8 2s2.5 1.12 2.5 2.5S9.38 7 8 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <span>참석: {{ minute.attendees }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if minute.agenda %}
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ minute.agenda }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- 화살표 아이콘 -->
+                <div style="display: flex; align-items: center; margin-left: auto;">
+                    <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style="opacity: 0.4; transition: all var(--transition-base);">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
             </div>
         </a>
         {% endfor %}
     </div>
     {% else %}
-    <div class="content" style="text-align: center; padding: var(--spacing-xl);">
-        <p style="color: var(--text-secondary); font-size: 1.1rem;">
-            등록된 회의록이 없습니다.
-        </p>
+    <div style="text-align: center; padding: 80px 20px;">
+        <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1rem;">등록된 회의록이 없습니다.</p>
     </div>
     {% endif %}
 </div>
+
+<style>
+.card:hover svg {
+    opacity: 1;
+    transform: translateX(4px);
+}
+</style>
 {% endblock %}
