@@ -2,61 +2,163 @@
 
 {% block content %}
 <section style="padding-top: 52px;">
-    {% if banner %}
-    <div style="width: 100%; height: 500px; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url('{{ banner.image_url }}') center/cover no-repeat; display: flex; align-items: center; justify-content: center; color: white;">
-        <div style="text-align: center;">
-            <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em;">{{ banner.title }}</h1>
-            {% if banner.link %}
-            <a href="{{ banner.link }}" class="btn-ku" style="background: white; color: var(--ku-crimson);">자세히 보기</a>
-            {% endif %}
+    {% if banners %}
+    <div class="banner-carousel" style="position: relative; width: 100%; height: clamp(180px, 30vw, 350px); background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); overflow: hidden;">
+        <!-- 배너 슬라이드 -->
+        <div class="banner-slides" style="display: flex; width: 100%; height: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+            {% for banner in banners %}
+            <div class="banner-slide" style="min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                {% if banner.link %}
+                <a href="{{ banner.link }}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                </a>
+                {% else %}
+                <img src="{{ banner.image_url }}" alt="{{ banner.title }}" style="width: 100%; height: 100%; object-fit: contain;">
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
+
+        <!-- 좌우 네비게이션 버튼 -->
+        {% if banners|length > 1 %}
+        <button class="banner-prev" onclick="changeBanner(-1)" style="position: absolute; left: clamp(8px, 2vw, 16px); top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: clamp(32px, 6vw, 40px); height: clamp(32px, 6vw, 40px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; z-index: 10;">
+            <svg width="clamp(12px, 3vw, 16px)" height="clamp(12px, 3vw, 16px)" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button class="banner-next" onclick="changeBanner(1)" style="position: absolute; right: clamp(8px, 2vw, 16px); top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: clamp(32px, 6vw, 40px); height: clamp(32px, 6vw, 40px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; z-index: 10;">
+            <svg width="clamp(12px, 3vw, 16px)" height="clamp(12px, 3vw, 16px)" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12L10 8L6 4" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <!-- 인디케이터 점 -->
+        <div class="banner-indicators" style="position: absolute; bottom: clamp(12px, 2.5vw, 16px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10;">
+            {% for banner in banners %}
+            <button class="banner-indicator {% if loop.first %}active{% endif %}" onclick="goToBanner({{ loop.index0 }})" style="width: 8px; height: 8px; border-radius: 50%; border: none; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; padding: 0;">
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
+
+    <script>
+    let currentBannerIndex = 0;
+    const totalBanners = {{ banners|length }};
+    let bannerAutoPlayInterval;
+
+    function changeBanner(direction) {
+        currentBannerIndex = (currentBannerIndex + direction + totalBanners) % totalBanners;
+        updateBannerDisplay();
+        resetBannerAutoPlay();
+    }
+
+    function goToBanner(index) {
+        currentBannerIndex = index;
+        updateBannerDisplay();
+        resetBannerAutoPlay();
+    }
+
+    function updateBannerDisplay() {
+        const slides = document.querySelector('.banner-slides');
+        const indicators = document.querySelectorAll('.banner-indicator');
+
+        slides.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+
+        indicators.forEach((indicator, index) => {
+            if (index === currentBannerIndex) {
+                indicator.classList.add('active');
+                indicator.style.background = 'rgba(255,255,255,0.9)';
+                indicator.style.width = '24px';
+            } else {
+                indicator.classList.remove('active');
+                indicator.style.background = 'rgba(255,255,255,0.5)';
+                indicator.style.width = '8px';
+            }
+        });
+    }
+
+    function startBannerAutoPlay() {
+        if (totalBanners > 1) {
+            bannerAutoPlayInterval = setInterval(() => {
+                changeBanner(1);
+            }, 5000);
+        }
+    }
+
+    function resetBannerAutoPlay() {
+        clearInterval(bannerAutoPlayInterval);
+        startBannerAutoPlay();
+    }
+
+    // 호버 시 자동재생 멈춤
+    document.querySelector('.banner-carousel')?.addEventListener('mouseenter', () => {
+        clearInterval(bannerAutoPlayInterval);
+    });
+
+    document.querySelector('.banner-carousel')?.addEventListener('mouseleave', () => {
+        startBannerAutoPlay();
+    });
+
+    // 페이지 로드 시 자동재생 시작
+    startBannerAutoPlay();
+    </script>
+
+    <style>
+    .banner-prev:hover, .banner-next:hover {
+        background: rgba(255,255,255,1);
+        transform: translateY(-50%) scale(1.1);
+    }
+    .banner-prev:active, .banner-next:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+    </style>
     {% else %}
-    <div style="padding: 120px 24px; text-align: center; background: var(--bg-secondary);">
-        <h1 style="font-size: 3.5rem; font-weight: 800; color: var(--ku-crimson); letter-spacing: -0.03em;">비범한 순간을 위해</h1>
-        <p style="font-size: 1.25rem; color: var(--text-secondary); margin-top: 24px;">고려대학교 제38대 총학생회 '비범'</p>
+    <div style="padding: clamp(60px, 15vw, 120px) 24px; text-align: center; background: var(--bg-secondary);">
+        <h1 style="font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; color: var(--ku-crimson); letter-spacing: -0.03em;">비범한 순간을 위해</h1>
+        <p style="font-size: clamp(1rem, 2.5vw, 1.25rem); color: var(--text-secondary); margin-top: 24px;">고려대학교 제38대 총학생회 '비범'</p>
     </div>
     {% endif %}
 </section>
 
-<section style="padding: 100px 0;">
+<section style="padding: clamp(60px, 12vw, 100px) 0;">
     <div class="container">
-        <div class="apple-card" style="display: flex; align-items: center; gap: 80px; padding: 60px;">
-            <div style="position: relative; width: 220px; height: 220px; flex-shrink: 0;">
+        <div class="apple-card" style="display: flex; align-items: center; gap: clamp(32px, 6vw, 80px); padding: clamp(32px, 6vw, 60px); flex-wrap: wrap; justify-content: center;">
+            <div style="position: relative; width: clamp(160px, 35vw, 220px); height: clamp(160px, 35vw, 220px); flex-shrink: 0;">
                 <svg viewBox="0 0 36 36" style="transform: rotate(-90deg); width: 100%; height: 100%;">
                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f2f2f7" stroke-width="3" />
                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ku-crimson)" stroke-width="3" stroke-dasharray="{{ promise_rate }}, 100" stroke-linecap="round" style="transition: stroke-dasharray 1s ease-out;" />
                 </svg>
                 <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <span style="font-size: 3rem; font-weight: 800; color: var(--ku-crimson);">{{ promise_rate }}%</span>
-                    <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 700; letter-spacing: 0.05em;">ACHIEVED</span>
+                    <span style="font-size: clamp(2rem, 6vw, 3rem); font-weight: 800; color: var(--ku-crimson);">{{ promise_rate }}%</span>
+                    <span style="font-size: clamp(0.7rem, 1.5vw, 0.85rem); color: var(--text-secondary); font-weight: 700; letter-spacing: 0.05em;">ACHIEVED</span>
                 </div>
             </div>
-            <div>
-                <h2 style="font-size: 2.25rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px;">학우들과의 약속,<br>실천으로 증명하겠습니다.</h2>
-                <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">비범 총학생회는 투명한 공약 이행 시스템을 통해<br>여러분의 평범한 하루를 특별하게 바꾸고 있습니다.</p>
-                <a href="{{ url_for('promises') }}" style="color: var(--ku-crimson); font-weight: 700; text-decoration: none; font-size: 1.1rem;">전체 공약 현황 확인 →</a>
+            <div style="flex: 1; min-width: 280px; text-align: center;">
+                <h2 style="font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 800; line-height: 1.2; margin-bottom: 20px;">학우들과의 약속,<br>실천으로 증명하겠습니다.</h2>
+                <p style="font-size: clamp(0.95rem, 2vw, 1.1rem); color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">비범 총학생회는 투명한 공약 이행 시스템을 통해 여러분의 평범한 하루를 특별하게 바꾸고 있습니다.</p>
+                <a href="{{ url_for('promises') }}" style="color: var(--ku-crimson); font-weight: 700; text-decoration: none; font-size: clamp(0.95rem, 2vw, 1.1rem);">전체 공약 현황 확인 →</a>
             </div>
         </div>
     </div>
 </section>
 
-<section style="padding: 100px 0; background: var(--bg-secondary);">
+<section style="padding: clamp(60px, 12vw, 100px) 0; background: var(--bg-secondary);">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
-            <h2 style="font-size: 2rem; font-weight: 800;">다가오는 일정</h2>
-            <a href="{{ url_for('schedule') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">전체 일정 보기 →</a>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; gap: 16px; flex-wrap: wrap;">
+            <h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800;">다가오는 일정</h2>
+            <a href="{{ url_for('schedule') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: clamp(0.9rem, 2vw, 1rem); white-space: nowrap;">전체 일정 보기 →</a>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
             {% for schedule in upcoming_schedules %}
-            <div class="apple-card" style="display: flex; gap: 24px; align-items: center; padding: 24px;">
-                <div style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); width: 80px; height: 80px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <span style="font-size: 1.6rem; font-weight: 800; line-height: 1;">{{ schedule.start_date.strftime('%d') }}</span>
-                    <span style="font-size: 0.85rem; font-weight: 700;">{{ schedule.start_date.strftime('%b') }}</span>
+            <div class="apple-card" style="display: flex; gap: clamp(16px, 4vw, 24px); align-items: center; padding: clamp(20px, 4vw, 24px);">
+                <div style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); width: clamp(70px, 15vw, 80px); height: clamp(70px, 15vw, 80px); border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <span style="font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 800; line-height: 1;">{{ schedule.start_date.strftime('%d') }}</span>
+                    <span style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700;">{{ schedule.start_date.strftime('%b') }}</span>
                 </div>
-                <div>
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">{{ schedule.title }}</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">{{ schedule.location }} | {{ schedule.start_date.strftime('%H:%M') }}</p>
+                <div style="flex: 1; min-width: 0;">
+                    <h3 style="font-size: clamp(1.05rem, 2.5vw, 1.25rem); font-weight: 700; margin-bottom: 6px; word-break: keep-all;">{{ schedule.title }}</h3>
+                    <p style="color: var(--text-secondary); font-size: clamp(0.85rem, 2vw, 0.95rem); word-break: break-all;">{{ schedule.location }} | {{ schedule.start_date.strftime('%H:%M') }}</p>
                 </div>
             </div>
             {% endfor %}
@@ -64,29 +166,87 @@
     </div>
 </section>
 
-<section style="padding: 100px 0;">
+<section style="padding: clamp(60px, 12vw, 100px) 0;">
     <div class="container">
-        <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 40px; text-align: center;">투명한 학생 사회를 위한 기록</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; gap: 16px; flex-wrap: wrap;">
+            <h2 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; text-align: center; flex: 1;">투명한 학생 사회를 위한 기록</h2>
+            <a href="{{ url_for('minutes') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600; font-size: clamp(0.9rem, 2vw, 1rem); white-space: nowrap;">전체 회의록 보기 →</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
             {% for minute in recent_minutes %}
-            <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="apple-card" style="text-decoration: none; color: inherit;">
-                <span style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); padding: 4px 12px; border-radius: 980px; font-size: 0.8rem; font-weight: 700;">{{ minute.meeting_type }}</span>
-                <h3 style="font-size: 1.4rem; font-weight: 700; margin: 16px 0 8px;">{{ minute.title }}</h3>
-                <p style="color: var(--text-secondary); font-size: 0.95rem;">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
+            <a href="{{ url_for('minute_detail', minute_id=minute.id) }}" class="apple-card" style="text-decoration: none; color: inherit; padding: clamp(24px, 5vw, 32px);">
+                <span style="background: var(--ku-crimson-lighter); color: var(--ku-crimson); padding: 6px 14px; border-radius: 980px; font-size: clamp(0.75rem, 1.8vw, 0.85rem); font-weight: 700;">{{ minute.meeting_type }}</span>
+                <h3 style="font-size: clamp(1.15rem, 3vw, 1.4rem); font-weight: 700; margin: 16px 0 8px; word-break: keep-all;">{{ minute.title }}</h3>
+                <p style="color: var(--text-secondary); font-size: clamp(0.9rem, 2vw, 0.95rem);">{{ minute.meeting_date.strftime('%Y년 %m월 %d일') }}</p>
             </a>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<section style="padding: 120px 0; background: var(--ku-crimson); color: white; text-align: center; position: relative; overflow: hidden;">
-    <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(60px);"></div>
+<section style="padding: clamp(80px, 15vw, 120px) 0; background: linear-gradient(135deg, #1d1d1f 0%, #2d2d30 100%); color: white; position: relative; overflow: hidden;">
+    <!-- 배경 장식 요소들 -->
+    <div style="position: absolute; top: -15%; right: -10%; width: clamp(200px, 40vw, 400px); height: clamp(200px, 40vw, 400px); background: radial-gradient(circle, rgba(150, 26, 50, 0.15) 0%, transparent 70%); border-radius: 50%; filter: blur(60px);"></div>
+    <div style="position: absolute; bottom: -20%; left: -8%; width: clamp(250px, 50vw, 500px); height: clamp(250px, 50vw, 500px); background: radial-gradient(circle, rgba(0, 122, 255, 0.1) 0%, transparent 70%); border-radius: 50%; filter: blur(80px);"></div>
+    <div style="position: absolute; top: 40%; right: 20%; width: clamp(100px, 20vw, 180px); height: clamp(100px, 20vw, 180px); background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%); border-radius: 50%; filter: blur(40px);"></div>
+
     <div class="container" style="position: relative; z-index: 2;">
-        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 24px;">함께 만드는 더 나은 내일</h2>
-        <p style="font-size: 1.25rem; opacity: 0.8; margin-bottom: 48px;">학생회는 항상 학우 여러분의 목소리를 경청합니다.</p>
-        <div style="display: flex; justify-content: center; gap: 20px;">
-            <a href="#" class="btn-ku" style="background: #FEE500; color: #3C1E1E; padding: 16px 40px;">카카오톡 채널</a>
-            <a href="#" class="btn-ku" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; padding: 16px 40px;">인스타그램</a>
+        <!-- 헤더 -->
+        <div style="text-align: center; margin-bottom: clamp(48px, 8vw, 64px);">
+            <div style="display: inline-block; padding: 8px 20px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.12);">
+                <span style="font-size: clamp(0.7rem, 1.5vw, 0.8rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.9;">Connect With Us</span>
+            </div>
+            <h2 style="font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: clamp(16px, 3vw, 24px); letter-spacing: -0.02em; line-height: 1.1;">함께 만드는<br class="hide-desktop"> 더 나은 내일</h2>
+            <p style="font-size: clamp(1rem, 2.5vw, 1.3rem); opacity: 0.85; max-width: 600px; margin: 0 auto; line-height: 1.6; font-weight: 500;">학생회는 항상 학우 여러분의 목소리를<br class="hide-desktop"> 경청합니다.</p>
+        </div>
+
+        <!-- 연락 카드 그리드 -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: clamp(16px, 3vw, 20px); max-width: 800px; margin: 0 auto;">
+            <!-- 카카오톡 채널 카드 -->
+            <a href="#" style="background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(20px); border-radius: var(--radius-2xl); padding: clamp(28px, 5vw, 36px); text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: all var(--transition-base); display: flex; align-items: center; gap: clamp(20px, 4vw, 28px); position: relative; overflow: hidden;"
+               onmouseover="this.style.transform='translateY(-6px)'; this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(254, 229, 0, 0.3)'; this.style.boxShadow='0 20px 60px rgba(254, 229, 0, 0.15)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.boxShadow='none';">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #FEE500, transparent);"></div>
+                <div style="width: clamp(60px, 12vw, 72px); height: clamp(60px, 12vw, 72px); background: #FEE500; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 24px rgba(254, 229, 0, 0.3);">
+                    <svg width="clamp(32px, 7vw, 40px)" height="clamp(32px, 7vw, 40px)" viewBox="0 0 24 24" fill="#3C1E1E">
+                        <path d="M12 2C6.48 2 2 5.88 2 10.72c0 3.24 2.16 6.08 5.38 7.64.24.12.56.38.64.62.08.24.04.6 0 .84l-.28 1.68c-.04.24-.2.96.84.52 1.04-.44 5.6-3.28 7.64-5.64C19.52 14.6 22 12.8 22 10.72 22 5.88 17.52 2 12 2z"/>
+                    </svg>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <h3 style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 700; color: white; margin-bottom: 6px;">카카오톡 채널</h3>
+                    <p style="font-size: clamp(0.9rem, 2vw, 1rem); color: rgba(255,255,255,0.7); margin: 0; line-height: 1.5;">실시간으로 소통하고 의견을 나눠보세요</p>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; opacity: 0.5;">
+                    <path d="M6 12L10 8L6 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </a>
+
+            <!-- 인스타그램 카드 -->
+            <a href="#" style="background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(20px); border-radius: var(--radius-2xl); padding: clamp(28px, 5vw, 36px); text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: all var(--transition-base); display: flex; align-items: center; gap: clamp(20px, 4vw, 28px); position: relative; overflow: hidden;"
+               onmouseover="this.style.transform='translateY(-6px)'; this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(225, 48, 108, 0.3)'; this.style.boxShadow='0 20px 60px rgba(225, 48, 108, 0.15)';"
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.06)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.boxShadow='none';">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #f09433, #e6683c, #dc2743, transparent);"></div>
+                <div style="width: clamp(60px, 12vw, 72px); height: clamp(60px, 12vw, 72px); background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 8px 24px rgba(225, 48, 108, 0.3);">
+                    <svg width="clamp(32px, 7vw, 40px)" height="clamp(32px, 7vw, 40px)" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.509-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 011.153-1.772A4.897 4.897 0 015.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
+                    </svg>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <h3 style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 700; color: white; margin-bottom: 6px;">인스타그램</h3>
+                    <p style="font-size: clamp(0.9rem, 2vw, 1rem); color: rgba(255,255,255,0.7); margin: 0; line-height: 1.5;">학생회의 다양한 소식과 활동을 확인하세요</p>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; opacity: 0.5;">
+                    <path d="M6 12L10 8L6 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- 추가 정보 -->
+        <div style="text-align: center; margin-top: clamp(40px, 8vw, 56px); padding-top: clamp(32px, 6vw, 48px); border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="font-size: clamp(0.85rem, 2vw, 0.95rem); opacity: 0.6; margin: 0; line-height: 1.6;">
+                여러분의 소중한 의견이 학생회 활동의 원동력입니다<br class="hide-desktop">
+                언제든지 편하게 연락주세요
+            </p>
         </div>
     </div>
 </section>

@@ -36,8 +36,8 @@ def save_file(file, subfolder='files'):
 
 @app.route('/')
 def index():
-    # 배너 로직 강화: 최우선순위 배너 1개 노출
-    banner = Banner.query.filter_by(is_active=True).order_by(Banner.is_event_banner.desc(), Banner.order.asc()).first()
+    # 배너 로직 강화: 모든 활성 배너 노출 (캐러셀)
+    banners = Banner.query.filter_by(is_active=True).order_by(Banner.is_event_banner.desc(), Banner.order.asc()).all()
     
     # 전반적인 공약 이행률 계산
     promises_list = Promise.query.all()
@@ -49,8 +49,8 @@ def index():
     # 메인 페이지용 최근 회의록 (2개)
     recent_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).limit(2).all()
     
-    return render_template('index.html', 
-                           banner=banner, 
+    return render_template('index.html',
+                           banners=banners,
                            promise_rate=promise_rate,
                            upcoming_schedules=upcoming_schedules,
                            recent_minutes=recent_minutes)
