@@ -3,60 +3,112 @@
 {% block title %}일정 관리 - 관리자{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <div class="flex-between">
-            <h1 style="font-size: 2rem; font-weight: 700;">일정 관리</h1>
-            <a href="{{ url_for('admin_schedule_add') }}" class="btn btn-primary">➕ 일정 추가</a>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- 헤더 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
+        <div>
+            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 12px; transition: var(--transition-base);" onmouseover="this.style.color='var(--korea-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                대시보드로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">일정 관리</h1>
         </div>
-    </div>
-
-    <div class="admin-nav">
-        <ul>
-            <li><a href="{{ url_for('admin_dashboard') }}">대시보드</a></li>
-            <li><a href="{{ url_for('admin_schedules') }}" class="active">일정 관리</a></li>
-            <li><a href="{{ url_for('admin_organization') }}">조직도 관리</a></li>
-            <li><a href="{{ url_for('admin_promises') }}">공약 관리</a></li>
-            <li><a href="{{ url_for('admin_minutes') }}">회의록 관리</a></li>
-            <li><a href="{{ url_for('admin_regulations') }}">회칙 관리</a></li>
-            <li><a href="{{ url_for('admin_programs') }}">프로그램 관리</a></li>
-        </ul>
+        <a href="{{ url_for('admin_schedule_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            일정 추가
+        </a>
     </div>
 
     {% if schedules %}
-    <div class="content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>제목</th>
-                    <th>카테고리</th>
-                    <th>일시</th>
-                    <th>장소</th>
-                    <th>관리</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for schedule in schedules %}
-                <tr>
-                    <td><strong>{{ schedule.title }}</strong></td>
-                    <td>{{ schedule.category or '-' }}</td>
-                    <td>{{ schedule.start_date.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ schedule.location or '-' }}</td>
-                    <td>
-                        <a href="{{ url_for('admin_schedule_edit', schedule_id=schedule.id) }}" class="btn btn-small btn-secondary">수정</a>
-                        <form method="POST" action="{{ url_for('admin_schedule_delete', schedule_id=schedule.id) }}" style="display: inline;" onsubmit="return confirmDelete()">
-                            <button type="submit" class="btn btn-small" style="background: #dc3545; color: white;">삭제</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="display: grid; gap: 16px;">
+        {% for schedule in schedules %}
+        <div style="background: white; border-radius: var(--radius-lg); padding: clamp(20px, 4vw, 28px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: all var(--transition-base);" onmouseover="this.style.boxShadow='var(--shadow-md)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+            <div style="display: flex; gap: 20px; align-items: start; flex-wrap: wrap;">
+                <!-- 날짜 섹션 -->
+                <div style="text-align: center; min-width: 80px;">
+                    <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--korea-crimson), var(--korea-crimson-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        {{ schedule.start_date.strftime('%d') }}
+                    </div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">
+                        {{ schedule.start_date.strftime('%Y.%m') }}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                        {{ schedule.start_date.strftime('%H:%M') }}
+                    </div>
+                </div>
+
+                <!-- 내용 섹션 -->
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: var(--text-primary); margin: 0;">
+                            {{ schedule.title }}
+                        </h3>
+                        {% if schedule.category %}
+                        <span style="padding: 4px 12px; background: var(--korea-crimson-lighter); color: var(--korea-crimson); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ schedule.category }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if schedule.location %}
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M7 7.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C4.2-1.5 1.5 1.2 1.5 4.5 1.5 8.5 7 13.5 7 13.5s5.5-5 5.5-9C12.5 1.2 9.8-1.5 7-1.5z" fill="currentColor"/>
+                        </svg>
+                        <span>{{ schedule.location }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if schedule.description %}
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ schedule.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- 관리 버튼 -->
+                <div style="display: flex; gap: 8px; margin-left: auto;">
+                    <a href="{{ url_for('admin_schedule_edit', schedule_id=schedule.id) }}" style="padding: 10px 20px; background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; transition: var(--transition-base); border: 1px solid var(--border-color);" onmouseover="this.style.background='var(--border-color)';" onmouseout="this.style.background='var(--bg-secondary)';">
+                        수정
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_schedule_delete', schedule_id=schedule.id) }}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                        <button type="submit" style="padding: 10px 20px; background: #fee; color: #dc3545; border: 1px solid #fcc; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: var(--transition-base);" onmouseover="this.style.background='#fdd'; this.style.borderColor='#fbb';" onmouseout="this.style.background='#fee'; this.style.borderColor='#fcc';">
+                            삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
-    <div class="content">
-        <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-xl);">등록된 일정이 없습니다.</p>
+    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 24px;">등록된 일정이 없습니다.</p>
+        <a href="{{ url_for('admin_schedule_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            첫 일정 추가하기
+        </a>
     </div>
     {% endif %}
 </div>
+
+<script>
+function confirmDelete() {
+    return confirm('정말 삭제하시겠습니까?');
+}
+</script>
 {% endblock %}

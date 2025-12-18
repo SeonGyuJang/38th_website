@@ -3,64 +3,158 @@
 {% block title %}관리자 대시보드 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="admin-header">
-        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: var(--spacing-xs);">관리자 대시보드</h1>
-        <p style="opacity: 0.9;">{{ current_user.name }}님, 환영합니다!</p>
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- 헤더 -->
+    <div style="margin-bottom: 48px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 12px;">
+            <div>
+                <h1 style="font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                    관리자 대시보드
+                </h1>
+                <p style="font-size: 1rem; color: var(--text-secondary);">
+                    <span style="font-weight: 600; color: var(--korea-crimson);">{{ current_user.name }}</span>님, 환영합니다!
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- 통계 카드 -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value">{{ stats.schedules }}</div>
-            <div class="stat-label">일정</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 60px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--radius-xl); padding: 28px; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 12px;">일정</div>
+                <div style="font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 8px;">{{ stats.schedules }}</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">등록된 일정</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">{{ stats.promises }}</div>
-            <div class="stat-label">공약</div>
+
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: var(--radius-xl); padding: 28px; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 12px;">공약</div>
+                <div style="font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 8px;">{{ stats.promises }}</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">등록된 공약</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">{{ stats.minutes }}</div>
-            <div class="stat-label">회의록</div>
+
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: var(--radius-xl); padding: 28px; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 12px;">회의록</div>
+                <div style="font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 8px;">{{ stats.minutes }}</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">등록된 회의록</div>
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value">{{ stats.programs }}</div>
-            <div class="stat-label">프로그램</div>
+
+        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: var(--radius-xl); padding: 28px; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 12px;">프로그램</div>
+                <div style="font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 8px;">{{ stats.programs }}</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">진행중인 프로그램</div>
+            </div>
         </div>
     </div>
 
     <!-- 관리 메뉴 -->
-    <div class="admin-nav">
-        <ul>
-            <li><a href="{{ url_for('admin_schedules') }}">📅 일정 관리</a></li>
-            <li><a href="{{ url_for('admin_organization') }}">👥 조직도 관리</a></li>
-            <li><a href="{{ url_for('admin_promises') }}">📋 공약 관리</a></li>
-            <li><a href="{{ url_for('admin_minutes') }}">📝 회의록 관리</a></li>
-            <li><a href="{{ url_for('admin_regulations') }}">📜 회칙 관리</a></li>
-            <li><a href="{{ url_for('admin_programs') }}">🎯 프로그램 관리</a></li>
-            <li><a href="{{ url_for('admin_banners') }}">🖼️ 배너 관리</a></li>
-        </ul>
+    <div style="margin-bottom: 60px;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 24px;">콘텐츠 관리</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            <a href="{{ url_for('admin_schedules') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    📅
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">일정 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">일정 추가 및 수정</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_organization') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    👥
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">조직도 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">구성원 정보 관리</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_promises') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    📋
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">공약 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">공약 추가 및 이행률 관리</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_minutes') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    📝
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">회의록 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">회의록 작성 및 관리</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_regulations') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    📜
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">회칙 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">회칙 문서 관리</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_programs') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    🎯
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">프로그램 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">프로그램 추가 및 관리</div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('admin_banners') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    🖼️
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">배너 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">메인 배너 관리</div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- 빠른 작업 -->
-    <div class="content">
-        <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: var(--spacing-md);">빠른 작업</h2>
-        <div class="card-grid">
-            <a href="{{ url_for('admin_schedule_add') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">➕</div>
-                <h3 class="card-title">일정 추가</h3>
+    <div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 24px;">빠른 작업</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+            <a href="{{ url_for('admin_schedule_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
+                <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">일정 추가</div>
             </a>
-            <a href="{{ url_for('admin_promise_add') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">➕</div>
-                <h3 class="card-title">공약 추가</h3>
+
+            <a href="{{ url_for('admin_promise_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
+                <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">공약 추가</div>
             </a>
-            <a href="{{ url_for('admin_minute_add') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">➕</div>
-                <h3 class="card-title">회의록 추가</h3>
+
+            <a href="{{ url_for('admin_minute_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
+                <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">회의록 추가</div>
             </a>
-            <a href="{{ url_for('admin_program_add') }}" class="card" style="text-decoration: none;">
-                <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">➕</div>
-                <h3 class="card-title">프로그램 추가</h3>
+
+            <a href="{{ url_for('admin_program_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--korea-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
+                <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">프로그램 추가</div>
             </a>
         </div>
     </div>
