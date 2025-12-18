@@ -3,151 +3,166 @@
 {% block title %}조직도 - 고려대학교 38대 총학생회{% endblock %}
 
 {% block content %}
-<section style="padding-top: 100px; padding-bottom: 80px; background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);">
+<style>
+    /* 이미지 테마 기반 스타일 */
+    .org-section {
+        background-color: #f3e9dc; /* 이미지 배경색과 유사한 베이지 */
+        padding: 60px 0 100px;
+        font-family: 'Pretendard', sans-serif;
+    }
+    .org-title-main {
+        background-color: #7a1a28; /* 고려대 크림슨 */
+        color: white;
+        text-align: center;
+        padding: 25px;
+        margin-bottom: 50px;
+        border-radius: 8px;
+    }
+    .org-title-main h1 { font-size: 2.5rem; font-weight: 800; margin: 0; }
+    
+    /* 카드 공통 */
+    .member-card-v2 {
+        background: white;
+        border: 2px solid #7a1a28;
+        width: 260px;
+        padding: 20px;
+        text-align: center;
+        border-radius: 4px;
+        box-shadow: 4px 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .card-pos-v2 {
+        background: #7a1a28;
+        color: white;
+        padding: 8px;
+        font-weight: 700;
+        margin: -20px -20px 15px -20px;
+        border-radius: 2px 2px 0 0;
+    }
+    .card-name-v2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; color: black; }
+    .card-major-v2 { font-size: 0.9rem; font-weight: 600; color: #333; }
+    .card-tel-v2 { font-size: 0.8rem; color: #666; margin-top: 10px; border-top: 1px dotted #ccc; padding-top: 10px; }
+
+    /* 이미지의 '본부', '산하위원회' 하늘색/연두색 바 스타일 */
+    .section-bar-v2 {
+        width: 100%;
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 12px;
+        border: 4px solid;
+        border-radius: 50px;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+    .bar-bonbu-v2 { background-color: #e1f5fe; border-color: #81d4fa; color: #01579b; }
+    .bar-sanha-v2 { background-color: #f9fbe7; border-color: #dce775; color: #33691e; }
+
+    /* 국(Department) 스타일 */
+    .dept-group-v2 { display: flex; flex-direction: column; width: 140px; gap: 8px; }
+    .dept-title-v2 { background: #7a1a28; color: white; padding: 5px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-align: center; }
+    .dept-box-v2 { background: white; border: 1.5px solid #7a1a28; padding: 10px; font-size: 0.85rem; height: 65px; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+
+    /* 선 연결 (이미지의 점선 구현) */
+    .connector-line-v2 { border-top: 2px dotted #555; width: 100px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; }
+</style>
+
+<div class="org-section">
     <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <p style="color: var(--korea-crimson); font-weight: 600; letter-spacing: 0.1em; margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem;">Organization Chart</p>
-            <h1 style="font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">제38대 총학생회 조직도</h1>
-            <p style="font-size: 1.05rem; color: var(--text-secondary);">고려대학교 세종캠퍼스</p>
+        <div class="org-title-main">
+            <p style="margin:0 0 5px; font-size: 1rem;">고려대학교 세종캠퍼스</p>
+            <h1>제38대 총학생회 조직도</h1>
         </div>
 
-        <!-- 조직도 구조 -->
-        <div style="max-width: 1400px; margin: 0 auto;">
-            <!-- 회장단 -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
-                <!-- 총학생회장 -->
-                {% for president in presidents %}
-                <div style="background: linear-gradient(135deg, var(--korea-crimson) 0%, var(--korea-crimson-dark) 100%); border-radius: var(--radius-xl); padding: 32px; text-align: center; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.1); filter: blur(40px);"></div>
-                    <div style="position: relative; z-index: 1;">
-                        <p style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; margin-bottom: 16px;">{{ president.position }}</p>
-                        {% if president.photo_url %}
-                        <img src="{{ president.photo_url }}" alt="{{ president.name }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.3); margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
-                        {% else %}
-                        <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.2); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700;">{{ president.name[0] }}</div>
-                        {% endif %}
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">{{ president.name }}</h3>
-                        {% if president.major %}
-                        <p style="font-size: 0.9rem; opacity: 0.9;">{{ president.major }} {{ president.student_id }}</p>
-                        {% endif %}
-                        {% if president.phone %}
-                        <p style="font-size: 0.85rem; margin-top: 12px; opacity: 0.8;">{{ president.phone }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-
-                <!-- 부총학생회장 -->
-                {% for vp in vice_presidents %}
-                <div style="background: linear-gradient(135deg, #2d2d30 0%, #1d1d1f 100%); border-radius: var(--radius-xl); padding: 32px; text-align: center; color: white; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; border-radius: 50%; background: rgba(150,26,50,0.2); filter: blur(40px);"></div>
-                    <div style="position: relative; z-index: 1;">
-                        <p style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; margin-bottom: 16px;">{{ vp.position }}</p>
-                        {% if vp.photo_url %}
-                        <img src="{{ vp.photo_url }}" alt="{{ vp.name }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.2); margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
-                        {% else %}
-                        <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.15); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700;">{{ vp.name[0] }}</div>
-                        {% endif %}
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">{{ vp.name }}</h3>
-                        {% if vp.major %}
-                        <p style="font-size: 0.9rem; opacity: 0.9;">{{ vp.major }} {{ vp.student_id }}</p>
-                        {% endif %}
-                        {% if vp.phone %}
-                        <p style="font-size: 0.85rem; margin-top: 12px; opacity: 0.8;">{{ vp.phone }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+        <div style="display: flex; justify-content: center; gap: 60px; margin-bottom: 60px; position: relative;">
+            <div class="connector-line-v2"></div>
+            {% for p in presidents %}
+            <div class="member-card-v2">
+                <div class="card-pos-v2">{{ p.position }}</div>
+                <div class="card-name-v2">{{ p.name }}</div>
+                <div class="card-major-v2">{{ p.major }} {{ p.student_id }}</div>
+                <div class="card-tel-v2">tel.{{ p.phone }}</div>
             </div>
+            {% endfor %}
+            {% for vp in vice_presidents %}
+            <div class="member-card-v2">
+                <div class="card-pos-v2">{{ vp.position }}</div>
+                <div class="card-name-v2">{{ vp.name }}</div>
+                <div class="card-major-v2">{{ vp.major }} {{ vp.student_id }}</div>
+                <div class="card-tel-v2">tel.{{ vp.phone }}</div>
+            </div>
+            {% endfor %}
+        </div>
 
-            <!-- 본부 & 산학위원회 -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 60px;">
-                <!-- 본부 섹션 -->
-                <div style="grid-column: 1 / -1;">
-                    <div style="background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); border-radius: var(--radius-xl); padding: 28px; text-align: center; margin-bottom: 32px; border: 2px solid var(--border-color);">
-                        <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary);">본부</h2>
-                    </div>
-                </div>
-
-                <!-- 위원장들 -->
-                {% for head in heads %}
-                <div style="background: white; border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
-                    <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid var(--korea-crimson); margin-bottom: 20px;">
-                        <p style="font-size: 0.8rem; font-weight: 600; color: var(--korea-crimson); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">{{ head.position }}</p>
-                        {% if head.photo_url %}
-                        <img src="{{ head.photo_url }}" alt="{{ head.name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--korea-crimson-lighter); margin: 0 auto 16px;">
-                        {% else %}
-                        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--korea-crimson-lighter); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; color: var(--korea-crimson);">{{ head.name[0] }}</div>
-                        {% endif %}
-                        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">{{ head.name }}</h3>
-                        {% if head.major %}
-                        <p style="font-size: 0.85rem; color: var(--text-secondary);">{{ head.major }} {{ head.student_id }}</p>
-                        {% endif %}
-                    </div>
-
-                    <!-- 해당 부서의 국원들 -->
-                    {% set dept_key = head.position.replace('위원장', '').strip() %}
-                    {% for dept_name, members in departments.items() if dept_name in dept_key or dept_key in dept_name %}
-                    <div style="display: grid; gap: 12px;">
-                        {% for member in members %}
-                        <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; gap: 12px; transition: all var(--transition-base);" onmouseover="this.style.background='var(--korea-crimson-lighter)'" onmouseout="this.style.background='var(--bg-secondary)'">
-                            {% if member.photo_url %}
-                            <img src="{{ member.photo_url }}" alt="{{ member.name }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                            {% else %}
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; color: var(--korea-crimson);">{{ member.name[0] }}</div>
-                            {% endif %}
-                            <div style="flex: 1; min-width: 0;">
-                                <p style="font-size: 0.75rem; color: var(--korea-crimson); font-weight: 600; margin-bottom: 2px;">{{ member.position }}</p>
-                                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">{{ member.name }}</p>
-                                {% if member.major %}
-                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">{{ member.major }}</p>
-                                {% endif %}
-                            </div>
+        <div style="display: flex; gap: 30px; align-items: flex-start;">
+            <div style="flex: 1.2;">
+                <div class="section-bar-v2 bar-bonbu-v2">본부</div>
+                <div style="display: flex; justify-content: space-around; gap: 20px;">
+                    {% for head in bonbu_heads %}
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                        <div class="member-card-v2" style="width: 180px;">
+                            <div class="card-pos-v2" style="font-size: 0.75rem;">{{ head.position }}</div>
+                            <div class="card-name-v2" style="font-size: 1.2rem;">{{ head.name }}</div>
+                            <div class="card-major-v2" style="font-size: 0.8rem;">{{ head.major }}</div>
+                            <div class="card-tel-v2" style="font-size: 0.7rem;">tel.{{ head.phone }}</div>
                         </div>
-                        {% endfor %}
+
+                        <div style="display: flex; gap: 8px;">
+                            {% set dept_map = {
+                                '중앙집행위원장': ['재정국', '사무국'],
+                                '기획정책위원장': ['정책국', '문화기획국']
+                            } %}
+                            {% for d_name in dept_map.get(head.position, []) %}
+                            <div class="dept-group-v2">
+                                <div class="dept-title-v2">{{ d_name }}</div>
+                                {% for m in departments.get(d_name, []) %}
+                                <div class="dept-box-v2">
+                                    <strong>{{ m.name }}</strong>
+                                    <span style="font-size: 0.75rem; color: #7a1a28; margin-top:3px;">{{ m.position }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
 
-                <!-- 산학위원회 섹션 -->
-                <div style="grid-column: 1 / -1; margin-top: 40px;">
-                    <div style="background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); border-radius: var(--radius-xl); padding: 28px; text-align: center; margin-bottom: 32px; border: 2px solid var(--border-color);">
-                        <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary);">산학위원회</h2>
-                    </div>
-                </div>
-
-                <!-- 기타 부서들 (산학위원회 소속) -->
-                {% for dept_name, members in departments.items() %}
-                {% set is_sanwi = dept_name in ['미디어홍보국', '대외협력국', '홍보국'] %}
-                {% if is_sanwi %}
-                <div style="background: white; border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
-                    <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #667eea; margin-bottom: 20px;">
-                        <p style="font-size: 0.9rem; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">{{ dept_name }}</p>
-                    </div>
-                    <div style="display: grid; gap: 12px;">
-                        {% for member in members %}
-                        <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; gap: 12px; transition: all var(--transition-base);" onmouseover="this.style.background='#eff1ff'" onmouseout="this.style.background='var(--bg-secondary)'">
-                            {% if member.photo_url %}
-                            <img src="{{ member.photo_url }}" alt="{{ member.name }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                            {% else %}
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; color: #667eea;">{{ member.name[0] }}</div>
-                            {% endif %}
-                            <div style="flex: 1; min-width: 0;">
-                                <p style="font-size: 0.75rem; color: #667eea; font-weight: 600; margin-bottom: 2px;">{{ member.position }}</p>
-                                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">{{ member.name }}</p>
-                                {% if member.major %}
-                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">{{ member.major }}</p>
-                                {% endif %}
-                            </div>
+            <div style="flex: 0.8;">
+                <div class="section-bar-v2 bar-sanha-v2">산하위원회</div>
+                <div style="display: flex; justify-content: space-around; gap: 20px;">
+                    {% for head in sanha_heads %}
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                        <div class="member-card-v2" style="width: 180px;">
+                            <div class="card-pos-v2" style="font-size: 0.75rem;">{{ head.position }}</div>
+                            <div class="card-name-v2" style="font-size: 1.2rem;">{{ head.name }}</div>
+                            <div class="card-major-v2" style="font-size: 0.8rem;">{{ head.major }}</div>
+                            <div class="card-tel-v2" style="font-size: 0.7rem;">tel.{{ head.phone }}</div>
                         </div>
-                        {% endfor %}
+
+                        <div style="display: flex; gap: 8px;">
+                            {% set dept_map_sanha = {
+                                '인권복지위원장': ['기획국', '사무행정국'],
+                                '교육복지위원장': ['기획국', '사무행정국']
+                            } %}
+                            {% for d_name in dept_map_sanha.get(head.position, []) %}
+                            <div class="dept-group-v2">
+                                <div class="dept-title-v2">{{ d_name }}</div>
+                                {% for m in departments.get(d_name, []) %}
+                                <div class="dept-box-v2">
+                                    <strong>{{ m.name }}</strong>
+                                    <span style="font-size: 0.75rem; color: #7a1a28; margin-top:3px;">{{ m.position }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endif %}
-                {% endfor %}
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

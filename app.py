@@ -8,9 +8,9 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-Config.init_app(app)  # Initialize upload folders
+Config.init_app(app)  # 업로드 폴더 초기화
 
-# Initialize extensions
+# 확장 기능 초기화
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -20,163 +20,99 @@ login_manager.login_view = 'admin_login'
 def load_user(user_id):
     return Admin.query.get(int(user_id))
 
-# ============ Helper Functions ============
+# ============ 헬퍼 함수 ============
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 def save_file(file, subfolder='files'):
-    """
-    파일을 저장하고 웹 접근 가능한 URL을 반환합니다.
-    """
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        # Add timestamp to prevent overwrite
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
         filename = timestamp + filename
-        
-        # Ensure directory exists
         save_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
         os.makedirs(save_dir, exist_ok=True)
-        
         save_path = os.path.join(save_dir, filename)
         file.save(save_path)
-        
-        # Return web-accessible path
         return url_for('static', filename=f'uploads/{subfolder}/{filename}')
     return None
 
-# ============ Public Routes ============
+# ============ 사용자용 라우트 ============
 
 @app.route('/')
 def index():
-    """홈페이지 (Apple Style Main)"""
-    # 배너 가져오기 (이벤트 배너 우선, 없으면 기본 배너)
     banner = Banner.query.filter_by(is_active=True, is_event_banner=True).order_by(Banner.order).first()
     if not banner:
         banner = Banner.query.filter_by(is_active=True, is_event_banner=False).order_by(Banner.order).first()
-
-    # 공약 이행률 계산
     promises_list = Promise.query.all()
     promise_rate = 0
     if promises_list:
         total_progress = sum(p.progress_rate for p in promises_list)
         promise_rate = total_progress / len(promises_list)
-
-    # 주요 데이터 (Bento Grid용)
-    # 1. 다가오는 일정
     recent_schedule = Schedule.query.filter(Schedule.start_date >= datetime.now()).order_by(Schedule.start_date).first()
-    # 2. 최신 회의록
     recent_minute = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).first()
-    # 3. 모집중인 프로그램
     active_program = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).first()
-
-    return render_template('index.html',
-                         banner=banner,
-                         promise_rate=int(promise_rate),
-                         recent_schedule=recent_schedule,
-                         recent_minute=recent_minute,
-                         active_program=active_program)
-
+    return render_template('index.html', banner=banner, promise_rate=int(promise_rate), recent_schedule=recent_schedule, recent_minute=recent_minute, active_program=active_program)
 
 @app.route('/schedule')
 def schedule():
-    """일정 페이지"""
     schedules = Schedule.query.order_by(Schedule.start_date.desc()).all()
     return render_template('schedule.html', schedules=schedules)
 
-
 @app.route('/organization')
 def organization():
-    """조직도 페이지 (Tree Structure Data)"""
-    # 조직도 구조화를 위한 데이터 처리
-    
-    # 1. Leadership (회장단)
-    # '회장'이 포함되지만 '부회장'은 아닌 경우 (총학생회장)
-    presidents = Organization.query.filter(
-        (Organization.position.contains('회장')) & 
-        (~Organization.position.contains('부회장')) &
-        (~Organization.position.contains('국장')) &
-        (~Organization.position.contains('위원장'))
-    ).order_by(Organization.order).all()
-    
-    # '부회장'인 경우
-    vice_presidents = Organization.query.filter(
-        Organization.position.contains('부회장')
-    ).order_by(Organization.order).all()
+    """이미지(image_a22cc7.png)의 3층 계층 구조를 반영한 조직도 데이터 처리"""
+    # 1. 최상단: 회장단 (총학생회장, 부총학생회장)
+    presidents = Organization.query.filter(Organization.position == '총학생회장').order_by(Organization.order).all()
+    vice_presidents = Organization.query.filter(Organization.position == '부총학생회장').order_by(Organization.order).all()
 
-    # 2. Heads (위원장 등)
-    heads = Organization.query.filter(
-        Organization.position.contains('위원장')
-    ).order_by(Organization.order).all()
+    # 2. 중간: 위원장단 (본부 vs 산하위원회)
+    # 이미지처럼 '본부' 탭에 중앙집행위원장, 기획정책위원장이 있고, '산하위원회' 탭에 인권복지, 교육복지가 있음
+    bonbu_heads = Organization.query.filter(Organization.department == '본부', Organization.position.contains('위원장')).order_by(Organization.order).all()
+    sanha_heads = Organization.query.filter(Organization.department == '산하위원회', Organization.position.contains('위원장')).order_by(Organization.order).all()
 
-    # 3. Departments (각 국)
-    # 회장단과 위원장이 아닌 나머지 멤버들
-    others = Organization.query.filter(
-        ~Organization.position.contains('회장'), # 부회장도 포함해서 제외됨 (contains 회장)
-        ~Organization.position.contains('위원장')
-    ).order_by(Organization.order).all()
-
-    # 부서별 그룹화
+    # 3. 하단: 각 국별 멤버 (재정국, 사무국, 정책국, 문화기획국 등)
+    # 부서 이름으로 그룹화하여 전달
+    all_members = Organization.query.filter(~Organization.position.contains('회장'), ~Organization.position.contains('위원장')).order_by(Organization.order).all()
     departments = {}
-    for member in others:
-        # 부회장 필터링 보완 (위에서 contains '회장'으로 다 제외되었을 수 있음)
-        # 명확하게 부서가 있는 국원들만 처리
-        if '부회장' in member.position: # 혹시 쿼리에서 안걸러졌을 경우
-            continue
-            
-        dept = member.department or "기타"
+    for m in all_members:
+        dept = m.department or "기타"
         if dept not in departments:
             departments[dept] = []
-        departments[dept].append(member)
+        departments[dept].append(m)
 
-    return render_template('organization.html', 
-                         presidents=presidents,
-                         vice_presidents=vice_presidents,
-                         heads=heads,
-                         departments=departments)
-
+    return render_template('organization.html', presidents=presidents, vice_presidents=vice_presidents, bonbu_heads=bonbu_heads, sanha_heads=sanha_heads, departments=departments)
 
 @app.route('/promises')
 def promises():
-    """공약 페이지"""
     promises_list = Promise.query.order_by(Promise.order).all()
     categories = {}
     for promise in promises_list:
         if promise.category not in categories:
             categories[promise.category] = []
         categories[promise.category].append(promise)
-    
     total_progress = sum(p.progress_rate for p in promises_list) / len(promises_list) if promises_list else 0
     return render_template('promises.html', categories=categories, total_progress=round(total_progress))
 
-
 @app.route('/promises/<int:promise_id>')
 def promise_detail(promise_id):
-    """공약 상세 페이지"""
     promise = Promise.query.get_or_404(promise_id)
     progress_updates = PromiseProgress.query.filter_by(promise_id=promise_id).order_by(PromiseProgress.date.desc()).all()
     return render_template('promise_detail.html', promise=promise, progress_updates=progress_updates)
 
-
 @app.route('/minutes')
 def minutes():
-    """회의록 페이지"""
     meeting_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).all()
     return render_template('minutes.html', minutes=meeting_minutes)
 
-
 @app.route('/minutes/<int:minute_id>')
 def minute_detail(minute_id):
-    """회의록 상세 페이지"""
     minute = MeetingMinutes.query.get_or_404(minute_id)
     return render_template('minute_detail.html', minute=minute)
 
-
 @app.route('/regulations')
 def regulations():
-    """회칙 페이지"""
     regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
     categories = {}
     for regulation in regulations_list:
@@ -185,51 +121,36 @@ def regulations():
         categories[regulation.category].append(regulation)
     return render_template('regulations.html', categories=categories)
 
-
 @app.route('/programs')
 def programs():
-    """교내 프로그램 페이지"""
     programs_list = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).all()
     return render_template('programs.html', programs=programs_list)
 
-
-# ============ Admin Authentication Routes ============
+# ============ 관리자 인증 라우트 ============
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
-    """관리자 로그인"""
     if current_user.is_authenticated:
         return redirect(url_for('admin_dashboard'))
-
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         admin = Admin.query.filter_by(username=username).first()
-
         if admin and admin.check_password(password):
             login_user(admin, remember=True)
-            next_page = request.args.get('next')
-            return redirect(next_page if next_page else url_for('admin_dashboard'))
-        else:
-            flash('아이디 또는 비밀번호가 올바르지 않습니다.', 'error')
-
+            return redirect(request.args.get('next') or url_for('admin_dashboard'))
+        flash('아이디 또는 비밀번호가 올바르지 않습니다.', 'error')
     return render_template('admin/login.html')
-
 
 @app.route('/admin/logout')
 @login_required
 def admin_logout():
-    """관리자 로그아웃"""
     logout_user()
     return redirect(url_for('index'))
-
-
-# ============ Admin Dashboard Routes ============
 
 @app.route('/admin')
 @login_required
 def admin_dashboard():
-    """관리자 대시보드"""
     stats = {
         'schedules': Schedule.query.count(),
         'promises': Promise.query.count(),
@@ -238,21 +159,17 @@ def admin_dashboard():
     }
     return render_template('admin/dashboard.html', stats=stats)
 
-
-# ============ Admin Schedule Management ============
+# ============ 일정 관리 ============
 
 @app.route('/admin/schedules')
 @login_required
 def admin_schedules():
-    """관리자 일정 관리"""
     schedules = Schedule.query.order_by(Schedule.start_date.desc()).all()
     return render_template('admin/schedules.html', schedules=schedules)
-
 
 @app.route('/admin/schedules/add', methods=['GET', 'POST'])
 @login_required
 def admin_schedule_add():
-    """일정 추가"""
     if request.method == 'POST':
         schedule = Schedule(
             title=request.form['title'],
@@ -266,16 +183,12 @@ def admin_schedule_add():
         db.session.commit()
         flash('일정이 추가되었습니다.', 'success')
         return redirect(url_for('admin_schedules'))
-
     return render_template('admin/schedule_form.html')
-
 
 @app.route('/admin/schedules/edit/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
 def admin_schedule_edit(schedule_id):
-    """일정 수정"""
     schedule = Schedule.query.get_or_404(schedule_id)
-
     if request.method == 'POST':
         schedule.title = request.form['title']
         schedule.description = request.form.get('description')
@@ -283,39 +196,31 @@ def admin_schedule_edit(schedule_id):
         schedule.end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%dT%H:%M') if request.form.get('end_date') else None
         schedule.location = request.form.get('location')
         schedule.category = request.form.get('category')
-
         db.session.commit()
         flash('일정이 수정되었습니다.', 'success')
         return redirect(url_for('admin_schedules'))
-
     return render_template('admin/schedule_form.html', schedule=schedule)
-
 
 @app.route('/admin/schedules/delete/<int:schedule_id>', methods=['POST'])
 @login_required
 def admin_schedule_delete(schedule_id):
-    """일정 삭제"""
     schedule = Schedule.query.get_or_404(schedule_id)
     db.session.delete(schedule)
     db.session.commit()
     flash('일정이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_schedules'))
 
-
-# ============ Admin Promise Management ============
+# ============ 공약 관리 ============
 
 @app.route('/admin/promises')
 @login_required
 def admin_promises():
-    """관리자 공약 관리"""
     promises_list = Promise.query.order_by(Promise.order).all()
     return render_template('admin/promises.html', promises=promises_list)
-
 
 @app.route('/admin/promises/add', methods=['GET', 'POST'])
 @login_required
 def admin_promise_add():
-    """공약 추가"""
     if request.method == 'POST':
         promise = Promise(
             category=request.form['category'],
@@ -330,16 +235,12 @@ def admin_promise_add():
         db.session.commit()
         flash('공약이 추가되었습니다.', 'success')
         return redirect(url_for('admin_promises'))
-
     return render_template('admin/promise_form.html')
-
 
 @app.route('/admin/promises/edit/<int:promise_id>', methods=['GET', 'POST'])
 @login_required
 def admin_promise_edit(promise_id):
-    """공약 수정"""
     promise = Promise.query.get_or_404(promise_id)
-
     if request.method == 'POST':
         promise.category = request.form['category']
         promise.title = request.form['title']
@@ -348,31 +249,24 @@ def admin_promise_edit(promise_id):
         promise.progress_rate = int(request.form.get('progress_rate', 0))
         promise.status = request.form.get('status', '진행중')
         promise.order = int(request.form.get('order', 0))
-
         db.session.commit()
         flash('공약이 수정되었습니다.', 'success')
         return redirect(url_for('admin_promises'))
-
     return render_template('admin/promise_form.html', promise=promise)
-
 
 @app.route('/admin/promises/delete/<int:promise_id>', methods=['POST'])
 @login_required
 def admin_promise_delete(promise_id):
-    """공약 삭제"""
     promise = Promise.query.get_or_404(promise_id)
     db.session.delete(promise)
     db.session.commit()
     flash('공약이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_promises'))
 
-
 @app.route('/admin/promises/<int:promise_id>/progress/add', methods=['GET', 'POST'])
 @login_required
 def admin_promise_progress_add(promise_id):
-    """공약 진행상황 추가"""
     promise = Promise.query.get_or_404(promise_id)
-
     if request.method == 'POST':
         progress = PromiseProgress(
             promise_id=promise_id,
@@ -384,34 +278,25 @@ def admin_promise_progress_add(promise_id):
         db.session.commit()
         flash('진행상황이 추가되었습니다.', 'success')
         return redirect(url_for('admin_promises'))
-
     return render_template('admin/promise_progress_form.html', promise=promise)
 
-
-# ============ Admin Minutes Management (File Upload) ============
+# ============ 회의록 관리 ============
 
 @app.route('/admin/minutes')
 @login_required
 def admin_minutes():
-    """관리자 회의록 관리"""
     meeting_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).all()
     return render_template('admin/minutes.html', minutes=meeting_minutes)
-
 
 @app.route('/admin/minutes/add', methods=['GET', 'POST'])
 @login_required
 def admin_minute_add():
-    """회의록 추가 (파일 업로드 지원)"""
     if request.method == 'POST':
-        # File Upload Logic
         file_url = None
         if 'file' in request.files:
             file = request.files['file']
             saved_path = save_file(file, 'minutes')
-            if saved_path:
-                file_url = saved_path
-        
-        # URL fallback if text input provided
+            if saved_path: file_url = saved_path
         if not file_url and request.form.get('file_url_text'):
              file_url = request.form.get('file_url_text')
 
@@ -429,25 +314,17 @@ def admin_minute_add():
         db.session.commit()
         flash('회의록이 추가되었습니다.', 'success')
         return redirect(url_for('admin_minutes'))
-
     return render_template('admin/minute_form.html')
-
 
 @app.route('/admin/minutes/edit/<int:minute_id>', methods=['GET', 'POST'])
 @login_required
 def admin_minute_edit(minute_id):
-    """회의록 수정 (파일 업로드 지원)"""
     minute = MeetingMinutes.query.get_or_404(minute_id)
-
     if request.method == 'POST':
-        # File Upload Logic
         if 'file' in request.files:
             file = request.files['file']
             saved_path = save_file(file, 'minutes')
-            if saved_path:
-                minute.file_url = saved_path
-        
-        # If manual URL text provided, override
+            if saved_path: minute.file_url = saved_path
         if request.form.get('file_url_text'):
              minute.file_url = request.form.get('file_url_text')
 
@@ -458,47 +335,37 @@ def admin_minute_edit(minute_id):
         minute.agenda = request.form.get('agenda')
         minute.content = request.form['content']
         minute.decisions = request.form.get('decisions')
-
         db.session.commit()
         flash('회의록이 수정되었습니다.', 'success')
         return redirect(url_for('admin_minutes'))
-
     return render_template('admin/minute_form.html', minute=minute)
-
 
 @app.route('/admin/minutes/delete/<int:minute_id>', methods=['POST'])
 @login_required
 def admin_minute_delete(minute_id):
-    """회의록 삭제"""
     minute = MeetingMinutes.query.get_or_404(minute_id)
     db.session.delete(minute)
     db.session.commit()
     flash('회의록이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_minutes'))
 
-
-# ============ Admin Regulations Management (File Upload) ============
+# ============ 회칙 관리 ============
 
 @app.route('/admin/regulations')
 @login_required
 def admin_regulations():
-    """관리자 회칙 관리"""
     regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
     return render_template('admin/regulations.html', regulations=regulations_list)
-
 
 @app.route('/admin/regulations/add', methods=['GET', 'POST'])
 @login_required
 def admin_regulation_add():
-    """회칙 추가 (파일 업로드 지원)"""
     if request.method == 'POST':
         file_url = None
         if 'file' in request.files:
             file = request.files['file']
             saved_path = save_file(file, 'regulations')
-            if saved_path:
-                file_url = saved_path
-        
+            if saved_path: file_url = saved_path
         if not file_url and request.form.get('file_url_text'):
              file_url = request.form.get('file_url_text')
 
@@ -513,71 +380,54 @@ def admin_regulation_add():
         db.session.commit()
         flash('회칙이 추가되었습니다.', 'success')
         return redirect(url_for('admin_regulations'))
-
     return render_template('admin/regulation_form.html')
-
 
 @app.route('/admin/regulations/edit/<int:regulation_id>', methods=['GET', 'POST'])
 @login_required
 def admin_regulation_edit(regulation_id):
-    """회칙 수정"""
     regulation = Regulation.query.get_or_404(regulation_id)
-
     if request.method == 'POST':
         if 'file' in request.files:
             file = request.files['file']
             saved_path = save_file(file, 'regulations')
-            if saved_path:
-                regulation.file_url = saved_path
-        
+            if saved_path: regulation.file_url = saved_path
         if request.form.get('file_url_text'):
              regulation.file_url = request.form.get('file_url_text')
-
         regulation.category = request.form['category']
         regulation.title = request.form['title']
         regulation.content = request.form['content']
         regulation.order = int(request.form.get('order', 0))
-
         db.session.commit()
         flash('회칙이 수정되었습니다.', 'success')
         return redirect(url_for('admin_regulations'))
-
     return render_template('admin/regulation_form.html', regulation=regulation)
-
 
 @app.route('/admin/regulations/delete/<int:regulation_id>', methods=['POST'])
 @login_required
 def admin_regulation_delete(regulation_id):
-    """회칙 삭제"""
     regulation = Regulation.query.get_or_404(regulation_id)
     db.session.delete(regulation)
     db.session.commit()
     flash('회칙이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_regulations'))
 
-
-# ============ Admin Programs Management (Image Upload) ============
+# ============ 프로그램 관리 ============
 
 @app.route('/admin/programs')
 @login_required
 def admin_programs():
-    """관리자 프로그램 관리"""
     programs_list = Program.query.order_by(Program.created_at.desc()).all()
     return render_template('admin/programs.html', programs=programs_list)
-
 
 @app.route('/admin/programs/add', methods=['GET', 'POST'])
 @login_required
 def admin_program_add():
-    """프로그램 추가 (이미지 업로드)"""
     if request.method == 'POST':
         image_url = None
         if 'image' in request.files:
             file = request.files['image']
             saved_path = save_file(file, 'programs')
-            if saved_path:
-                image_url = saved_path
-        
+            if saved_path: image_url = saved_path
         if not image_url and request.form.get('image_url_text'):
             image_url = request.form.get('image_url_text')
 
@@ -600,26 +450,19 @@ def admin_program_add():
         db.session.commit()
         flash('프로그램이 추가되었습니다.', 'success')
         return redirect(url_for('admin_programs'))
-
     return render_template('admin/program_form.html')
-
 
 @app.route('/admin/programs/edit/<int:program_id>', methods=['GET', 'POST'])
 @login_required
 def admin_program_edit(program_id):
-    """프로그램 수정"""
     program = Program.query.get_or_404(program_id)
-
     if request.method == 'POST':
         if 'image' in request.files:
             file = request.files['image']
             saved_path = save_file(file, 'programs')
-            if saved_path:
-                program.image_url = saved_path
-        
+            if saved_path: program.image_url = saved_path
         if request.form.get('image_url_text'):
             program.image_url = request.form.get('image_url_text')
-
         program.title = request.form['title']
         program.category = request.form.get('category')
         program.description = request.form['description']
@@ -632,50 +475,39 @@ def admin_program_edit(program_id):
         program.location = request.form.get('location')
         program.link = request.form.get('link')
         program.is_active = request.form.get('is_active') == 'on'
-
         db.session.commit()
         flash('프로그램이 수정되었습니다.', 'success')
         return redirect(url_for('admin_programs'))
-
     return render_template('admin/program_form.html', program=program)
-
 
 @app.route('/admin/programs/delete/<int:program_id>', methods=['POST'])
 @login_required
 def admin_program_delete(program_id):
-    """프로그램 삭제"""
     program = Program.query.get_or_404(program_id)
     db.session.delete(program)
     db.session.commit()
     flash('프로그램이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_programs'))
 
-
-# ============ Admin Banner Management (Image Upload) ============
+# ============ 배너 관리 ============
 
 @app.route('/admin/banners')
 @login_required
 def admin_banners():
-    """관리자 배너 관리"""
     banners = Banner.query.order_by(Banner.order).all()
     return render_template('admin/banners.html', banners=banners)
-
 
 @app.route('/admin/banners/add', methods=['GET', 'POST'])
 @login_required
 def admin_banner_add():
-    """배너 추가 (이미지 업로드)"""
     if request.method == 'POST':
         image_url = None
         if 'image' in request.files:
             file = request.files['image']
             saved_path = save_file(file, 'banners')
-            if saved_path:
-                image_url = saved_path
-        
+            if saved_path: image_url = saved_path
         if not image_url and request.form.get('image_url_text'):
             image_url = request.form.get('image_url_text')
-
         banner = Banner(
             title=request.form['title'],
             image_url=image_url,
@@ -688,26 +520,19 @@ def admin_banner_add():
         db.session.commit()
         flash('배너가 추가되었습니다.', 'success')
         return redirect(url_for('admin_banners'))
-
     return render_template('admin/banner_form.html')
-
 
 @app.route('/admin/banners/edit/<int:banner_id>', methods=['GET', 'POST'])
 @login_required
 def admin_banner_edit(banner_id):
-    """배너 수정"""
     banner = Banner.query.get_or_404(banner_id)
-
     if request.method == 'POST':
         if 'image' in request.files:
             file = request.files['image']
             saved_path = save_file(file, 'banners')
-            if saved_path:
-                banner.image_url = saved_path
-        
+            if saved_path: banner.image_url = saved_path
         if request.form.get('image_url_text'):
             banner.image_url = request.form.get('image_url_text')
-
         banner.title = request.form['title']
         banner.link = request.form.get('link')
         banner.is_active = request.form.get('is_active') == 'on'
@@ -716,46 +541,36 @@ def admin_banner_edit(banner_id):
         db.session.commit()
         flash('배너가 수정되었습니다.', 'success')
         return redirect(url_for('admin_banners'))
-
     return render_template('admin/banner_form.html', banner=banner)
-
 
 @app.route('/admin/banners/delete/<int:banner_id>', methods=['POST'])
 @login_required
 def admin_banner_delete(banner_id):
-    """배너 삭제"""
     banner = Banner.query.get_or_404(banner_id)
     db.session.delete(banner)
     db.session.commit()
     flash('배너가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_banners'))
 
-
-# ============ Admin Organization Management (Photo Upload) ============
+# ============ 조직도 관리 ============
 
 @app.route('/admin/organization')
 @login_required
 def admin_organization():
-    """관리자 조직도 관리"""
     members = Organization.query.order_by(Organization.order).all()
     return render_template('admin/organization.html', members=members)
-
 
 @app.route('/admin/organization/add', methods=['GET', 'POST'])
 @login_required
 def admin_organization_add():
-    """조직도 멤버 추가 (사진 업로드)"""
     if request.method == 'POST':
         photo_url = None
         if 'photo' in request.files:
             file = request.files['photo']
             saved_path = save_file(file, 'profiles')
-            if saved_path:
-                photo_url = saved_path
-        
+            if saved_path: photo_url = saved_path
         if not photo_url and request.form.get('photo_url_text'):
             photo_url = request.form.get('photo_url_text')
-
         member = Organization(
             name=request.form['name'],
             position=request.form['position'],
@@ -771,26 +586,19 @@ def admin_organization_add():
         db.session.commit()
         flash('조직도 멤버가 추가되었습니다.', 'success')
         return redirect(url_for('admin_organization'))
-
     return render_template('admin/organization_form.html')
-
 
 @app.route('/admin/organization/edit/<int:member_id>', methods=['GET', 'POST'])
 @login_required
 def admin_organization_edit(member_id):
-    """조직도 멤버 수정"""
     member = Organization.query.get_or_404(member_id)
-
     if request.method == 'POST':
         if 'photo' in request.files:
             file = request.files['photo']
             saved_path = save_file(file, 'profiles')
-            if saved_path:
-                member.photo_url = saved_path
-        
+            if saved_path: member.photo_url = saved_path
         if request.form.get('photo_url_text'):
             member.photo_url = request.form.get('photo_url_text')
-
         member.name = request.form['name']
         member.position = request.form['position']
         member.department = request.form.get('department')
@@ -799,45 +607,33 @@ def admin_organization_edit(member_id):
         member.phone = request.form.get('phone')
         member.email = request.form.get('email')
         member.order = int(request.form.get('order', 0))
-
         db.session.commit()
         flash('조직도 멤버가 수정되었습니다.', 'success')
         return redirect(url_for('admin_organization'))
-
     return render_template('admin/organization_form.html', member=member)
-
 
 @app.route('/admin/organization/delete/<int:member_id>', methods=['POST'])
 @login_required
 def admin_organization_delete(member_id):
-    """조직도 멤버 삭제"""
     member = Organization.query.get_or_404(member_id)
     db.session.delete(member)
     db.session.commit()
     flash('조직도 멤버가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_organization'))
 
-
-# ============ Initialize Database ============
+# ============ DB 초기화 명령 ============
 
 @app.cli.command()
 def init_db():
-    """데이터베이스 초기화"""
     with app.app_context():
         db.create_all()
-
-        # 기본 관리자 계정 생성 (username: admin, password: admin)
         if not Admin.query.filter_by(username='admin').first():
             admin = Admin(username='admin', name='관리자')
             admin.set_password('admin')
             db.session.add(admin)
             db.session.commit()
-            print('기본 관리자 계정이 생성되었습니다. (ID: admin, PW: admin)')
-
+            print('기본 관리자 계정 생성 완료 (admin / admin)')
 
 if __name__ == '__main__':
-    # 포트 번호를 환경 변수로 설정 가능
-    port = int(os.environ.get('PORT', 7676))
-
-    # watchdog 호환성 문제 해결: stat reloader 사용
+    port = int(os.environ.get('PORT', 2543))
     app.run(debug=True, host='0.0.0.0', port=port, use_reloader=True, reloader_type='stat')
