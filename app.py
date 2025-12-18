@@ -36,32 +36,24 @@ def save_file(file, subfolder='files'):
 
 @app.route('/')
 def index():
-    banner = Banner.query.filter_by(is_active=True, is_event_banner=True).order_by(Banner.order).first()
-    if not banner:
-        banner = Banner.query.filter_by(is_active=True, is_event_banner=False).order_by(Banner.order).first()
+    # 배너 로직 강화: 최우선순위 배너 1개 노출
+    banner = Banner.query.filter_by(is_active=True).order_by(Banner.is_event_banner.desc(), Banner.order.asc()).first()
     
+    # 전반적인 공약 이행률 계산
     promises_list = Promise.query.all()
-    promise_rate = 0
-    if promises_list:
-        total_progress = sum(p.progress_rate for p in promises_list)
-        promise_rate = total_progress / len(promises_list)
+    promise_rate = int(sum(p.progress_rate for p in promises_list) / len(promises_list)) if promises_list else 0
 
-    # 메인 화면용 조직 데이터 (이미지 1의 구조: 회장단 및 각 위원장)
-    presidents = Organization.query.filter(Organization.position.contains('회장')).order_by(Organization.order).all()
-    heads = Organization.query.filter(Organization.position.contains('위원장')).order_by(Organization.order).all()
-
-    recent_schedule = Schedule.query.filter(Schedule.start_date >= datetime.now()).order_by(Schedule.start_date).first()
-    recent_minute = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).first()
-    active_program = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).first()
+    # 메인 페이지용 다가오는 일정 (2개)
+    upcoming_schedules = Schedule.query.filter(Schedule.start_date >= datetime.now()).order_by(Schedule.start_date.asc()).limit(2).all()
+    
+    # 메인 페이지용 최근 회의록 (2개)
+    recent_minutes = MeetingMinutes.query.order_by(MeetingMinutes.meeting_date.desc()).limit(2).all()
     
     return render_template('index.html', 
                            banner=banner, 
-                           promise_rate=int(promise_rate), 
-                           recent_schedule=recent_schedule, 
-                           recent_minute=recent_minute, 
-                           active_program=active_program,
-                           presidents=presidents,
-                           heads=heads)
+                           promise_rate=promise_rate,
+                           upcoming_schedules=upcoming_schedules,
+                           recent_minutes=recent_minutes)
 
 @app.route('/schedule')
 def schedule():
@@ -70,26 +62,22 @@ def schedule():
 
 @app.route('/organization')
 def organization():
-    """상세 조직도: 이미지 2의 구조 (국장, 차장 포함 모든 멤버)"""
-    presidents = Organization.query.filter(Organization.position == '총학생회장').order_by(Organization.order).all()
-    vice_presidents = Organization.query.filter(Organization.position == '부총학생회장').order_by(Organization.order).all()
+    # 간략 보기용 데이터 (회장단 및 위원장)
+    presidents = Organization.query.filter(Organization.position.contains('회장')).order_by(Organization.order).all()
+    heads = Organization.query.filter(Organization.position.contains('위원장')).order_by(Organization.order).all()
 
-    bonbu_heads = Organization.query.filter(Organization.department == '본부', Organization.position.contains('위원장')).order_by(Organization.order).all()
-    sanha_heads = Organization.query.filter(Organization.department == '산하위원회', Organization.position.contains('위원장')).order_by(Organization.order).all()
-
-    all_members = Organization.query.filter(~Organization.position.contains('회장'), ~Organization.position.contains('위원장')).order_by(Organization.order).all()
+    # 상세 보기용 데이터 (부서별 그룹화)
+    all_members = Organization.query.order_by(Organization.order).all()
     departments = {}
     for m in all_members:
-        dept = m.department or "기타"
+        dept = m.department or "회장단 및 중앙기구"
         if dept not in departments:
             departments[dept] = []
         departments[dept].append(m)
 
     return render_template('organization.html', 
                            presidents=presidents, 
-                           vice_presidents=vice_presidents, 
-                           bonbu_heads=bonbu_heads, 
-                           sanha_heads=sanha_heads, 
+                           heads=heads, 
                            departments=departments)
 
 @app.route('/promises')
@@ -625,5 +613,5 @@ def init_db():
             print('기본 관리자 계정 생성 완료 (admin / admin)')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 2543))
+    port = int(os.environ.get('PORT', 8080))
     app.run(debug=True, host='0.0.0.0', port=port, use_reloader=True, reloader_type='stat')

@@ -1,141 +1,83 @@
 {% extends "base.html" %}
 
-{% block title %}조직도 - 고려대학교 38대 총학생회{% endblock %}
-
 {% block content %}
-<style>
-    .org-section-full { background-color: #f3e9dc; padding: 120px 0 100px; font-family: 'Pretendard', sans-serif; }
-    .org-header-full { background-color: #7a1a28; color: white; text-align: center; padding: 30px; border-radius: 8px; margin-bottom: 60px; box-shadow: var(--shadow-md); }
-    
-    /* 인물 카드 스타일 */
-    .member-box-full { background: white; border: 2px solid #7a1a28; width: 100%; max-width: 250px; padding: 20px; text-align: center; border-radius: 4px; box-shadow: 4px 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
-    .member-box-full:hover { transform: translateY(-5px); }
-    .member-pos-full { background: #7a1a28; color: white; padding: 8px; font-weight: 700; margin: -20px -20px 15px -20px; border-radius: 2px 2px 0 0; font-size: 0.9rem; }
-    .member-name-full { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; color: #000; }
-    .member-info-full { font-size: 0.9rem; font-weight: 600; color: #333; }
-    .member-contact-full { font-size: 0.8rem; color: #666; margin-top: 10px; border-top: 1px dotted #ccc; padding-top: 10px; }
-
-    /* 국(Department) 계층 스타일 */
-    .dept-container-full { display: flex; flex-direction: column; width: 160px; gap: 10px; }
-    .dept-label-full { background: #7a1a28; color: white; padding: 6px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-align: center; letter-spacing: 0.05em; }
-    .dept-member-full { background: white; border: 1.5px solid #7a1a28; padding: 12px; font-size: 0.85rem; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; text-align: center; min-height: 70px; }
-    .member-role-tag { display: block; font-size: 0.7rem; color: #7a1a28; font-weight: 800; margin-bottom: 3px; border-bottom: 1px solid #f3e9dc; padding-bottom: 2px; }
-
-    /* 하늘색/연두색 구분 바 */
-    .type-bar-full { width: 100%; max-width: 500px; margin: 40px auto; padding: 12px; border: 4px solid; border-radius: 50px; text-align: center; font-size: 1.8rem; font-weight: 900; }
-    .bar-blue { background-color: #e1f5fe; border-color: #81d4fa; color: #01579b; }
-    .bar-green { background-color: #f9fbe7; border-color: #dce775; color: #33691e; }
-</style>
-
-<div class="org-section-full">
-    <div class="container">
-        <div class="org-header-full">
-            <p style="margin:0 0 5px; font-size: 1rem; opacity: 0.9;">고려대학교 세종캠퍼스</p>
-            <h1 style="margin:0; font-size: 2.5rem; font-weight: 900;">제38대 총학생회 상세 조직도</h1>
+<div class="container" style="padding-top: 120px; padding-bottom: 100px;">
+    <div style="text-align: center; margin-bottom: 80px;">
+        <h1 style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 32px;">조직도</h1>
+        
+        <div class="tab-container">
+            <button onclick="switchView('simple')" id="tab-simple" class="tab-btn active">간략하게 보기</button>
+            <button onclick="switchView('detail')" id="tab-detail" class="tab-btn">상세하게 보기</button>
         </div>
+    </div>
 
-        <div style="display: flex; justify-content: center; gap: 60px; margin-bottom: 80px; position: relative;">
-            <div class="member-box-full">
-                <div class="member-pos-full">총학생회장</div>
-                <div class="member-name-full">홍길동</div>
-                <div class="member-info-full">OO학과 21학번</div>
-                <div class="member-contact-full">tel.010-0000-0000</div>
-            </div>
-            <div class="member-box-full">
-                <div class="member-pos-full">부총학생회장</div>
-                <div class="member-name-full">홍길동</div>
-                <div class="member-info-full">OO학과 23학번</div>
-                <div class="member-contact-full">tel.010-0000-0000</div>
+    <div id="view-simple">
+        <div style="margin-bottom: 60px;">
+            <h2 style="text-align: center; font-size: 1.5rem; color: var(--ku-crimson); margin-bottom: 40px;">회장단</h2>
+            <div style="display: flex; justify-content: center; gap: 32px;">
+                {% for p in presidents %}
+                <div class="apple-card" style="width: 320px; text-align: center;">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.9rem; margin-bottom: 12px;">{{ p.position }}</div>
+                    <div style="font-size: 1.75rem; font-weight: 800; margin-bottom: 8px;">{{ p.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: 1rem;">{{ p.major }}</div>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
-        <div style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;">
-            <div style="flex: 1.2; min-width: 500px;">
-                <div class="type-bar-full bar-blue">본부</div>
-                <div style="display: flex; justify-content: center; gap: 30px;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
-                        <div class="member-box-full" style="max-width: 200px;">
-                            <div class="member-pos-full" style="font-size: 0.8rem;">중앙집행위원장</div>
-                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
-                            <div class="member-info-full" style="font-size: 0.8rem;">OO학과 23</div>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">재정국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">사무국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
-                        <div class="member-box-full" style="max-width: 200px;">
-                            <div class="member-pos-full" style="font-size: 0.8rem;">기획정책위원장</div>
-                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
-                            <div class="member-info-full" style="font-size: 0.8rem;">OO학과 23</div>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">정책국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">문화기획국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                        </div>
-                    </div>
+        <div>
+            <h2 style="text-align: center; font-size: 1.5rem; color: var(--ku-crimson); margin-bottom: 40px;">중앙 집행 위원장단</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                {% for h in heads %}
+                <div class="apple-card" style="text-align: center; padding: 24px;">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.85rem; margin-bottom: 10px;">{{ h.position }}</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ h.major }}</div>
                 </div>
-            </div>
-
-            <div style="flex: 0.8; min-width: 400px;">
-                <div class="type-bar-full bar-green">산하위원회</div>
-                <div style="display: flex; justify-content: center; gap: 30px;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
-                        <div class="member-box-full" style="max-width: 200px;">
-                            <div class="member-pos-full" style="font-size: 0.8rem;">인권복지위원장</div>
-                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">기획국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">사무재정국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 30px;">
-                        <div class="member-box-full" style="max-width: 200px;">
-                            <div class="member-pos-full" style="font-size: 0.8rem;">교육복지위원장</div>
-                            <div class="member-name-full" style="font-size: 1.3rem;">홍길동</div>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">기획국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                            <div class="dept-container-full">
-                                <div class="dept-label-full">사무재정국</div>
-                                <div class="dept-member-full"><span class="member-role-tag">국장</span><strong>홍길동</strong></div>
-                                <div class="dept-member-full"><span class="member-role-tag">차장</span><strong>홍길동</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+
+    <div id="view-detail" style="display: none;">
+        {% for dept, members in departments.items() %}
+        <div style="margin-bottom: 80px;">
+            <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 32px; padding-left: 16px; border-left: 6px solid var(--ku-crimson);">{{ dept }}</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
+                {% for m in members %}
+                <div class="apple-card" style="padding: 24px;">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: 0.8rem; margin-bottom: 8px;">{{ m.position }}</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px;">{{ m.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">{{ m.major }}</div>
+                    {% if m.email %}
+                    <div style="margin-top: 12px; font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px;">{{ m.email }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
+<script>
+function switchView(mode) {
+    const simpleView = document.getElementById('view-simple');
+    const detailView = document.getElementById('view-detail');
+    const tabSimple = document.getElementById('tab-simple');
+    const tabDetail = document.getElementById('tab-detail');
+
+    if (mode === 'simple') {
+        simpleView.style.display = 'block';
+        detailView.style.display = 'none';
+        tabSimple.classList.add('active');
+        tabDetail.classList.remove('active');
+    } else {
+        simpleView.style.display = 'none';
+        detailView.style.display = 'block';
+        tabDetail.classList.add('active');
+        tabSimple.classList.remove('active');
+    }
+}
+</script>
 {% endblock %}

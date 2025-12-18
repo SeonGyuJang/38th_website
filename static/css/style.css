@@ -4,11 +4,11 @@
    ============================================ */
 
 :root {
-    /* Apple 시그니처 컬러 (SF Blue) */
-    --apple-blue: #007AFF;
-    --apple-blue-dark: #0051D5;
-    --apple-blue-light: #5AC8FA;
-    --apple-blue-lighter: #E5F3FF;
+    /* 고려대학교 시그니처 컬러 (KU Crimson) */
+    --ku-crimson: #961A32;
+    --ku-crimson-dark: #7a1529;
+    --ku-crimson-light: #b02a44;
+    --ku-crimson-lighter: #f9ecee;
 
     /* 배경 컬러 */
     --bg-primary: #ffffff;
@@ -41,6 +41,7 @@
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.10);
     --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.12);
+    --shadow-apple: 0 8px 30px rgba(0, 0, 0, 0.04);
 
     /* 간격 (Spacing) */
     --spacing-xs: 4px;
@@ -58,6 +59,7 @@
     --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-apple: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     /* 폰트 */
     --font-system: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
@@ -331,8 +333,8 @@ button {
 }
 
 .nav-menu a.active {
-    color: var(--apple-blue);
-    background: var(--apple-blue-lighter);
+    color: var(--ku-crimson);
+    background: var(--ku-crimson-lighter);
 }
 
 /* 데스크톱 네비게이션 */
@@ -377,13 +379,13 @@ button {
         left: 0;
         width: 0;
         height: 2px;
-        background: var(--apple-blue);
+        background: var(--ku-crimson);
         transition: width var(--transition-base);
     }
 
     .nav-menu a:hover {
         opacity: 1;
-        color: var(--apple-blue);
+        color: var(--ku-crimson);
     }
 
     .nav-menu a:hover::after,
@@ -393,7 +395,7 @@ button {
 
     .nav-menu a.active {
         opacity: 1;
-        color: var(--apple-blue);
+        color: var(--ku-crimson);
         background: transparent;
     }
 }
@@ -432,7 +434,7 @@ button {
     letter-spacing: -0.03em;
     line-height: 1.1;
     margin-bottom: var(--spacing-lg);
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--apple-blue) 60%, var(--text-primary) 100%);
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--ku-crimson) 60%, var(--text-primary) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -563,7 +565,7 @@ button {
     .bento-item:hover {
         transform: translateY(-8px);
         box-shadow: var(--shadow-lg);
-        border-color: var(--apple-blue);
+        border-color: var(--ku-crimson);
     }
 }
 
@@ -614,7 +616,7 @@ button {
 }
 
 .badge-primary {
-    background: var(--apple-blue);
+    background: var(--ku-crimson);
     color: white;
 }
 
@@ -693,12 +695,12 @@ button {
 }
 
 .btn-primary {
-    background: var(--apple-blue);
+    background: var(--ku-crimson);
 }
 
 @media (hover: hover) {
     .btn-primary:hover {
-        background: var(--apple-blue-dark);
+        background: var(--ku-crimson-dark);
     }
 }
 
@@ -715,13 +717,13 @@ button {
 
 .btn-outline {
     background: transparent;
-    border: 2px solid var(--apple-blue);
-    color: var(--apple-blue);
+    border: 2px solid var(--ku-crimson);
+    color: var(--ku-crimson);
 }
 
 @media (hover: hover) {
     .btn-outline:hover {
-        background: var(--apple-blue);
+        background: var(--ku-crimson);
         color: white;
     }
 }
@@ -762,7 +764,7 @@ button {
     .card:hover {
         transform: translateY(-6px);
         box-shadow: var(--shadow-md);
-        border-color: var(--apple-blue);
+        border-color: var(--ku-crimson);
     }
 }
 
@@ -867,7 +869,7 @@ button {
 .form-textarea:focus,
 .form-select:focus {
     outline: none;
-    border-color: var(--apple-blue);
+    border-color: var(--ku-crimson);
     background: white;
     box-shadow: 0 0 0 3px rgba(150, 26, 50, 0.1);
 }
@@ -1019,7 +1021,7 @@ footer a:hover {
     .org-node:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
-        border-color: var(--apple-blue);
+        border-color: var(--ku-crimson);
     }
 }
 
@@ -1041,7 +1043,7 @@ footer a:hover {
 
 .org-role {
     font-size: 0.8rem;
-    color: var(--apple-blue);
+    color: var(--ku-crimson);
     font-weight: 600;
     margin-bottom: 2px;
 }
@@ -1166,4 +1168,75 @@ footer a:hover {
     .hide-desktop {
         display: none !important;
     }
+}
+
+/* ============================================
+   KU 커스텀 스타일
+   ============================================ */
+
+/* 버튼 스타일 */
+.btn-ku {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ku-crimson);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 980px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: var(--transition-apple);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-ku:hover {
+    transform: scale(1.02);
+    background: var(--ku-crimson-dark);
+    box-shadow: 0 8px 20px rgba(150, 26, 50, 0.2);
+}
+
+.btn-ku:active {
+    transform: scale(0.98);
+}
+
+/* 카드 UI */
+.apple-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    box-shadow: var(--shadow-apple);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-apple);
+}
+
+.apple-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* 조직도 전용 탭 버튼 */
+.tab-container {
+    display: inline-flex;
+    background: var(--bg-secondary);
+    padding: 5px;
+    border-radius: 980px;
+    gap: 4px;
+}
+
+.tab-btn {
+    padding: 8px 24px;
+    border-radius: 980px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-apple);
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.tab-btn.active {
+    background: var(--ku-crimson);
+    color: white;
 }
