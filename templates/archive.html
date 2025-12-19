@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}활동 아카이브 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .archive-card {
+        animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+
+    .archive-card:nth-child(3n+1) { animation-delay: 0.05s; }
+    .archive-card:nth-child(3n+2) { animation-delay: 0.1s; }
+    .archive-card:nth-child(3n) { animation-delay: 0.15s; }
+
+    .archive-thumbnail {
+        position: relative;
+        overflow: hidden;
+        padding-top: 66.67%; /* 3:2 비율 */
+    }
+
+    .archive-thumbnail img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .archive-card:hover .archive-thumbnail img {
+        transform: scale(1.08);
+    }
+
+    .category-filter {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .category-filter.active {
+        background: var(--ku-crimson) !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    <!-- 헤더 -->
+    <div style="margin-bottom: 50px; text-align: center;">
+        <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Activity Archive</p>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">활동 아카이브</h1>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">학생회의 다양한 활동과 순간들을 사진으로 만나보세요</p>
+    </div>
+
+    {% if archives %}
+    <!-- 카테고리 필터 -->
+    {% set categories = archives | map(attribute='category') | select | unique | list %}
+    {% if categories %}
+    <div style="margin-bottom: 50px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
+            <button onclick="filterArchives('all')" class="category-filter active" data-category="all" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
+                전체
+            </button>
+            {% for category in categories %}
+            <button onclick="filterArchives('{{ category }}')" class="category-filter" data-category="{{ category }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                {{ category }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 아카이브 그리드 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 32px;">
+        {% for archive in archives %}
+        <a href="{{ url_for('archive_detail', archive_id=archive.id) }}" class="archive-card" data-category="{{ archive.category if archive.category else 'uncategorized' }}" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; display: block;"
+           onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.borderColor='var(--ku-crimson)';"
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
+
+            <!-- 썸네일 이미지 -->
+            <div class="archive-thumbnail">
+                {% if archive.thumbnail_url %}
+                <img src="{{ archive.thumbnail_url }}" alt="{{ archive.title }}">
+                {% elif archive.images and archive.images|length > 0 %}
+                <img src="{{ archive.images[0].image_url }}" alt="{{ archive.title }}">
+                {% else %}
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); display: flex; align-items: center; justify-content: center;">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </div>
+                {% endif %}
+
+                <!-- 카테고리 배지 -->
+                {% if archive.category %}
+                <div style="position: absolute; top: 16px; right: 16px; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
+                    {{ archive.category }}
+                </div>
+                {% endif %}
+
+                <!-- 이미지 개수 표시 -->
+                {% if archive.images and archive.images|length > 0 %}
+                <div style="position: absolute; bottom: 16px; left: 16px; padding: 8px 14px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    {{ archive.images|length }}장
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 콘텐츠 -->
+            <div style="padding: 28px;">
+                <!-- 날짜 및 장소 -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px; color: var(--ku-crimson); font-size: 0.85rem; font-weight: 600;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            <path d="M5 1.5v3M11 1.5v3M2 6.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        {{ archive.event_date.strftime('%Y.%m.%d') }}
+                    </div>
+                    {% if archive.location %}
+                    <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C5.2-1 2.5 1.7 2.5 5c0 4 5.5 9 5.5 9s5.5-5 5.5-9c0-3.3-2.7-6-5.5-6z" fill="currentColor"/>
+                        </svg>
+                        {{ archive.location }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 제목 -->
+                <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.4; letter-spacing: -0.01em;">
+                    {{ archive.title }}
+                </h3>
+
+                <!-- 설명 -->
+                {% if archive.description %}
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ archive.description }}
+                </p>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- 빈 상태 -->
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);">
+        <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.15rem; font-weight: 600;">아직 등록된 아카이브가 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function filterArchives(category) {
+        // 모든 버튼의 active 클래스 제거
+        document.querySelectorAll('.category-filter').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#F5F5F7';
+            btn.style.color = 'var(--text-primary)';
+            btn.style.boxShadow = 'none';
+        });
+
+        // 클릭된 버튼에 active 클래스 추가
+        const clickedBtn = document.querySelector(`.category-filter[data-category="${category}"]`);
+        if (clickedBtn) {
+            clickedBtn.classList.add('active');
+        }
+
+        // 카드 필터링
+        const cards = document.querySelectorAll('.archive-card');
+        cards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'block';
+                // 페이드인 애니메이션 재실행
+                card.style.animation = 'none';
+                setTimeout(() => {
+                    card.style.animation = 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                }, 10);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

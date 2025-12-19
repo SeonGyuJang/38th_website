@@ -130,6 +130,16 @@
                     <div style="font-size: 0.85rem; color: var(--text-secondary);">메인 배너 관리</div>
                 </div>
             </a>
+
+            <a href="{{ url_for('admin_archives') }}" style="background: white; border-radius: var(--radius-lg); padding: 24px; text-decoration: none; border: 2px solid var(--border-light); transition: all var(--transition-base); display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                    📸
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">아카이브 관리</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">활동 사진 관리</div>
+                </div>
+            </a>
         </div>
     </div>
 
@@ -155,6 +165,11 @@
             <a href="{{ url_for('admin_program_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
                 <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">프로그램 추가</div>
+            </a>
+
+            <a href="{{ url_for('admin_archive_add') }}" style="background: white; border-radius: var(--radius-lg); padding: 32px; text-align: center; text-decoration: none; border: 2px dashed var(--border-color); transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.borderStyle='solid'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.borderStyle='dashed'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">➕</div>
+                <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">아카이브 추가</div>
             </a>
         </div>
     </div>

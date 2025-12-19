@@ -33,6 +33,7 @@
                 <a href="{{ url_for('regulations') }}">회칙</a>
                 <a href="{{ url_for('schedule') }}">일정</a>
                 <a href="{{ url_for('programs') }}">프로그램</a>
+                <a href="{{ url_for('archive') }}">아카이브</a>
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('admin_dashboard') }}" style="color: var(--apple-blue); font-weight: 700;">관리자</a>
                 <a href="{{ url_for('admin_logout') }}">로그아웃</a>

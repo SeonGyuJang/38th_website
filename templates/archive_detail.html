@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}{{ archive.title }} - 활동 아카이브{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .gallery-item {
+        animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        cursor: pointer;
+    }
+
+    .gallery-item:nth-child(4n+1) { animation-delay: 0.05s; }
+    .gallery-item:nth-child(4n+2) { animation-delay: 0.1s; }
+    .gallery-item:nth-child(4n+3) { animation-delay: 0.15s; }
+    .gallery-item:nth-child(4n) { animation-delay: 0.2s; }
+
+    .gallery-thumbnail {
+        position: relative;
+        overflow: hidden;
+        padding-top: 100%; /* 1:1 정사각형 */
+        border-radius: 16px;
+        background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+    }
+
+    .gallery-thumbnail img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gallery-item:hover .gallery-thumbnail img {
+        transform: scale(1.1);
+    }
+
+    /* 라이트박스 스타일 */
+    .lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s;
+    }
+
+    .lightbox.active {
+        display: flex;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .lightbox-content {
+        max-width: 90%;
+        max-height: 90vh;
+        animation: scaleUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes scaleUp {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-nav:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lightbox-nav.prev {
+        left: 40px;
+    }
+
+    .lightbox-nav.next {
+        right: 40px;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 30px;
+        right: 40px;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: rotate(90deg);
+    }
+
+    .lightbox-counter {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+    <!-- 뒤로가기 버튼 -->
+    <div style="margin-bottom: 32px;">
+        <a href="{{ url_for('archive') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: white; border-radius: 12px; text-decoration: none; color: var(--text-primary); font-weight: 600; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.3s;"
+           onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateX(-4px)';"
+           onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.transform='translateX(0)';">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            목록으로
+        </a>
+    </div>
+
+    <!-- 헤더 -->
+    <div style="background: white; border-radius: 24px; padding: clamp(40px, 8vw, 60px); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); margin-bottom: 40px;">
+        <!-- 카테고리 & 날짜 -->
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+            {% if archive.category %}
+            <span style="padding: 8px 18px; background: var(--ku-crimson); color: white; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;">
+                {{ archive.category }}
+            </span>
+            {% endif %}
+            <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.95rem; font-weight: 600;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <path d="M5 1.5v3M11 1.5v3M2 6.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                {{ archive.event_date.strftime('%Y년 %m월 %d일') }}
+            </div>
+            {% if archive.location %}
+            <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.95rem; font-weight: 600;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C5.2-1 2.5 1.7 2.5 5c0 4 5.5 9 5.5 9s5.5-5 5.5-9c0-3.3-2.7-6-5.5-6z" fill="currentColor"/>
+                </svg>
+                {{ archive.location }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 제목 -->
+        <h1 style="font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 800; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.2;">
+            {{ archive.title }}
+        </h1>
+
+        <!-- 설명 -->
+        {% if archive.description %}
+        <p style="font-size: clamp(1rem, 2vw, 1.1rem); line-height: 1.8; color: var(--text-secondary); margin: 0;">
+            {{ archive.description }}
+        </p>
+        {% endif %}
+
+        <!-- 이미지 개수 표시 -->
+        {% if archive.images %}
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1.5px solid rgba(0, 0, 0, 0.06);">
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--ku-crimson); font-weight: 700; font-size: 0.95rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                총 {{ archive.images|length }}장의 사진
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 이미지 갤러리 -->
+    {% if archive.images %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 20px;">
+        {% for image in archive.images %}
+        <div class="gallery-item" onclick="openLightbox({{ loop.index0 }})">
+            <div class="gallery-thumbnail">
+                <img src="{{ image.image_url }}" alt="{{ image.caption if image.caption else archive.title }}">
+            </div>
+            {% if image.caption %}
+            <p style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                {{ image.caption }}
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 라이트박스 -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <div class="lightbox-close" onclick="closeLightbox(event)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </div>
+
+        <div class="lightbox-nav prev" onclick="changeImage(-1, event)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </div>
+
+        <img id="lightbox-img" class="lightbox-content" src="" alt="">
+
+        <div class="lightbox-nav next" onclick="changeImage(1, event)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </div>
+
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
+
+    <script>
+        const images = {{ archive.images | map(attribute='image_url') | list | tojson }};
+        let currentImageIndex = 0;
+
+        function openLightbox(index) {
+            currentImageIndex = index;
+            updateLightboxImage();
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(event) {
+            if (event.target.id === 'lightbox' || event.target.closest('.lightbox-close')) {
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = '';
+                event.stopPropagation();
+            }
+        }
+
+        function changeImage(delta, event) {
+            event.stopPropagation();
+            currentImageIndex = (currentImageIndex + delta + images.length) % images.length;
+            updateLightboxImage();
+        }
+
+        function updateLightboxImage() {
+            document.getElementById('lightbox-img').src = images[currentImageIndex];
+            document.getElementById('lightbox-counter').textContent = `${currentImageIndex + 1} / ${images.length}`;
+        }
+
+        // 키보드 네비게이션
+        document.addEventListener('keydown', function(e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = '';
+                } else if (e.key === 'ArrowLeft') {
+                    changeImage(-1, e);
+                } else if (e.key === 'ArrowRight') {
+                    changeImage(1, e);
+                }
+            }
+        });
+    </script>
+    {% else %}
+    <!-- 이미지 없음 -->
+    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);">
+        <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; font-weight: 600;">아직 등록된 사진이 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

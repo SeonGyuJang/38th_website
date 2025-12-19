@@ -138,3 +138,31 @@ class Banner(db.Model):
     order = db.Column(db.Integer, default=0)  # 정렬 순서
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Archive(db.Model):
+    """아카이브 모델 - 학생회 활동 사진 모음"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)  # 행사명/활동명
+    description = db.Column(db.Text)  # 행사 설명
+    event_date = db.Column(db.DateTime, nullable=False)  # 행사 날짜
+    category = db.Column(db.String(100))  # 카테고리 (축제, 행사, 프로그램 등)
+    location = db.Column(db.String(200))  # 장소
+    thumbnail_url = db.Column(db.String(500))  # 대표 이미지 (썸네일)
+    is_active = db.Column(db.Boolean, default=True)  # 활성화 여부
+    order = db.Column(db.Integer, default=0)  # 정렬 순서
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 아카이브 이미지들 (1:N 관계)
+    images = db.relationship('ArchiveImage', backref='archive', lazy=True, cascade='all, delete-orphan', order_by='ArchiveImage.order')
+
+
+class ArchiveImage(db.Model):
+    """아카이브 이미지 모델"""
+    id = db.Column(db.Integer, primary_key=True)
+    archive_id = db.Column(db.Integer, db.ForeignKey('archive.id'), nullable=False)
+    image_url = db.Column(db.String(500), nullable=False)  # 이미지 URL
+    caption = db.Column(db.String(500))  # 이미지 설명
+    order = db.Column(db.Integer, default=0)  # 정렬 순서
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

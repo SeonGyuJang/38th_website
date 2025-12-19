@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
-from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner
+from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner, Archive, ArchiveImage
 from config import Config
 from datetime import datetime
 import os
@@ -131,6 +131,16 @@ def regulations():
 def programs():
     programs_list = Program.query.filter_by(is_active=True).order_by(Program.created_at.desc()).all()
     return render_template('programs.html', programs=programs_list)
+
+@app.route('/archive')
+def archive():
+    archives_list = Archive.query.filter_by(is_active=True).order_by(Archive.event_date.desc()).all()
+    return render_template('archive.html', archives=archives_list)
+
+@app.route('/archive/<int:archive_id>')
+def archive_detail(archive_id):
+    archive_item = Archive.query.get_or_404(archive_id)
+    return render_template('archive_detail.html', archive=archive_item)
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -610,6 +620,114 @@ def admin_organization_delete(member_id):
     db.session.commit()
     flash('조직도 멤버가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_organization'))
+
+@app.route('/admin/archives')
+@login_required
+def admin_archives():
+    archives = Archive.query.order_by(Archive.event_date.desc()).all()
+    return render_template('admin/archives.html', archives=archives)
+
+@app.route('/admin/archives/add', methods=['GET', 'POST'])
+@login_required
+def admin_archive_add():
+    if request.method == 'POST':
+        thumbnail_url = None
+        if 'thumbnail' in request.files:
+            file = request.files['thumbnail']
+            saved_path = save_file(file, 'archives')
+            if saved_path: thumbnail_url = saved_path
+        if not thumbnail_url and request.form.get('thumbnail_url_text'):
+            thumbnail_url = request.form.get('thumbnail_url_text')
+
+        archive = Archive(
+            title=request.form['title'],
+            description=request.form.get('description'),
+            event_date=datetime.strptime(request.form['event_date'], '%Y-%m-%d'),
+            category=request.form.get('category'),
+            location=request.form.get('location'),
+            thumbnail_url=thumbnail_url,
+            is_active=request.form.get('is_active') == 'on',
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(archive)
+        db.session.commit()
+
+        # 다중 이미지 업로드 처리
+        if 'images' in request.files:
+            files = request.files.getlist('images')
+            for idx, file in enumerate(files):
+                if file and allowed_file(file.filename):
+                    image_url = save_file(file, 'archives')
+                    if image_url:
+                        archive_image = ArchiveImage(
+                            archive_id=archive.id,
+                            image_url=image_url,
+                            order=idx
+                        )
+                        db.session.add(archive_image)
+            db.session.commit()
+
+        flash('아카이브가 추가되었습니다.', 'success')
+        return redirect(url_for('admin_archives'))
+    return render_template('admin/archive_form.html')
+
+@app.route('/admin/archives/edit/<int:archive_id>', methods=['GET', 'POST'])
+@login_required
+def admin_archive_edit(archive_id):
+    archive = Archive.query.get_or_404(archive_id)
+    if request.method == 'POST':
+        if 'thumbnail' in request.files:
+            file = request.files['thumbnail']
+            saved_path = save_file(file, 'archives')
+            if saved_path: archive.thumbnail_url = saved_path
+        if request.form.get('thumbnail_url_text'):
+            archive.thumbnail_url = request.form.get('thumbnail_url_text')
+
+        archive.title = request.form['title']
+        archive.description = request.form.get('description')
+        archive.event_date = datetime.strptime(request.form['event_date'], '%Y-%m-%d')
+        archive.category = request.form.get('category')
+        archive.location = request.form.get('location')
+        archive.is_active = request.form.get('is_active') == 'on'
+        archive.order = int(request.form.get('order', 0))
+
+        # 새로운 이미지 추가
+        if 'images' in request.files:
+            files = request.files.getlist('images')
+            current_max_order = max([img.order for img in archive.images], default=-1)
+            for idx, file in enumerate(files):
+                if file and allowed_file(file.filename):
+                    image_url = save_file(file, 'archives')
+                    if image_url:
+                        archive_image = ArchiveImage(
+                            archive_id=archive.id,
+                            image_url=image_url,
+                            order=current_max_order + idx + 1
+                        )
+                        db.session.add(archive_image)
+
+        db.session.commit()
+        flash('아카이브가 수정되었습니다.', 'success')
+        return redirect(url_for('admin_archives'))
+    return render_template('admin/archive_form.html', archive=archive)
+
+@app.route('/admin/archives/delete/<int:archive_id>', methods=['POST'])
+@login_required
+def admin_archive_delete(archive_id):
+    archive = Archive.query.get_or_404(archive_id)
+    db.session.delete(archive)
+    db.session.commit()
+    flash('아카이브가 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_archives'))
+
+@app.route('/admin/archives/<int:archive_id>/images/delete/<int:image_id>', methods=['POST'])
+@login_required
+def admin_archive_image_delete(archive_id, image_id):
+    image = ArchiveImage.query.get_or_404(image_id)
+    db.session.delete(image)
+    db.session.commit()
+    flash('이미지가 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_archive_edit', archive_id=archive_id))
 
 @app.cli.command()
 def init_db():
