@@ -1,0 +1,16 @@
+# Flask 웹 프레임워크
+Flask==3.0.0
+Flask-Login==0.6.3
+Werkzeug==3.0.1
+
+# Supabase Python Client
+supabase==2.3.4
+
+# PostgreSQL 어댑터 (선택사항, 직접 연결 시 필요)
+psycopg2-binary==2.9.9
+
+# 환경 변수 관리
+python-dotenv==1.0.0
+
+# 기존 SQLAlchemy (롤백용으로 유지 가능, 제거 가능)
+# Flask-SQLAlchemy==3.1.1
