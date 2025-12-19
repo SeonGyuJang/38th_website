@@ -27,6 +27,20 @@
     .month-group {
         animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
     }
+
+    .month-filter-btn {
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .month-filter-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .month-filter-btn.active {
+        background: var(--ku-crimson) !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
+    }
 </style>
 
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
@@ -45,19 +59,33 @@
     </div>
 
     {% if schedules_raw %}
+    {% set schedules_by_month = {} %}
+    {% for schedule in schedules_raw %}
+        {% set month_key = schedule.start_date.strftime('%Y년 %m월') %}
+        {% if month_key not in schedules_by_month %}
+            {% set _ = schedules_by_month.update({month_key: []}) %}
+        {% endif %}
+        {% set _ = schedules_by_month[month_key].append(schedule) %}
+    {% endfor %}
+
+    <!-- 월별 필터 -->
+    <div style="margin-bottom: 50px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); max-width: 1000px; margin: 0 auto;">
+            <button onclick="filterMonth('all')" class="month-filter-btn active" data-month="all" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
+                전체
+            </button>
+            {% for month in schedules_by_month.keys() %}
+            <button onclick="filterMonth('{{ month }}')" class="month-filter-btn" data-month="{{ month }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                {{ month }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- 일정 목록 -->
     <div style="max-width: 1000px; margin: 0 auto;">
-        {% set schedules_by_month = {} %}
-        {% for schedule in schedules_raw %}
-            {% set month_key = schedule.start_date.strftime('%Y년 %m월') %}
-            {% if month_key not in schedules_by_month %}
-                {% set _ = schedules_by_month.update({month_key: []}) %}
-            {% endif %}
-            {% set _ = schedules_by_month[month_key].append(schedule) %}
-        {% endfor %}
-
         {% for month, month_schedules in schedules_by_month.items() %}
-        <div class="month-group" style="margin-bottom: clamp(56px, 10vw, 80px);">
+        <div class="month-group" data-month="{{ month }}" style="margin-bottom: clamp(56px, 10vw, 80px);">
             <!-- 월 헤더 -->
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
                 <div style="flex-shrink: 0; width: 6px; height: 48px; background: linear-gradient(180deg, var(--ku-crimson) 0%, #b02a44 100%); border-radius: 3px;"></div>
@@ -168,4 +196,32 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    function filterMonth(month) {
+        // 모든 버튼의 active 클래스 제거
+        document.querySelectorAll('.month-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#F5F5F7';
+            btn.style.color = 'var(--text-primary)';
+            btn.style.boxShadow = 'none';
+        });
+
+        // 클릭된 버튼에 active 클래스 추가
+        const clickedBtn = document.querySelector(`[data-month="${month}"]`);
+        if (clickedBtn && clickedBtn.classList.contains('month-filter-btn')) {
+            clickedBtn.classList.add('active');
+        }
+
+        // 월별 그룹 필터링
+        const groups = document.querySelectorAll('.month-group');
+        groups.forEach(group => {
+            if (month === 'all' || group.dataset.month === month) {
+                group.style.display = 'block';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+    }
+</script>
 {% endblock %}

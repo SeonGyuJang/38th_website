@@ -67,8 +67,20 @@
     {% endif %}
 
     <!-- 프로그램 그리드 -->
+    {% set category_colors = {
+        0: '#961A32',
+        1: '#0969DA',
+        2: '#1A7F37',
+        3: '#8250DF',
+        4: '#BC4C00',
+        5: '#0A3069',
+        6: '#A0216C',
+        7: '#6E7781'
+    } %}
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 28px;">
         {% for program in programs %}
+        {% set category_index = (categories.index(program.category) if program.category in categories else 0) % 8 %}
+        {% set category_color = category_colors[category_index] %}
         <div class="program-card" data-category="{{ program.category if program.category else 'uncategorized' }}" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.borderColor='var(--ku-crimson)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
 
             <!-- 이미지 -->
@@ -79,14 +91,14 @@
                      onmouseover="this.style.transform='scale(1.05)';"
                      onmouseout="this.style.transform='scale(1)';">
                 {% if program.category %}
-                <div style="position: absolute; top: 16px; right: 16px; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
+                <div style="position: absolute; top: 16px; right: 16px; padding: 8px 16px; background: {{ category_color }}; backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
                     {{ program.category }}
                 </div>
                 {% endif %}
             </div>
             {% else %}
             {% if program.category %}
-            <div style="padding: 20px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%);">
+            <div style="padding: 20px; background: {{ category_color }};">
                 <span style="padding: 8px 18px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; display: inline-block;">
                     {{ program.category }}
                 </span>
