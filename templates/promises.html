@@ -59,7 +59,7 @@
     {% endif %}
 
     <!-- 전체 이행률 히어로 카드 -->
-    <div style="background: white; border-radius: 24px; padding: clamp(60px, 10vw, 100px) clamp(40px, 8vw, 80px); text-align: center; box-shadow: 0 4px 40px rgba(150, 26, 50, 0.08); margin-bottom: 80px; position: relative; overflow: hidden; border: 1px solid rgba(150, 26, 50, 0.08);">
+    <div id="overall-achievement-card" style="background: white; border-radius: 24px; padding: clamp(60px, 10vw, 100px) clamp(40px, 8vw, 80px); text-align: center; box-shadow: 0 4px 40px rgba(150, 26, 50, 0.08); margin-bottom: 80px; position: relative; overflow: hidden; border: 1px solid rgba(150, 26, 50, 0.08);">
         <!-- 배경 장식 -->
         <div style="position: absolute; top: -50%; right: -20%; width: clamp(300px, 50vw, 500px); height: clamp(300px, 50vw, 500px); background: radial-gradient(circle, rgba(150, 26, 50, 0.04) 0%, transparent 70%); border-radius: 50%; filter: blur(80px);"></div>
         <div style="position: absolute; bottom: -50%; left: -20%; width: clamp(400px, 60vw, 600px); height: clamp(400px, 60vw, 600px); background: radial-gradient(circle, rgba(150, 26, 50, 0.03) 0%, transparent 70%); border-radius: 50%; filter: blur(100px);"></div>
@@ -128,15 +128,18 @@
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% set category_colors = {
-            0: {'solid': 'var(--ku-crimson)', 'light': 'rgba(150, 26, 50, 0.08)', 'glow': 'rgba(150, 26, 50, 0.15)'},
-            1: {'solid': '#b02a44', 'light': 'rgba(176, 42, 68, 0.08)', 'glow': 'rgba(176, 42, 68, 0.15)'},
-            2: {'solid': '#7a1529', 'light': 'rgba(122, 21, 41, 0.08)', 'glow': 'rgba(122, 21, 41, 0.15)'},
-            3: {'solid': '#961A32', 'light': 'rgba(150, 26, 50, 0.08)', 'glow': 'rgba(150, 26, 50, 0.15)'},
-            4: {'solid': '#b02a44', 'light': 'rgba(176, 42, 68, 0.08)', 'glow': 'rgba(176, 42, 68, 0.15)'}
+            0: {'solid': '#961A32', 'light': 'rgba(150, 26, 50, 0.08)', 'glow': 'rgba(150, 26, 50, 0.15)'},
+            1: {'solid': '#0969DA', 'light': 'rgba(9, 105, 218, 0.08)', 'glow': 'rgba(9, 105, 218, 0.15)'},
+            2: {'solid': '#1A7F37', 'light': 'rgba(26, 127, 55, 0.08)', 'glow': 'rgba(26, 127, 55, 0.15)'},
+            3: {'solid': '#8250DF', 'light': 'rgba(130, 80, 223, 0.08)', 'glow': 'rgba(130, 80, 223, 0.15)'},
+            4: {'solid': '#BC4C00', 'light': 'rgba(188, 76, 0, 0.08)', 'glow': 'rgba(188, 76, 0, 0.15)'},
+            5: {'solid': '#0A3069', 'light': 'rgba(10, 48, 105, 0.08)', 'glow': 'rgba(10, 48, 105, 0.15)'},
+            6: {'solid': '#A0216C', 'light': 'rgba(160, 33, 108, 0.08)', 'glow': 'rgba(160, 33, 108, 0.15)'},
+            7: {'solid': '#6E7781', 'light': 'rgba(110, 119, 129, 0.08)', 'glow': 'rgba(110, 119, 129, 0.15)'}
         } %}
 
         {% for category, promises_list in categories.items() %}
-        {% set category_index = loop.index0 % 5 %}
+        {% set category_index = loop.index0 % 8 %}
         {% set colors = category_colors[category_index] %}
         {% set category_progress = (promises_list|sum(attribute='progress_rate') / promises_list|length)|int if promises_list else 0 %}
 
@@ -242,6 +245,16 @@
         const clickedBtn = document.querySelector(`[data-category="${category}"]`);
         if (clickedBtn) {
             clickedBtn.classList.add('active');
+        }
+
+        // 전체 이행률 카드 표시/숨김
+        const overallCard = document.getElementById('overall-achievement-card');
+        if (overallCard) {
+            if (category === 'all') {
+                overallCard.style.display = 'block';
+            } else {
+                overallCard.style.display = 'none';
+            }
         }
 
         // 섹션 필터링
