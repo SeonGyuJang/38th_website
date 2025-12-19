@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner, Archive, ArchiveImage
@@ -119,13 +119,19 @@ def minute_detail(minute_id):
 
 @app.route('/regulations')
 def regulations():
-    regulations_list = Regulation.query.order_by(Regulation.category, Regulation.order).all()
+    regulations_list = Regulation.query.order_by(Regulation.order, Regulation.id).all()
     categories = {}
     for regulation in regulations_list:
         if regulation.category not in categories:
             categories[regulation.category] = []
         categories[regulation.category].append(regulation)
     return render_template('regulations.html', categories=categories)
+
+@app.route('/regulations/pdf/<filename>')
+def regulation_pdf(filename):
+    """회칙 PDF 파일 뷰어"""
+    regulations_dir = os.path.join(app.root_path, 'static', 'regulations')
+    return send_from_directory(regulations_dir, filename)
 
 @app.route('/programs')
 def programs():

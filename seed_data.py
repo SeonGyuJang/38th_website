@@ -510,33 +510,80 @@ def create_regulations():
     regulations_data = [
         {
             'category': '총학생회',
-            'title': '고려대학교 총학생회 회칙',
-            'content': '제1장 총칙\n제1조(명칭) 본 회는 고려대학교 총학생회라 칭한다.\n제2조(목적) 본 회는 학생 복지 증진과 권익 향상을 목적으로 한다.\n\n제2장 조직\n제3조(구성) 본 회는 총학생회장, 부총학생회장 및 각 국으로 구성된다.',
+            'title': '총학생회칙 및 세칙',
+            'content': '고려대학교 세종캠퍼스 총학생회의 기본 회칙 및 세부 운영 세칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회칙 및 세칙 (24.03.09 개정).pdf',
             'order': 1
         },
         {
             'category': '총학생회',
-            'title': '총학생회 선거 관리 규정',
-            'content': '제1조(목적) 이 규정은 총학생회장 및 부총학생회장 선거의 공정한 관리를 목적으로 한다.\n제2조(선거권) 재학 중인 모든 학부생은 선거권을 가진다.\n제3조(피선거권) 선거일 기준 2학기 이상 재학한 학부생은 피선거권을 가진다.',
+            'title': '총학생회 일반규칙',
+            'content': '총학생회의 일반적인 운영 규칙과 절차를 정의합니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 2
         },
         {
-            'category': '동아리연합회',
-            'title': '동아리연합회 회칙',
-            'content': '제1장 총칙\n제1조(명칭) 본 회는 고려대학교 동아리연합회라 칭한다.\n제2조(목적) 본 회는 교내 동아리의 건전한 발전과 회원 간 친목 도모를 목적으로 한다.',
+            'category': '총학생회',
+            'title': '총학생회 세칙에 부수된 규칙',
+            'content': '총학생회 세칙을 보완하는 부속 규칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회칙 및 세칙 (24.03.09 개정).pdf',
             'order': 3
         },
         {
-            'category': '동아리연합회',
-            'title': '동아리 등록 및 관리 규정',
-            'content': '제1조(등록 요건) 동아리로 등록하기 위해서는 10명 이상의 회원이 필요하다.\n제2조(지원금) 정식 등록된 동아리는 학기별 지원금을 신청할 수 있다.\n제3조(동아리방) 동아리방은 선착순 및 활동 실적을 고려하여 배정한다.',
+            'category': '단과대학',
+            'title': '과학기술대학 학생회칙',
+            'content': '과학기술대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\과학기술대학 학생회칙 ( 2022 개정 ).pdf',
             'order': 4
         },
         {
-            'category': '학생복지위원회',
-            'title': '학생복지위원회 운영 규정',
-            'content': '제1조(목적) 학생들의 복지 증진을 위한 정책을 수립하고 집행한다.\n제2조(구성) 위원장 1명과 위원 10명 이내로 구성한다.\n제3조(회의) 정기회의는 월 1회 개최하며, 필요시 임시회의를 소집할 수 있다.',
+            'category': '단과대학',
+            'title': '글로벌비즈니스대학 학생회칙',
+            'content': '글로벌비즈니스대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교_글로벌비즈니스대학_학생회칙_(2025.09.02개정).pdf',
             'order': 5
+        },
+        {
+            'category': '단과대학',
+            'title': '문화스포츠대학 학생회칙',
+            'content': '문화스포츠대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\문화스포츠대학 회칙 (2025.11.17 개정).pdf',
+            'order': 6
+        },
+        {
+            'category': '단과대학',
+            'title': '약학대학 학생회칙',
+            'content': '약학대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
+            'order': 7
+        },
+        {
+            'category': '단과대학',
+            'title': '공공정책대학 학생회칙',
+            'content': '공공정책대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
+            'order': 8
+        },
+        {
+            'category': '단과대학',
+            'title': '스마트도시대학 학생회칙',
+            'content': '스마트도시대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
+            'order': 9
+        },
+        {
+            'category': '특별기구',
+            'title': '총예비역회 학생회칙',
+            'content': '총예비역회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
+            'order': 10
+        },
+        {
+            'category': '특별기구',
+            'title': '총동아리연합회 학생회칙',
+            'content': '총동아리연합회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\총동아리연합회_회칙.pdf',
+            'order': 11
         },
     ]
 
@@ -645,8 +692,8 @@ def create_organization():
         {'name': '서가연', 'position': '기획정책위원장', 'department': '본부', 'major': '정부행정학부23', 'student_id': '2023****', 'email': 'planning@korea.ac.kr', 'phone': '010-****-****', 'order': 4},
 
         # 1순위 - 산하위원회
-        {'name': '김민수', 'position': '인권복지위원장', 'department': '산하위원회', 'major': '사회학과', 'student_id': '2022****', 'email': 'humanrights@korea.ac.kr', 'phone': '010-****-****', 'order': 5},
-        {'name': '이서연', 'position': '교육복지위원장', 'department': '산하위원회', 'major': '교육학과', 'student_id': '2022****', 'email': 'education@korea.ac.kr', 'phone': '010-****-****', 'order': 6},
+        {'name': '김민수', 'position': '산하위원장', 'department': '산하위원회', 'major': '사회학과', 'student_id': '2022****', 'email': 'humanrights@korea.ac.kr', 'phone': '010-****-****', 'order': 5},
+        {'name': '이서연', 'position': '산하위원장', 'department': '산하위원회', 'major': '교육학과', 'student_id': '2022****', 'email': 'education@korea.ac.kr', 'phone': '010-****-****', 'order': 6},
 
         # 2순위 - 중집위 국들
         # 미디어소통국
@@ -680,37 +727,37 @@ def create_organization():
         {'name': '박서연', 'position': '차장', 'department': '기획정책위원회 정책국', 'major': '행정학과', 'student_id': '2023****', 'email': 'policy_vice@korea.ac.kr', 'phone': '', 'order': 23},
         {'name': '이민호', 'position': '국원', 'department': '기획정책위원회 정책국', 'major': '법학과', 'student_id': '2023****', 'email': 'policy_member@korea.ac.kr', 'phone': '', 'order': 24},
 
-        # 인복위 국들
+        # 인권/복지부 국들
         # 홍보국
-        {'name': '정하늘', 'position': '국장', 'department': '인권복지위원회 홍보국', 'major': '광고홍보학과', 'student_id': '2023****', 'email': 'hr_pr@korea.ac.kr', 'phone': '010-7777-7777', 'order': 25},
-        {'name': '최민준', 'position': '차장', 'department': '인권복지위원회 홍보국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'hr_pr_vice@korea.ac.kr', 'phone': '', 'order': 26},
-        {'name': '강지우', 'position': '국원', 'department': '인권복지위원회 홍보국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'hr_pr_member@korea.ac.kr', 'phone': '', 'order': 27},
+        {'name': '정하늘', 'position': '국장', 'department': '인권/복지부 홍보국', 'major': '광고홍보학과', 'student_id': '2023****', 'email': 'hr_pr@korea.ac.kr', 'phone': '010-7777-7777', 'order': 25},
+        {'name': '최민준', 'position': '차장', 'department': '인권/복지부 홍보국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'hr_pr_vice@korea.ac.kr', 'phone': '', 'order': 26},
+        {'name': '강지우', 'position': '국원', 'department': '인권/복지부 홍보국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'hr_pr_member@korea.ac.kr', 'phone': '', 'order': 27},
 
         # 기획국
-        {'name': '윤태영', 'position': '국장', 'department': '인권복지위원회 기획국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_planning@korea.ac.kr', 'phone': '010-8888-8888', 'order': 28},
-        {'name': '송예진', 'position': '차장', 'department': '인권복지위원회 기획국', 'major': '경제학과', 'student_id': '2023****', 'email': 'hr_planning_vice@korea.ac.kr', 'phone': '', 'order': 29},
-        {'name': '임수빈', 'position': '국원', 'department': '인권복지위원회 기획국', 'major': '행정학과', 'student_id': '2023****', 'email': 'hr_planning_member@korea.ac.kr', 'phone': '', 'order': 30},
+        {'name': '윤태영', 'position': '국장', 'department': '인권/복지부 기획국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_planning@korea.ac.kr', 'phone': '010-8888-8888', 'order': 28},
+        {'name': '송예진', 'position': '차장', 'department': '인권/복지부 기획국', 'major': '경제학과', 'student_id': '2023****', 'email': 'hr_planning_vice@korea.ac.kr', 'phone': '', 'order': 29},
+        {'name': '임수빈', 'position': '국원', 'department': '인권/복지부 기획국', 'major': '행정학과', 'student_id': '2023****', 'email': 'hr_planning_member@korea.ac.kr', 'phone': '', 'order': 30},
 
         # 사무재정국
-        {'name': '조현우', 'position': '국장', 'department': '인권복지위원회 사무재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'hr_admin@korea.ac.kr', 'phone': '010-9999-9999', 'order': 31},
-        {'name': '백서현', 'position': '차장', 'department': '인권복지위원회 사무재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'hr_admin_vice@korea.ac.kr', 'phone': '', 'order': 32},
-        {'name': '황준혁', 'position': '국원', 'department': '인권복지위원회 사무재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_admin_member@korea.ac.kr', 'phone': '', 'order': 33},
+        {'name': '조현우', 'position': '국장', 'department': '인권/복지부 사무재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'hr_admin@korea.ac.kr', 'phone': '010-9999-9999', 'order': 31},
+        {'name': '백서현', 'position': '차장', 'department': '인권/복지부 사무재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'hr_admin_vice@korea.ac.kr', 'phone': '', 'order': 32},
+        {'name': '황준혁', 'position': '국원', 'department': '인권/복지부 사무재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_admin_member@korea.ac.kr', 'phone': '', 'order': 33},
 
-        # 교복위 국들
+        # 교육/복지부 국들
         # 홍보국
-        {'name': '김다은', 'position': '국장', 'department': '교육복지위원회 홍보국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_pr@korea.ac.kr', 'phone': '010-1010-1010', 'order': 34},
-        {'name': '박준영', 'position': '차장', 'department': '교육복지위원회 홍보국', 'major': '특수교육학과', 'student_id': '2023****', 'email': 'edu_pr_vice@korea.ac.kr', 'phone': '', 'order': 35},
-        {'name': '이서아', 'position': '국원', 'department': '교육복지위원회 홍보국', 'major': '교육심리학과', 'student_id': '2023****', 'email': 'edu_pr_member@korea.ac.kr', 'phone': '', 'order': 36},
+        {'name': '김다은', 'position': '국장', 'department': '교육/복지부 홍보국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_pr@korea.ac.kr', 'phone': '010-1010-1010', 'order': 34},
+        {'name': '박준영', 'position': '차장', 'department': '교육/복지부 홍보국', 'major': '특수교육학과', 'student_id': '2023****', 'email': 'edu_pr_vice@korea.ac.kr', 'phone': '', 'order': 35},
+        {'name': '이서아', 'position': '국원', 'department': '교육/복지부 홍보국', 'major': '교육심리학과', 'student_id': '2023****', 'email': 'edu_pr_member@korea.ac.kr', 'phone': '', 'order': 36},
 
         # 기획국
-        {'name': '최태민', 'position': '국장', 'department': '교육복지위원회 기획국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_planning@korea.ac.kr', 'phone': '010-1111-1111', 'order': 37},
-        {'name': '장미래', 'position': '차장', 'department': '교육복지위원회 기획국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_planning_vice@korea.ac.kr', 'phone': '', 'order': 38},
-        {'name': '노현준', 'position': '국원', 'department': '교육복지위원회 기획국', 'major': '교육공학과', 'student_id': '2023****', 'email': 'edu_planning_member@korea.ac.kr', 'phone': '', 'order': 39},
+        {'name': '최태민', 'position': '국장', 'department': '교육/복지부 기획국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_planning@korea.ac.kr', 'phone': '010-1111-1111', 'order': 37},
+        {'name': '장미래', 'position': '차장', 'department': '교육/복지부 기획국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_planning_vice@korea.ac.kr', 'phone': '', 'order': 38},
+        {'name': '노현준', 'position': '국원', 'department': '교육/복지부 기획국', 'major': '교육공학과', 'student_id': '2023****', 'email': 'edu_planning_member@korea.ac.kr', 'phone': '', 'order': 39},
 
         # 사무재정국
-        {'name': '서지훈', 'position': '국장', 'department': '교육복지위원회 사무재정국', 'major': '교육재정학과', 'student_id': '2023****', 'email': 'edu_admin@korea.ac.kr', 'phone': '010-1212-1212', 'order': 40},
-        {'name': '안유진', 'position': '차장', 'department': '교육복지위원회 사무재정국', 'major': '교육경제학과', 'student_id': '2023****', 'email': 'edu_admin_vice@korea.ac.kr', 'phone': '', 'order': 41},
-        {'name': '홍성민', 'position': '국원', 'department': '교육복지위원회 사무재정국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_admin_member@korea.ac.kr', 'phone': '', 'order': 42},
+        {'name': '서지훈', 'position': '국장', 'department': '교육/복지부 사무재정국', 'major': '교육재정학과', 'student_id': '2023****', 'email': 'edu_admin@korea.ac.kr', 'phone': '010-1212-1212', 'order': 40},
+        {'name': '안유진', 'position': '차장', 'department': '교육/복지부 사무재정국', 'major': '교육경제학과', 'student_id': '2023****', 'email': 'edu_admin_vice@korea.ac.kr', 'phone': '', 'order': 41},
+        {'name': '홍성민', 'position': '국원', 'department': '교육/복지부 사무재정국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_admin_member@korea.ac.kr', 'phone': '', 'order': 42},
     ]
 
     for data in organization_data:
