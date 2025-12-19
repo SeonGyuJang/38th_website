@@ -41,10 +41,10 @@
                         </h3>
                         {% if minute.meeting_type %}
                         <span style="flex-shrink: 0; padding: 8px 18px;
-                            {% if '정기' in minute.meeting_type %}background: var(--ku-crimson); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.25);
-                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #FF3B30; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
-                            {% elif '간담회' in minute.meeting_type %}background: #34C759; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25);
-                            {% else %}background: #5856D6; box-shadow: 0 4px 12px rgba(88, 86, 214, 0.25);{% endif %}
+                            {% if '정기' in minute.meeting_type %}background: #961A32; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);
+                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #F85149; box-shadow: 0 4px 12px rgba(248, 81, 73, 0.2);
+                            {% elif '간담회' in minute.meeting_type %}background: #0969DA; box-shadow: 0 4px 12px rgba(9, 105, 218, 0.2);
+                            {% else %}background: #8250DF; box-shadow: 0 4px 12px rgba(130, 80, 223, 0.2);{% endif %}
                             color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
                             {{ minute.meeting_type }}
                         </span>

@@ -59,16 +59,16 @@
                 <!-- 카테고리 및 제목 -->
                 <div style="margin-bottom: 20px;">
                     <div style="display: inline-block; padding: 6px 14px; background: var(--ku-crimson-lighter); color: var(--ku-crimson); border-radius: 8px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.05em;">
-                        {{ category }}
+                        {{ category | replace('/n', '') }}
                     </div>
                     <h3 style="font-size: clamp(1.2rem, 2.8vw, 1.45rem); font-weight: 800; color: var(--text-primary); margin: 0; letter-spacing: -0.01em;">
-                        {{ regulation.title }}
+                        {{ regulation.title | replace('/n', '') }}
                     </h3>
                 </div>
 
                 <!-- 내용 -->
                 <div style="font-size: 0.95rem; line-height: 1.85; color: var(--text-primary); white-space: pre-wrap; padding: 28px; background: #F5F5F7; border-radius: 16px; margin-bottom: 20px;">
-                    {{ regulation.content }}
+                    {{ regulation.content | replace('/n', '') }}
                 </div>
 
                 <!-- 버튼 그룹 -->
