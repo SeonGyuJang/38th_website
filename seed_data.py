@@ -637,8 +637,8 @@ def create_organization():
 
     organization_data = [
         # 0순위 - 회장단
-        {'name': '오미령', 'position': '총학생회장', 'department': '회장단', 'major': '중국학전공21', 'student_id': '2021****', 'email': 'president@korea.ac.kr', 'phone': '010-****-****', 'order': 1},
-        {'name': '장선규', 'position': '부총학생회장', 'department': '회장단', 'major': '디지털경영전공23', 'student_id': '2023****', 'email': 'vicepresident@korea.ac.kr', 'phone': '010-****-****', 'order': 2},
+        {'name': '오미령', 'position': '총학생회장', 'department': '총학생회장단', 'major': '중국학전공21', 'student_id': '2021****', 'email': 'president@korea.ac.kr', 'phone': '010-****-****', 'order': 1},
+        {'name': '장선규', 'position': '부총학생회장', 'department': '총학생회장단', 'major': '디지털경영전공23', 'student_id': '2023****', 'email': 'vicepresident@korea.ac.kr', 'phone': '010-****-****', 'order': 2},
 
         # 1순위 - 본부
         {'name': '이세민', 'position': '중앙집행위원장', 'department': '본부', 'major': '정부행정학부23', 'student_id': '2023****', 'email': 'executive@korea.ac.kr', 'phone': '010-****-****', 'order': 3},
