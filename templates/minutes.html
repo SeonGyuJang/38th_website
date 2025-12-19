@@ -16,15 +16,15 @@
         {% for minute in minutes %}
         <a href="{{ url_for('minute_detail', minute_id=minute.id) }}"
            style="background: white; border-radius: var(--radius-xl); padding: clamp(24px, 4vw, 32px); text-decoration: none; border: 2px solid var(--border-light); box-shadow: var(--shadow-sm); transition: all var(--transition-base); display: block; position: relative; overflow: hidden;"
-           onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-4px)'; this.querySelector('.arrow-icon').style.opacity='1'; this.querySelector('.arrow-icon').style.transform='translateX(4px)';"
+           onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 12px 40px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-4px)'; this.querySelector('.arrow-icon').style.opacity='1'; this.querySelector('.arrow-icon').style.transform='translateX(4px)';"
            onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)'; this.querySelector('.arrow-icon').style.opacity='0.4'; this.querySelector('.arrow-icon').style.transform='translateX(0)';">
 
             <!-- 상단 색상 인디케이터 -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-light) 100%);"></div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%);"></div>
 
             <div style="padding-top: 8px; display: flex; gap: clamp(20px, 4vw, 28px); align-items: start;">
                 <!-- 날짜 박스 -->
-                <div style="text-align: center; min-width: clamp(80px, 12vw, 100px); padding: clamp(16px, 3vw, 20px); background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: var(--radius-lg); color: white; flex-shrink: 0; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);">
+                <div style="text-align: center; min-width: clamp(80px, 12vw, 100px); padding: clamp(16px, 3vw, 20px); background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: var(--radius-lg); color: white; flex-shrink: 0; box-shadow: 0 8px 20px rgba(150, 26, 50, 0.3);">
                     <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 4px;">
                         {{ minute.meeting_date.strftime('%Y') }}
                     </div>
@@ -44,7 +44,7 @@
                         </h3>
                         {% if minute.meeting_type %}
                         <span style="flex-shrink: 0; padding: 8px 18px;
-                            {% if '정기' in minute.meeting_type %}background: #007AFF; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+                            {% if '정기' in minute.meeting_type %}background: var(--ku-crimson); box-shadow: 0 4px 12px rgba(150, 26, 50, 0.25);
                             {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #FF3B30; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
                             {% elif '간담회' in minute.meeting_type %}background: #34C759; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25);
                             {% else %}background: #5856D6; box-shadow: 0 4px 12px rgba(88, 86, 214, 0.25);{% endif %}
@@ -77,7 +77,7 @@
                     </div>
 
                     {% if minute.file_url %}
-                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--apple-blue-lighter); color: var(--apple-blue); border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ku-crimson-lighter); color: var(--ku-crimson); border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M9 2H3v12h10V7M9 2l4 5M9 2v5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -88,7 +88,7 @@
 
                 <!-- 화살표 아이콘 -->
                 <div style="display: flex; align-items: center; flex-shrink: 0;">
-                    <svg class="arrow-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" style="opacity: 0.4; transition: all var(--transition-base); color: var(--apple-blue);">
+                    <svg class="arrow-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" style="opacity: 0.4; transition: all var(--transition-base); color: var(--ku-crimson);">
                         <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
                     </svg>
                 </div>
