@@ -4,23 +4,6 @@
 
 {% block content %}
 <style>
-    .view-toggle-btn {
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .view-toggle-btn.active {
-        background: var(--ku-crimson) !important;
-        color: white !important;
-        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
-    }
-
-    .schedule-card {
-        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-    }
-
-    .schedule-card:nth-child(odd) { animation-delay: 0.05s; }
-    .schedule-card:nth-child(even) { animation-delay: 0.1s; }
-
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -32,178 +15,147 @@
         }
     }
 
-    .calendar-day {
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    .schedule-item {
+        animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
     }
 
-    .calendar-day:hover {
-        background: rgba(150, 26, 50, 0.08);
-        transform: scale(1.05);
-    }
+    .schedule-item:nth-child(4n+1) { animation-delay: 0.05s; }
+    .schedule-item:nth-child(4n+2) { animation-delay: 0.1s; }
+    .schedule-item:nth-child(4n+3) { animation-delay: 0.15s; }
+    .schedule-item:nth-child(4n) { animation-delay: 0.2s; }
 
-    .calendar-day.has-event {
-        position: relative;
-    }
-
-    .calendar-day.has-event::after {
-        content: '';
-        position: absolute;
-        bottom: 6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 6px;
-        height: 6px;
-        background: var(--ku-crimson);
-        border-radius: 50%;
-    }
-
-    .calendar-day.today {
-        background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%);
-        color: white;
-        font-weight: 800;
+    .month-group {
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
     }
 </style>
 
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
-    <div style="text-align: center; margin-bottom: 50px;">
-        <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Schedule & Events</p>
-        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">학생회 일정</h1>
-        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7;">다가오는 행사와 주요 일정을 한눈에 확인하세요</p>
-    </div>
-
-    <!-- 뷰 토글 -->
-    <div style="margin-bottom: 40px;">
-        <div style="display: flex; justify-content: center; gap: 12px; padding: 8px; background: white; border-radius: 16px; max-width: 300px; margin: 0 auto; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
-            <button onclick="switchView('calendar')" class="view-toggle-btn active" id="btn-calendar" style="flex: 1; padding: 12px 20px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
-                캘린더
-            </button>
-            <button onclick="switchView('list')" class="view-toggle-btn" id="btn-list" style="flex: 1; padding: 12px 20px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
-                목록
-            </button>
+    <div style="text-align: center; margin-bottom: 60px;">
+        <div style="display: inline-block; padding: 8px 20px; background: rgba(150, 26, 50, 0.08); border-radius: 100px; margin-bottom: 20px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--ku-crimson); letter-spacing: 0.15em; text-transform: uppercase;">Schedule & Events</span>
         </div>
+        <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 24px; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.1;">
+            학생회<br class="show-mobile">
+            <span style="background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">일정</span>
+        </h1>
+        <p style="font-size: clamp(1rem, 2.3vw, 1.2rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7; font-weight: 500;">
+            학생회의 다양한 활동과 행사 일정을<br class="show-mobile"> 한눈에 확인하세요
+        </p>
     </div>
 
     {% if schedules_raw %}
-    <!-- 캘린더 뷰 -->
-    <div id="calendar-view" style="max-width: 1000px; margin: 0 auto;">
-        <!-- 월 네비게이션 -->
-        <div style="background: white; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button onclick="changeMonth(-1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--ku-crimson)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
-                    ‹
-                </button>
-                <h2 id="current-month" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0;">
-                    2025년 1월
-                </h2>
-                <button onclick="changeMonth(1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--ku-crimson)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
-                    ›
-                </button>
-            </div>
-        </div>
+    <!-- 일정 목록 -->
+    <div style="max-width: 1000px; margin: 0 auto;">
+        {% set schedules_by_month = {} %}
+        {% for schedule in schedules_raw %}
+            {% set month_key = schedule.start_date.strftime('%Y년 %m월') %}
+            {% if month_key not in schedules_by_month %}
+                {% set _ = schedules_by_month.update({month_key: []}) %}
+            {% endif %}
+            {% set _ = schedules_by_month[month_key].append(schedule) %}
+        {% endfor %}
 
-        <!-- 캘린더 그리드 -->
-        <div style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); margin-bottom: 40px;">
-            <!-- 요일 헤더 -->
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 16px;">
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: #FF3B30; padding: 8px;">일</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">월</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">화</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">수</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">목</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">금</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--ku-crimson); padding: 8px;">토</div>
+        {% for month, month_schedules in schedules_by_month.items() %}
+        <div class="month-group" style="margin-bottom: clamp(56px, 10vw, 80px);">
+            <!-- 월 헤더 -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
+                <div style="flex-shrink: 0; width: 6px; height: 48px; background: linear-gradient(180deg, var(--ku-crimson) 0%, #b02a44 100%); border-radius: 3px;"></div>
+                <h2 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 900; color: var(--text-primary); margin: 0; letter-spacing: -0.02em;">{{ month }}</h2>
+                <div style="flex: 1; height: 2px; background: linear-gradient(90deg, rgba(150, 26, 50, 0.2) 0%, transparent 100%);"></div>
             </div>
 
-            <!-- 날짜 그리드 -->
-            <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
-                <!-- 자바스크립트로 동적 생성 -->
-            </div>
-        </div>
+            <!-- 일정 카드들 -->
+            <div style="display: grid; gap: 20px;">
+                {% for schedule in month_schedules %}
+                <div class="schedule-item" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.12)'; this.style.borderColor='rgba(150, 26, 50, 0.3)';"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
 
-        <!-- 선택된 날짜의 일정 -->
-        <div id="selected-day-events" style="display: none;">
-            <!-- 동적으로 표시 -->
-        </div>
-    </div>
+                    <div style="display: flex; gap: 0; align-items: stretch;">
+                        <!-- 좌측 날짜 영역 -->
+                        <div style="flex-shrink: 0; width: clamp(120px, 20vw, 160px); background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(24px, 4vw, 32px); position: relative; overflow: hidden;">
+                            <!-- 배경 장식 -->
+                            <div style="position: absolute; top: -20%; right: -20%; width: 80px; height: 80px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(20px);"></div>
 
-    <!-- 리스트 뷰 -->
-    <div id="list-view" style="display: none; max-width: 900px; margin: 0 auto;">
-        <div style="display: grid; gap: 24px;">
-            {% for schedule in schedules_raw %}
-            <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative;"
-                 onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-6px)';"
-                 onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
+                            <!-- 요일 -->
+                            <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; margin-bottom: 8px; position: relative; z-index: 2;">
+                                {{ schedule.start_date.strftime('%a') }}
+                            </div>
 
-                <div style="display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
-                    <!-- 날짜 박스 -->
-                    <div style="text-align: center; min-width: clamp(90px, 15vw, 120px); padding: clamp(20px, 3vw, 28px); background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 16px; color: white; flex-shrink: 0; box-shadow: 0 8px 24px rgba(150, 26, 50, 0.3);">
-                        <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 8px;">
-                            {{ schedule.start_date.strftime('%Y') }}
-                        </div>
-                        <div style="font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 800; letter-spacing: 0.05em; opacity: 0.9; margin-bottom: 4px;">
-                            {{ schedule.start_date.strftime('%m') }}월
-                        </div>
-                        <div style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 900; line-height: 1; margin-bottom: 8px;">
-                            {{ schedule.start_date.strftime('%d') }}
-                        </div>
-                        {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
-                        <div style="font-size: clamp(0.8rem, 1.5vw, 0.9rem); font-weight: 600; opacity: 0.9; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
-                            {{ schedule.start_date.strftime('%H:%M') }}
-                            {% if schedule.end_date and schedule.end_date != schedule.start_date %}
-                            <br><span style="font-size: 0.7em; opacity: 0.8;">~ {{ schedule.end_date.strftime('%H:%M') }}</span>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    </div>
+                            <!-- 날짜 -->
+                            <div style="font-size: clamp(3rem, 7vw, 4rem); font-weight: 900; line-height: 1; margin-bottom: 8px; position: relative; z-index: 2;">
+                                {{ schedule.start_date.strftime('%d') }}
+                            </div>
 
-                    <!-- 내용 -->
-                    <div style="flex: 1; min-width: 250px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                            <h3 style="font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 800; color: var(--text-primary); margin: 0; line-height: 1.3; flex: 1; letter-spacing: -0.01em;">
-                                {{ schedule.title }}
-                            </h3>
-                            {% if schedule.category %}
-                            <span style="flex-shrink: 0; padding: 8px 18px; background: var(--ku-crimson); color: white; border-radius: 12px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.25);">
-                                {{ schedule.category }}
-                            </span>
-                            {% endif %}
-                        </div>
+                            <!-- 월 -->
+                            <div style="font-size: clamp(0.9rem, 2vw, 1.1rem); font-weight: 800; letter-spacing: 0.05em; opacity: 0.95; position: relative; z-index: 2;">
+                                {{ schedule.start_date.strftime('%b') }}
+                            </div>
 
-                        {% if schedule.description %}
-                        <p style="color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.75; font-size: clamp(0.95rem, 2vw, 1.05rem);">
-                            {{ schedule.description }}
-                        </p>
-                        {% endif %}
-
-                        <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1.5px solid rgba(0, 0, 0, 0.06);">
-                            {% if schedule.location %}
-                            <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.95rem;">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                    <path d="M8 8.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C5.2-.5 2.5 2.2 2.5 5.5 2.5 9.5 8 14.5 8 14.5s5.5-5 5.5-9C13.5 2.2 10.8-.5 8-.5z" fill="currentColor"/>
-                                </svg>
-                                <span style="font-weight: 600;">{{ schedule.location }}</span>
+                            <!-- 시간 -->
+                            {% if schedule.start_date.strftime('%H:%M') != '00:00' %}
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.3); width: 100%; text-align: center; position: relative; z-index: 2;">
+                                <div style="font-size: clamp(0.85rem, 1.8vw, 1rem); font-weight: 700; opacity: 0.95;">
+                                    {{ schedule.start_date.strftime('%H:%M') }}
+                                </div>
                             </div>
                             {% endif %}
-                            {% if schedule.end_date and schedule.end_date.date() != schedule.start_date.date() %}
-                            <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.95rem;">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <path d="M8 4v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                <span style="font-weight: 600;">~ {{ schedule.end_date.strftime('%Y.%m.%d') }}</span>
+                        </div>
+
+                        <!-- 우측 내용 영역 -->
+                        <div style="flex: 1; padding: clamp(24px, 4vw, 32px); min-width: 0;">
+                            <!-- 카테고리 & 제목 -->
+                            <div style="margin-bottom: 16px;">
+                                {% if schedule.category %}
+                                <span style="display: inline-block; padding: 6px 16px; background: rgba(150, 26, 50, 0.08); color: var(--ku-crimson); border-radius: 8px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 12px; text-transform: uppercase;">
+                                    {{ schedule.category }}
+                                </span>
+                                {% endif %}
+                                <h3 style="font-size: clamp(1.25rem, 3vw, 1.6rem); font-weight: 800; color: var(--text-primary); margin: 0; line-height: 1.3; letter-spacing: -0.01em; word-break: keep-all;">
+                                    {{ schedule.title }}
+                                </h3>
                             </div>
+
+                            <!-- 설명 -->
+                            {% if schedule.description %}
+                            <p style="color: var(--text-secondary); margin: 0 0 20px 0; line-height: 1.7; font-size: clamp(0.95rem, 2vw, 1.05rem); font-weight: 500;">
+                                {{ schedule.description }}
+                            </p>
                             {% endif %}
+
+                            <!-- 메타 정보 -->
+                            <div style="display: flex; flex-wrap: wrap; gap: clamp(16px, 3vw, 20px); padding-top: 20px; border-top: 1.5px solid rgba(0, 0, 0, 0.06);">
+                                {% if schedule.location %}
+                                <div style="display: flex; align-items: center; gap: 8px; color: var(--ku-crimson); font-size: 0.95rem;">
+                                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                                        <path d="M8 8.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C5.2-.5 2.5 2.2 2.5 5.5 2.5 9.5 8 14.5 8 14.5s5.5-5 5.5-9C13.5 2.2 10.8-.5 8-.5z" fill="currentColor"/>
+                                    </svg>
+                                    <span style="font-weight: 700;">{{ schedule.location }}</span>
+                                </div>
+                                {% endif %}
+
+                                {% if schedule.end_date and schedule.end_date.date() != schedule.start_date.date() %}
+                                <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.95rem;">
+                                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                        <path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                    <span style="font-weight: 600;">{{ schedule.end_date.strftime('%Y.%m.%d %H:%M') }}까지</span>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
     {% else %}
     <!-- 빈 상태 -->
-    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); max-width: 600px; margin: 0 auto;">
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); max-width: 600px; margin: 0 auto;">
         <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -216,143 +168,4 @@
     </div>
     {% endif %}
 </div>
-
-<script>
-    let currentDate = new Date();
-    const schedules = {{ schedules|tojson|safe if schedules else '[]' }};
-
-    function switchView(view) {
-        const calendarView = document.getElementById('calendar-view');
-        const listView = document.getElementById('list-view');
-        const btnCalendar = document.getElementById('btn-calendar');
-        const btnList = document.getElementById('btn-list');
-
-        if (view === 'calendar') {
-            calendarView.style.display = 'block';
-            listView.style.display = 'none';
-            btnCalendar.classList.add('active');
-            btnList.classList.remove('active');
-            renderCalendar();
-        } else {
-            calendarView.style.display = 'none';
-            listView.style.display = 'block';
-            btnList.classList.add('active');
-            btnCalendar.classList.remove('active');
-        }
-    }
-
-    function changeMonth(delta) {
-        currentDate.setMonth(currentDate.getMonth() + delta);
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-
-        // 월 표시 업데이트
-        document.getElementById('current-month').textContent = `${year}년 ${month + 1}월`;
-
-        // 캘린더 그리드 생성
-        const grid = document.getElementById('calendar-grid');
-        grid.innerHTML = '';
-
-        // 첫 날과 마지막 날
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
-
-        // 오늘 날짜
-        const today = new Date();
-        const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
-
-        // 이전 달 빈 칸
-        for (let i = 0; i < startingDayOfWeek; i++) {
-            const emptyDay = document.createElement('div');
-            emptyDay.style.cssText = 'min-height: 80px;';
-            grid.appendChild(emptyDay);
-        }
-
-        // 날짜 칸
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const hasEvent = schedules.some(s => {
-                const startDate = s.start_date.split('T')[0];
-                const endDate = s.end_date ? s.end_date.split('T')[0] : startDate;
-                return dateStr >= startDate && dateStr <= endDate;
-            });
-
-            const dayElement = document.createElement('div');
-            dayElement.className = 'calendar-day' + (hasEvent ? ' has-event' : '') + (isCurrentMonth && day === today.getDate() ? ' today' : '');
-            dayElement.style.cssText = `
-                min-height: 80px;
-                padding: 12px;
-                border-radius: 12px;
-                cursor: pointer;
-                display: flex;
-                align-items: flex-start;
-                justify-content: center;
-                font-size: 1.1rem;
-                font-weight: 600;
-                background: ${isCurrentMonth && day === today.getDate() ? 'linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%)' : '#FAFAFA'};
-                color: ${isCurrentMonth && day === today.getDate() ? 'white' : 'var(--text-primary)'};
-            `;
-            dayElement.textContent = day;
-
-            if (hasEvent) {
-                dayElement.onclick = () => showDayEvents(dateStr);
-            }
-
-            grid.appendChild(dayElement);
-        }
-    }
-
-    function showDayEvents(dateStr) {
-        const dayEvents = schedules.filter(s => {
-            const startDate = s.start_date.split('T')[0];
-            const endDate = s.end_date ? s.end_date.split('T')[0] : startDate;
-            return dateStr >= startDate && dateStr <= endDate;
-        });
-
-        if (dayEvents.length === 0) return;
-
-        const container = document.getElementById('selected-day-events');
-        const date = new Date(dateStr);
-        const dateFormatted = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-
-        let html = `
-            <div style="background: white; border-radius: 20px; padding: 32px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid var(--ku-crimson); margin-bottom: 24px;">
-                <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 8px; height: 40px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 4px;"></div>
-                    ${dateFormatted}의 일정
-                </h3>
-                <div style="display: grid; gap: 16px;">
-        `;
-
-        dayEvents.forEach(event => {
-            html += `
-                <div style="padding: 20px; background: #F5F5F7; border-radius: 16px; border-left: 4px solid var(--ku-crimson);">
-                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">${event.title}</div>
-                    ${event.description ? `<div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">${event.description}</div>` : ''}
-                    ${event.location ? `<div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">📍 ${event.location}</div>` : ''}
-                </div>
-            `;
-        });
-
-        html += `</div></div>`;
-        container.innerHTML = html;
-        container.style.display = 'block';
-
-        // 부드럽게 스크롤
-        setTimeout(() => {
-            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
-    }
-
-    // 초기 렌더링
-    if (schedules && schedules.length > 0) {
-        renderCalendar();
-    }
-</script>
 {% endblock %}
