@@ -623,5 +623,5 @@ def init_db():
             print('기본 관리자 계정 생성 완료 (admin / admin)')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 2424))
+    port = int(os.environ.get('PORT', 1992))
     app.run(debug=True, host='0.0.0.0', port=port, use_reloader=True, reloader_type='stat')
