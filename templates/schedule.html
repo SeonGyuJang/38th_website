@@ -131,14 +131,11 @@
     <div id="list-view" style="display: none; max-width: 900px; margin: 0 auto;">
         <div style="display: grid; gap: 24px;">
             {% for schedule in schedules_raw %}
-            <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; position: relative;"
-                 onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 8px 32px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-4px)';"
-                 onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 16px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
+            <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative;"
+                 onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-6px)';"
+                 onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
 
-                <!-- 상단 색상 인디케이터 -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--ku-crimson) 0%, var(--ku-crimson-light) 100%);"></div>
-
-                <div style="padding-top: 8px; display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
+                <div style="display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
                     <!-- 날짜 박스 -->
                     <div style="text-align: center; min-width: clamp(90px, 15vw, 120px); padding: clamp(20px, 3vw, 28px); background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 16px; color: white; flex-shrink: 0; box-shadow: 0 8px 24px rgba(150, 26, 50, 0.3);">
                         <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 8px;">

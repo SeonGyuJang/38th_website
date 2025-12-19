@@ -59,40 +59,80 @@
     {% endif %}
 
     <!-- 전체 이행률 히어로 카드 -->
-    <div style="background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: var(--radius-2xl); padding: clamp(50px, 8vw, 80px) clamp(30px, 6vw, 60px); text-align: center; color: white; box-shadow: 0 20px 60px rgba(150, 26, 50, 0.35); margin-bottom: 80px; position: relative; overflow: hidden;">
+    <div style="background: white; border-radius: 24px; padding: clamp(60px, 10vw, 100px) clamp(40px, 8vw, 80px); text-align: center; box-shadow: 0 4px 40px rgba(150, 26, 50, 0.08); margin-bottom: 80px; position: relative; overflow: hidden; border: 1px solid rgba(150, 26, 50, 0.08);">
         <!-- 배경 장식 -->
-        <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.08); filter: blur(60px);"></div>
-        <div style="position: absolute; bottom: -120px; left: -120px; width: 350px; height: 350px; border-radius: 50%; background: rgba(0,0,0,0.08); filter: blur(80px);"></div>
-        <div style="position: absolute; top: 50%; right: 15%; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.06); filter: blur(40px);"></div>
+        <div style="position: absolute; top: -50%; right: -20%; width: clamp(300px, 50vw, 500px); height: clamp(300px, 50vw, 500px); background: radial-gradient(circle, rgba(150, 26, 50, 0.04) 0%, transparent 70%); border-radius: 50%; filter: blur(80px);"></div>
+        <div style="position: absolute; bottom: -50%; left: -20%; width: clamp(400px, 60vw, 600px); height: clamp(400px, 60vw, 600px); background: radial-gradient(circle, rgba(150, 26, 50, 0.03) 0%, transparent 70%); border-radius: 50%; filter: blur(100px);"></div>
 
-        <div style="position: relative; z-index: 1;">
-            <div style="display: inline-block; padding: 8px 20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.2);">
-                <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;">Overall Achievement</span>
+        <div style="position: relative; z-index: 2;">
+            <!-- 상단 배지 -->
+            <div style="display: inline-block; padding: 8px 20px; background: rgba(150, 26, 50, 0.08); border-radius: 100px; margin-bottom: clamp(32px, 6vw, 40px); border: 1px solid rgba(150, 26, 50, 0.12);">
+                <span style="font-size: clamp(0.75rem, 1.8vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ku-crimson);">Overall Achievement</span>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: clamp(6rem, 18vw, 9rem); font-weight: 900; line-height: 0.9; margin-bottom: 8px; text-shadow: 0 4px 30px rgba(0,0,0,0.15);">
-                    {{ total_progress }}<span style="font-size: 0.4em; font-weight: 700; opacity: 0.85;">%</span>
+            <!-- 진행률 원형 그래프 -->
+            <div style="position: relative; width: clamp(220px, 45vw, 320px); height: clamp(220px, 45vw, 320px); margin: 0 auto clamp(40px, 8vw, 56px);">
+                <svg viewBox="0 0 36 36" style="transform: rotate(-90deg); width: 100%; height: 100%; filter: drop-shadow(0 8px 32px rgba(150, 26, 50, 0.15));">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(150, 26, 50, 0.08)" stroke-width="2.5" />
+                    <path class="overall-progress-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="url(#overallGradient)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;" />
+                    <defs>
+                        <linearGradient id="overallGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color: var(--ku-crimson); stop-opacity: 1" />
+                            <stop offset="100%" style="stop-color: #b02a44; stop-opacity: 1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <span class="overall-percentage" style="font-size: clamp(3.5rem, 12vw, 6rem); font-weight: 900; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">0%</span>
+                    <span style="font-size: clamp(0.85rem, 2vw, 1.1rem); color: var(--text-secondary); font-weight: 700; letter-spacing: 0.1em; margin-top: 12px; text-transform: uppercase;">Achieved</span>
                 </div>
             </div>
 
-            <p style="font-size: clamp(1.1rem, 2.2vw, 1.35rem); opacity: 0.95; font-weight: 600; letter-spacing: -0.01em;">전체 공약 이행률</p>
-
-            <!-- 진행 바 -->
-            <div style="max-width: 400px; margin: 32px auto 0; background: rgba(255,255,255,0.2); border-radius: 100px; height: 12px; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);">
-                <div style="background: white; height: 100%; width: {{ total_progress }}%; transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 10px rgba(255,255,255,0.5);"></div>
-            </div>
+            <!-- 타이틀 -->
+            <h3 style="font-size: clamp(1.8rem, 4.5vw, 2.8rem); font-weight: 900; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.02em;">전체 공약 이행률</h3>
+            <p style="font-size: clamp(1.05rem, 2.5vw, 1.35rem); color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7; font-weight: 500;">
+                학우 여러분과의 약속을 투명하게 공개하고,<br class="show-mobile"> 하나하나 실천해 나가고 있습니다.
+            </p>
         </div>
     </div>
+
+    <script>
+    // Overall Achievement 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalProgress = {{ total_progress }};
+        const progressRing = document.querySelector('.overall-progress-ring');
+        const percentageText = document.querySelector('.overall-percentage');
+
+        setTimeout(() => {
+            if (progressRing) {
+                progressRing.style.strokeDasharray = `${totalProgress}, 100`;
+            }
+
+            // 숫자 카운트업 애니메이션
+            let currentRate = 0;
+            const increment = totalProgress / 80;
+            const counter = setInterval(() => {
+                currentRate += increment;
+                if (currentRate >= totalProgress) {
+                    currentRate = totalProgress;
+                    clearInterval(counter);
+                }
+                if (percentageText) {
+                    percentageText.textContent = Math.round(currentRate) + '%';
+                }
+            }, 20);
+        }, 500);
+    });
+    </script>
 
     <!-- 카테고리별 공약 -->
     {% if categories %}
         {% set category_colors = {
-            0: {'solid': '#007AFF', 'light': 'rgba(0, 122, 255, 0.1)', 'glow': 'rgba(0, 122, 255, 0.25)'},
-            1: {'solid': '#34C759', 'light': 'rgba(52, 199, 89, 0.1)', 'glow': 'rgba(52, 199, 89, 0.25)'},
-            2: {'solid': '#FF9500', 'light': 'rgba(255, 149, 0, 0.1)', 'glow': 'rgba(255, 149, 0, 0.25)'},
-            3: {'solid': '#5856D6', 'light': 'rgba(88, 86, 214, 0.1)', 'glow': 'rgba(88, 86, 214, 0.25)'},
-            4: {'solid': '#FF3B30', 'light': 'rgba(255, 59, 48, 0.1)', 'glow': 'rgba(255, 59, 48, 0.25)'}
+            0: {'solid': 'var(--ku-crimson)', 'light': 'rgba(150, 26, 50, 0.08)', 'glow': 'rgba(150, 26, 50, 0.15)'},
+            1: {'solid': '#b02a44', 'light': 'rgba(176, 42, 68, 0.08)', 'glow': 'rgba(176, 42, 68, 0.15)'},
+            2: {'solid': '#7a1529', 'light': 'rgba(122, 21, 41, 0.08)', 'glow': 'rgba(122, 21, 41, 0.15)'},
+            3: {'solid': '#961A32', 'light': 'rgba(150, 26, 50, 0.08)', 'glow': 'rgba(150, 26, 50, 0.15)'},
+            4: {'solid': '#b02a44', 'light': 'rgba(176, 42, 68, 0.08)', 'glow': 'rgba(176, 42, 68, 0.15)'}
         } %}
 
         {% for category, promises_list in categories.items() %}
@@ -138,14 +178,11 @@
             <!-- 공약 카드 그리드 -->
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 24px;">
                 {% for promise in promises_list %}
-                <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" style="background: white; border-radius: var(--radius-xl); padding: 28px; text-decoration: none; border: 2px solid var(--border-light); box-shadow: var(--shadow-sm); transition: all var(--transition-base); display: flex; flex-direction: column; position: relative; overflow: hidden;"
-                   onmouseover="this.style.borderColor='{{ colors.solid }}'; this.style.boxShadow='0 12px 40px {{ colors.glow }}'; this.style.transform='translateY(-4px)';"
-                   onmouseout="this.style.borderColor='var(--border-light)'; this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+                <a href="{{ url_for('promise_detail', promise_id=promise.id) }}" style="background: white; border-radius: 20px; padding: 32px; text-decoration: none; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; position: relative; overflow: hidden;"
+                   onmouseover="this.style.borderColor='{{ colors.solid }}'; this.style.boxShadow='0 16px 48px {{ colors.glow }}'; this.style.transform='translateY(-6px)';"
+                   onmouseout="this.style.borderColor='rgba(0,0,0,0.06)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.04)'; this.style.transform='translateY(0)';">
 
-                    <!-- 상단 색상 인디케이터 -->
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: {{ colors.solid }};"></div>
-
-                    <div style="padding-top: 8px; display: flex; flex-direction: column; height: 100%;">
+                    <div style="display: flex; flex-direction: column; height: 100%;">
                         <!-- 헤더 -->
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
                             <h3 style="font-size: 1.2rem; font-weight: 700; line-height: 1.4; color: var(--text-primary); margin: 0; flex: 1;">{{ promise.title }}</h3>
