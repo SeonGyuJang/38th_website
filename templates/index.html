@@ -348,23 +348,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="container" style="position: relative; z-index: 2;">
         <!-- 섹션 헤더 -->
-        <div style="margin-bottom: clamp(40px, 8vw, 56px);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
-                <div>
-                    <div style="display: inline-block; padding: 6px 16px; background: rgba(150, 26, 50, 0.08); border-radius: 100px; margin-bottom: 16px;">
-                        <span style="font-size: clamp(0.7rem, 1.5vw, 0.75rem); font-weight: 700; color: var(--ku-crimson); letter-spacing: 0.1em; text-transform: uppercase;">Upcoming Events</span>
-                    </div>
-                    <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: var(--text-primary); letter-spacing: -0.03em;">다가오는 일정</h2>
-                </div>
-                <a href="{{ url_for('schedule') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--ku-crimson); text-decoration: none; font-weight: 700; font-size: clamp(0.95rem, 2vw, 1.05rem); padding: 10px 20px; background: rgba(150, 26, 50, 0.06); border-radius: 10px; transition: all 0.3s;"
-                   onmouseover="this.style.background='rgba(150, 26, 50, 0.1)'; this.style.transform='translateX(4px)';"
-                   onmouseout="this.style.background='rgba(150, 26, 50, 0.06)'; this.style.transform='translateX(0)';">
-                    전체 보기
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                </a>
+        <div style="margin-bottom: clamp(40px, 8vw, 56px); text-align: center;">
+            <div style="display: inline-block; padding: 6px 16px; background: rgba(150, 26, 50, 0.08); border-radius: 100px; margin-bottom: 16px;">
+                <span style="font-size: clamp(0.7rem, 1.5vw, 0.75rem); font-weight: 700; color: var(--ku-crimson); letter-spacing: 0.1em; text-transform: uppercase;">Upcoming Events</span>
             </div>
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 12px;">
+                다가오는<br class="show-mobile">
+                <span style="background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">일정</span>
+            </h2>
+            <p style="font-size: clamp(1rem, 2.3vw, 1.2rem); color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px; line-height: 1.7; font-weight: 500;">
+                학생회의 주요 행사와 일정을 확인하세요
+            </p>
+            <a href="{{ url_for('schedule') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--ku-crimson); text-decoration: none; font-weight: 700; font-size: clamp(0.95rem, 2vw, 1.05rem); padding: 10px 20px; background: rgba(150, 26, 50, 0.06); border-radius: 10px; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(150, 26, 50, 0.1)'; this.style.transform='translateX(4px)';"
+               onmouseout="this.style.background='rgba(150, 26, 50, 0.06)'; this.style.transform='translateX(0)';">
+                전체 보기
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </a>
         </div>
 
         <!-- 일정 카드 그리드 -->
