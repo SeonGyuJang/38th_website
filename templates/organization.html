@@ -78,51 +78,84 @@
             <!-- 산하위원회 섹션 -->
             <div style="flex: 1; min-width: 300px;">
                 <h2 style="text-align: center; font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--ku-crimson); margin-bottom: clamp(28px, 5vw, 40px);">산하위원회</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px);">
-                    {% for h in heads %}
-                    {% if '산하위원장' in h.position %}
-                    <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px);">
-                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
-                        <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
-                        <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem); margin-bottom: 16px;">{{ h.major }}</div>
 
-                        <!-- 해당 위원장의 국서들 표시 -->
-                        {% if '인권/복지부' in h.department %}
-                            <!-- 인권/복지부 -->
-                            {% for dept_name in ['인권/복지부 홍보국', '인권/복지부 기획국', '인권/복지부 사무재정국'] %}
-                            {% if departments.get(dept_name) %}
-                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
-                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
-                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
-                                    {% for member in departments[dept_name] %}
-                                        {% if member.position in ['국장', '차장', '국원'] %}
-                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        {% elif '교육/복지부' in h.department %}
-                            <!-- 교육/복지부 -->
-                            {% for dept_name in ['교육/복지부 홍보국', '교육/복지부 기획국', '교육/복지부 사무재정국'] %}
-                            {% if departments.get(dept_name) %}
-                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
-                                <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
-                                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
-                                    {% for member in departments[dept_name] %}
-                                        {% if member.position in ['국장', '차장', '국원'] %}
-                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        {% endif %}
+                <!-- 산하위원장 -->
+                {% for h in heads %}
+                {% if h.position == '산하위원장' %}
+                <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px); margin-bottom: clamp(24px, 5vw, 32px);">
+                    <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
+                    <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem);">{{ h.major }}</div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <!-- 인권/복지부 -->
+                <div style="margin-bottom: clamp(24px, 5vw, 32px);">
+                    <h3 style="text-align: center; font-size: clamp(1rem, 2.5vw, 1.2rem); color: var(--ku-crimson); margin-bottom: clamp(16px, 3vw, 20px); font-weight: 700;">인권/복지부</h3>
+
+                    <!-- 인권/복지부장 -->
+                    {% for h in heads %}
+                    {% if h.position == '인권/복지부장' %}
+                    <div class="apple-card" style="text-align: center; padding: clamp(16px, 3vw, 20px); margin-bottom: clamp(16px, 3vw, 20px);">
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.7rem, 1.5vw, 0.8rem); margin-bottom: 8px;">{{ h.position }}</div>
+                        <div style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                        <div style="color: var(--text-secondary); font-size: clamp(0.8rem, 1.8vw, 0.85rem);">{{ h.major }}</div>
                     </div>
                     {% endif %}
                     {% endfor %}
+
+                    <!-- 인권/복지부 산하 국들 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: clamp(12px, 2vw, 16px);">
+                        {% for dept_name in ['인권/복지부 홍보국', '인권/복지부 기획국', '인권/복지부 사무재정국'] %}
+                        {% if departments.get(dept_name) %}
+                        <div class="apple-card" style="padding: clamp(12px, 2.5vw, 16px);">
+                            <div style="font-weight: 600; color: var(--ku-crimson); font-size: clamp(0.7rem, 1.5vw, 0.75rem); margin-bottom: 8px; text-align: center;">{{ dept_name.split(' ')[1] if ' ' in dept_name else dept_name }}</div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                {% for member in departments[dept_name] %}
+                                    {% if member.position in ['국장', '차장', '국원'] %}
+                                    <div style="font-size: clamp(0.7rem, 1.5vw, 0.75rem); color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %}; text-align: center;">{{ member.name }} {{ member.position }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 교육/복지부 -->
+                <div>
+                    <h3 style="text-align: center; font-size: clamp(1rem, 2.5vw, 1.2rem); color: var(--ku-crimson); margin-bottom: clamp(16px, 3vw, 20px); font-weight: 700;">교육/복지부</h3>
+
+                    <!-- 교육/복지부장 -->
+                    {% for h in heads %}
+                    {% if h.position == '교육/복지부장' %}
+                    <div class="apple-card" style="text-align: center; padding: clamp(16px, 3vw, 20px); margin-bottom: clamp(16px, 3vw, 20px);">
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.7rem, 1.5vw, 0.8rem); margin-bottom: 8px;">{{ h.position }}</div>
+                        <div style="font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
+                        <div style="color: var(--text-secondary); font-size: clamp(0.8rem, 1.8vw, 0.85rem);">{{ h.major }}</div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- 교육/복지부 산하 국들 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: clamp(12px, 2vw, 16px);">
+                        {% for dept_name in ['교육/복지부 홍보국', '교육/복지부 기획국', '교육/복지부 사무재정국'] %}
+                        {% if departments.get(dept_name) %}
+                        <div class="apple-card" style="padding: clamp(12px, 2.5vw, 16px);">
+                            <div style="font-weight: 600; color: var(--ku-crimson); font-size: clamp(0.7rem, 1.5vw, 0.75rem); margin-bottom: 8px; text-align: center;">{{ dept_name.split(' ')[1] if ' ' in dept_name else dept_name }}</div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                {% for member in departments[dept_name] %}
+                                    {% if member.position in ['국장', '차장', '국원'] %}
+                                    <div style="font-size: clamp(0.7rem, 1.5vw, 0.75rem); color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %}; text-align: center;">{{ member.name }} {{ member.position }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
