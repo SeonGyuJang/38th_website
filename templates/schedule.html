@@ -37,7 +37,7 @@
     }
 
     .calendar-day:hover {
-        background: rgba(0, 122, 255, 0.08);
+        background: rgba(150, 26, 50, 0.08);
         transform: scale(1.05);
     }
 
@@ -53,12 +53,12 @@
         transform: translateX(-50%);
         width: 6px;
         height: 6px;
-        background: var(--apple-blue);
+        background: var(--ku-crimson);
         border-radius: 50%;
     }
 
     .calendar-day.today {
-        background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);
+        background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%);
         color: white;
         font-weight: 800;
     }
@@ -75,7 +75,7 @@
     <!-- 뷰 토글 -->
     <div style="margin-bottom: 40px;">
         <div style="display: flex; justify-content: center; gap: 12px; padding: 8px; background: white; border-radius: 16px; max-width: 300px; margin: 0 auto; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
-            <button onclick="switchView('calendar')" class="view-toggle-btn active" id="btn-calendar" style="flex: 1; padding: 12px 20px; background: var(--apple-blue); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);">
+            <button onclick="switchView('calendar')" class="view-toggle-btn active" id="btn-calendar" style="flex: 1; padding: 12px 20px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
                 캘린더
             </button>
             <button onclick="switchView('list')" class="view-toggle-btn" id="btn-list" style="flex: 1; padding: 12px 20px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
@@ -90,13 +90,13 @@
         <!-- 월 네비게이션 -->
         <div style="background: white; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button onclick="changeMonth(-1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--apple-blue)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
+                <button onclick="changeMonth(-1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--ku-crimson)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
                     ‹
                 </button>
                 <h2 id="current-month" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0;">
                     2025년 1월
                 </h2>
-                <button onclick="changeMonth(1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--apple-blue)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
+                <button onclick="changeMonth(1)" style="width: 40px; height: 40px; border: none; background: #F5F5F7; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;" onmouseover="this.style.background='var(--ku-crimson)'; this.style.color='white';" onmouseout="this.style.background='#F5F5F7'; this.style.color='var(--text-primary)';">
                     ›
                 </button>
             </div>
@@ -112,7 +112,7 @@
                 <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">수</div>
                 <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">목</div>
                 <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 8px;">금</div>
-                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: #007AFF; padding: 8px;">토</div>
+                <div style="text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--ku-crimson); padding: 8px;">토</div>
             </div>
 
             <!-- 날짜 그리드 -->
@@ -131,16 +131,13 @@
     <div id="list-view" style="display: none; max-width: 900px; margin: 0 auto;">
         <div style="display: grid; gap: 24px;">
             {% for schedule in schedules_raw %}
-            <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; position: relative;"
-                 onmouseover="this.style.borderColor='var(--apple-blue)'; this.style.boxShadow='0 8px 32px rgba(0, 122, 255, 0.15)'; this.style.transform='translateY(-4px)';"
-                 onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 16px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
+            <div class="schedule-card" style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative;"
+                 onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-6px)';"
+                 onmouseout="this.style.borderColor='rgba(0, 0, 0, 0.06)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.transform='translateY(0)';">
 
-                <!-- 상단 색상 인디케이터 -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--apple-blue) 0%, var(--apple-blue-light) 100%);"></div>
-
-                <div style="padding-top: 8px; display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
+                <div style="display: flex; gap: clamp(20px, 4vw, 32px); align-items: start; flex-wrap: wrap;">
                     <!-- 날짜 박스 -->
-                    <div style="text-align: center; min-width: clamp(90px, 15vw, 120px); padding: clamp(20px, 3vw, 28px); background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%); border-radius: 16px; color: white; flex-shrink: 0; box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);">
+                    <div style="text-align: center; min-width: clamp(90px, 15vw, 120px); padding: clamp(20px, 3vw, 28px); background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 16px; color: white; flex-shrink: 0; box-shadow: 0 8px 24px rgba(150, 26, 50, 0.3);">
                         <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 8px;">
                             {{ schedule.start_date.strftime('%Y') }}
                         </div>
@@ -167,7 +164,7 @@
                                 {{ schedule.title }}
                             </h3>
                             {% if schedule.category %}
-                            <span style="flex-shrink: 0; padding: 8px 18px; background: #007AFF; color: white; border-radius: 12px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);">
+                            <span style="flex-shrink: 0; padding: 8px 18px; background: var(--ku-crimson); color: white; border-radius: 12px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.25);">
                                 {{ schedule.category }}
                             </span>
                             {% endif %}
@@ -298,7 +295,7 @@
                 justify-content: center;
                 font-size: 1.1rem;
                 font-weight: 600;
-                background: ${isCurrentMonth && day === today.getDate() ? 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)' : '#FAFAFA'};
+                background: ${isCurrentMonth && day === today.getDate() ? 'linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%)' : '#FAFAFA'};
                 color: ${isCurrentMonth && day === today.getDate() ? 'white' : 'var(--text-primary)'};
             `;
             dayElement.textContent = day;
@@ -325,9 +322,9 @@
         const dateFormatted = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 
         let html = `
-            <div style="background: white; border-radius: 20px; padding: 32px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid var(--apple-blue); margin-bottom: 24px;">
+            <div style="background: white; border-radius: 20px; padding: 32px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 2px solid var(--ku-crimson); margin-bottom: 24px;">
                 <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 8px; height: 40px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); border-radius: 4px;"></div>
+                    <div style="width: 8px; height: 40px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 4px;"></div>
                     ${dateFormatted}의 일정
                 </h3>
                 <div style="display: grid; gap: 16px;">
@@ -335,7 +332,7 @@
 
         dayEvents.forEach(event => {
             html += `
-                <div style="padding: 20px; background: #F5F5F7; border-radius: 16px; border-left: 4px solid var(--apple-blue);">
+                <div style="padding: 20px; background: #F5F5F7; border-radius: 16px; border-left: 4px solid var(--ku-crimson);">
                     <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">${event.title}</div>
                     ${event.description ? `<div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">${event.description}</div>` : ''}
                     ${event.location ? `<div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">📍 ${event.location}</div>` : ''}

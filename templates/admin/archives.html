@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}아카이브 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- 헤더 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
+        <div>
+            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 12px; transition: var(--transition-base);" onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='var(--text-secondary)';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                대시보드로 돌아가기
+            </a>
+            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">아카이브 관리</h1>
+        </div>
+        <a href="{{ url_for('admin_archive_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            아카이브 추가
+        </a>
+    </div>
+
+    {% if archives %}
+    <div style="display: grid; gap: 16px;">
+        {% for archive in archives %}
+        <div style="background: white; border-radius: var(--radius-lg); padding: clamp(20px, 4vw, 28px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: all var(--transition-base);" onmouseover="this.style.boxShadow='var(--shadow-md)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
+            <div style="display: flex; gap: 20px; align-items: start; flex-wrap: wrap;">
+                <!-- 썸네일 섹션 -->
+                <div style="flex-shrink: 0; width: clamp(120px, 20vw, 180px); aspect-ratio: 3/2; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
+                    {% if archive.thumbnail_url %}
+                    <img src="{{ archive.thumbnail_url }}" alt="{{ archive.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% elif archive.images and archive.images|length > 0 %}
+                    <img src="{{ archive.images[0].image_url }}" alt="{{ archive.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 내용 섹션 -->
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: var(--text-primary); margin: 0;">
+                            {{ archive.title }}
+                        </h3>
+                        {% if archive.category %}
+                        <span style="padding: 4px 12px; background: var(--ku-crimson-lighter); color: var(--ku-crimson); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            {{ archive.category }}
+                        </span>
+                        {% endif %}
+                        {% if not archive.is_active %}
+                        <span style="padding: 4px 12px; background: #fee; color: #dc3545; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                            비활성
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- 날짜 및 장소 -->
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-secondary); flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                <rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                <path d="M5 1.5v3M11 1.5v3M2 6.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            {{ archive.event_date.strftime('%Y.%m.%d') }}
+                        </div>
+                        {% if archive.location %}
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M7 7.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0-9C4.2-1.5 1.5 1.2 1.5 4.5 1.5 8.5 7 13.5 7 13.5s5.5-5 5.5-9C12.5 1.2 9.8-1.5 7-1.5z" fill="currentColor"/>
+                            </svg>
+                            {{ archive.location }}
+                        </div>
+                        {% endif %}
+                        {% if archive.images %}
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            {{ archive.images|length }}장
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if archive.description %}
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ archive.description }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- 관리 버튼 -->
+                <div style="display: flex; gap: 8px; margin-left: auto;">
+                    <a href="{{ url_for('admin_archive_edit', archive_id=archive.id) }}" style="padding: 10px 20px; background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; transition: var(--transition-base); border: 1px solid var(--border-color);" onmouseover="this.style.background='var(--border-color)';" onmouseout="this.style.background='var(--bg-secondary)';">
+                        수정
+                    </a>
+                    <form method="POST" action="{{ url_for('admin_archive_delete', archive_id=archive.id) }}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까? 이 아카이브에 속한 모든 이미지도 함께 삭제됩니다.')">
+                        <button type="submit" style="padding: 10px 20px; background: #fee; color: #dc3545; border: 1px solid #fcc; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: var(--transition-base);" onmouseover="this.style.background='#fdd'; this.style.borderColor='#fbb';" onmouseout="this.style.background='#fee'; this.style.borderColor='#fcc';">
+                            삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 24px;">등록된 아카이브가 없습니다.</p>
+        <a href="{{ url_for('admin_archive_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            첫 아카이브 추가하기
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
