@@ -511,78 +511,78 @@ def create_regulations():
         {
             'category': '총학생회',
             'title': '총학생회칙 및 세칙',
-            'content': '고려대학교 세종캠퍼스 총학생회의 기본 회칙 및 세부 운영 세칙입니다.\n\n제1장 총칙, 제2장 조직, 제3장 선거관리, 제4장 재정 운영 등의 내용을 담고 있으며, 학생 자치의 근간이 되는 규정입니다.',
-            'pdf_filename': 'student_council_regulation.pdf',
+            'content': '고려대학교 세종캠퍼스 총학생회의 기본 회칙 및 세부 운영 세칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회칙 및 세칙 (24.03.09 개정).pdf',
             'order': 1
         },
         {
             'category': '총학생회',
             'title': '총학생회 일반규칙',
-            'content': '총학생회의 일반적인 운영 규칙과 절차를 정의합니다.\n\n회의 소집, 의결 정족수, 안건 상정 절차, 예산 집행 원칙 등 총학생회 운영의 기본 원칙을 담고 있습니다.',
-            'pdf_filename': 'student_council_general_rules.pdf',
+            'content': '총학생회의 일반적인 운영 규칙과 절차를 정의합니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 2
         },
         {
             'category': '총학생회',
             'title': '총학생회 세칙에 부수된 규칙',
-            'content': '총학생회 세칙을 보완하는 부속 규칙입니다.\n\n각종 위원회 운영 규정, 사업 추진 절차, 학생 단체 지원 기준 등 세부적인 운영 지침을 제공합니다.',
-            'pdf_filename': 'student_council_supplementary_rules.pdf',
+            'content': '총학생회 세칙을 보완하는 부속 규칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회칙 및 세칙 (24.03.09 개정).pdf',
             'order': 3
         },
         {
             'category': '단과대학',
             'title': '과학기술대학 학생회칙',
-            'content': '과학기술대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n과학기술대학 학생회장단 구성, 학생 대표자 선출, 학과별 학생회 운영 등을 규정합니다.',
-            'pdf_filename': 'science_tech_regulation.pdf',
+            'content': '과학기술대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\과학기술대학 학생회칙 ( 2022 개정 ).pdf',
             'order': 4
         },
         {
             'category': '단과대학',
             'title': '글로벌비즈니스대학 학생회칙',
-            'content': '글로벌비즈니스대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n학생회 임원 선출, 학술 활동 지원, 취업 및 진로 프로그램 운영 등을 명시합니다.',
-            'pdf_filename': 'global_business_regulation.pdf',
+            'content': '글로벌비즈니스대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교_글로벌비즈니스대학_학생회칙_(2025.09.02개정).pdf',
             'order': 5
         },
         {
             'category': '단과대학',
             'title': '문화스포츠대학 학생회칙',
-            'content': '문화스포츠대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n문화 예술 활동 지원, 체육 행사 운영, 학과 간 교류 활성화 등의 내용을 포함합니다.',
-            'pdf_filename': 'culture_sports_regulation.pdf',
+            'content': '문화스포츠대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\문화스포츠대학 회칙 (2025.11.17 개정).pdf',
             'order': 6
         },
         {
             'category': '단과대학',
             'title': '약학대학 학생회칙',
-            'content': '약학대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n전문 학술 활동 지원, 실습 관련 학생 권익 보호, 국가고시 대비 프로그램 운영 등을 규정합니다.',
-            'pdf_filename': 'pharmacy_regulation.pdf',
+            'content': '약학대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 7
         },
         {
             'category': '단과대학',
             'title': '공공정책대학 학생회칙',
-            'content': '공공정책대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n정책 연구 활동 지원, 공공기관 취업 준비 프로그램, 학술 세미나 운영 등을 명시합니다.',
-            'pdf_filename': 'public_policy_regulation.pdf',
+            'content': '공공정책대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 8
         },
         {
             'category': '단과대학',
             'title': '스마트도시대학 학생회칙',
-            'content': '스마트도시대학 학생회의 조직과 운영에 관한 회칙입니다.\n\n스마트시티 관련 프로젝트 지원, 산학협력 활동, 기술 세미나 및 워크샵 운영 등을 규정합니다.',
-            'pdf_filename': 'smart_city_regulation.pdf',
+            'content': '스마트도시대학 학생회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 9
         },
         {
             'category': '특별기구',
             'title': '총예비역회 학생회칙',
-            'content': '총예비역회의 조직과 운영에 관한 회칙입니다.\n\n예비역 학우들의 권익 보호, 복학생 지원 프로그램, 군 복무 관련 정보 제공 등의 활동을 명시합니다.',
-            'pdf_filename': 'reserve_forces_regulation.pdf',
+            'content': '총예비역회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\고려대학교 세종총학생회 일반규칙.pdf',
             'order': 10
         },
         {
             'category': '특별기구',
             'title': '총동아리연합회 학생회칙',
-            'content': '총동아리연합회의 조직과 운영에 관한 회칙입니다.\n\n동아리 등록 및 관리, 동아리방 배정, 활동 지원금 지급, 동아리 축제 운영 등을 규정합니다.',
-            'pdf_filename': 'club_union_regulation.pdf',
+            'content': '총동아리연합회의 조직과 운영에 관한 회칙입니다.',
+            'pdf_filename': 'static\regulations\총동아리연합회_회칙.pdf',
             'order': 11
         },
     ]
