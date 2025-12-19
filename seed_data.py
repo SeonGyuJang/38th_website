@@ -692,8 +692,8 @@ def create_organization():
         {'name': '서가연', 'position': '기획정책위원장', 'department': '본부', 'major': '정부행정학부23', 'student_id': '2023****', 'email': 'planning@korea.ac.kr', 'phone': '010-****-****', 'order': 4},
 
         # 1순위 - 산하위원회
-        {'name': '김민수', 'position': '산하위원장', 'department': '산하위원회', 'major': '사회학과', 'student_id': '2022****', 'email': 'humanrights@korea.ac.kr', 'phone': '010-****-****', 'order': 5},
-        {'name': '이서연', 'position': '산하위원장', 'department': '산하위원회', 'major': '교육학과', 'student_id': '2022****', 'email': 'education@korea.ac.kr', 'phone': '010-****-****', 'order': 6},
+        {'name': '김민수', 'position': '산하위원장', 'department': '산하위원회 인권/복지부', 'major': '사회학과', 'student_id': '2022****', 'email': 'humanrights@korea.ac.kr', 'phone': '010-****-****', 'order': 5},
+        {'name': '이서연', 'position': '산하위원장', 'department': '산하위원회 교육/복지부', 'major': '교육학과', 'student_id': '2022****', 'email': 'education@korea.ac.kr', 'phone': '010-****-****', 'order': 6},
 
         # 2순위 - 중집위 국들
         # 미디어소통국
