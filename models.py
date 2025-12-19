@@ -80,8 +80,9 @@ class Regulation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(100), nullable=False)  # 단위 (총학생회, 동아리연합회 등)
     title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    file_url = db.Column(db.String(500))  # 첨부파일 URL
+    content = db.Column(db.Text, nullable=False)  # 회칙 설명
+    pdf_filename = db.Column(db.String(500))  # PDF 파일명 (static/regulations/ 내)
+    file_url = db.Column(db.String(500))  # 첨부파일 URL (하위 호환성)
     order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
