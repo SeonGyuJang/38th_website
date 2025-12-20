@@ -193,7 +193,15 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_minute(self, minute_id: int) -> bool:
-        """회의록 삭제"""
+        """회의록 삭제 (파일 포함)"""
+        # 삭제 전에 데이터 조회하여 파일 URL 확인
+        minute = self.get_minute_by_id(minute_id)
+        if minute and minute.get('file_url'):
+            # 파일 삭제
+            from storage_helper import storage
+            storage.delete_file(minute['file_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('meeting_minutes').delete().eq('id', minute_id).execute()
         return len(response.data) > 0
 
@@ -224,7 +232,15 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_regulation(self, regulation_id: int) -> bool:
-        """회칙 삭제"""
+        """회칙 삭제 (파일 포함)"""
+        # 삭제 전에 데이터 조회하여 파일 URL 확인
+        regulation = self.get_regulation_by_id(regulation_id)
+        if regulation and regulation.get('file_url'):
+            # 파일 삭제
+            from storage_helper import storage
+            storage.delete_file(regulation['file_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('regulations').delete().eq('id', regulation_id).execute()
         return len(response.data) > 0
 
@@ -255,7 +271,15 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_program(self, program_id: int) -> bool:
-        """프로그램 삭제"""
+        """프로그램 삭제 (이미지 포함)"""
+        # 삭제 전에 데이터 조회하여 이미지 URL 확인
+        program = self.get_program_by_id(program_id)
+        if program and program.get('image_url'):
+            # 이미지 삭제
+            from storage_helper import storage
+            storage.delete_file(program['image_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('programs').delete().eq('id', program_id).execute()
         return len(response.data) > 0
 
@@ -291,7 +315,15 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_organization(self, member_id: int) -> bool:
-        """조직도 멤버 삭제"""
+        """조직도 멤버 삭제 (사진 포함)"""
+        # 삭제 전에 데이터 조회하여 사진 URL 확인
+        member = self.get_organization_by_id(member_id)
+        if member and member.get('photo_url'):
+            # 사진 삭제
+            from storage_helper import storage
+            storage.delete_file(member['photo_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('organizations').delete().eq('id', member_id).execute()
         return len(response.data) > 0
 
@@ -320,7 +352,15 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_banner(self, banner_id: int) -> bool:
-        """배너 삭제"""
+        """배너 삭제 (이미지 포함)"""
+        # 삭제 전에 데이터 조회하여 이미지 URL 확인
+        banner = self.get_banner_by_id(banner_id)
+        if banner and banner.get('image_url'):
+            # 이미지 삭제
+            from storage_helper import storage
+            storage.delete_file(banner['image_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('banners').delete().eq('id', banner_id).execute()
         return len(response.data) > 0
 
@@ -359,7 +399,18 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_archive(self, archive_id: int) -> bool:
-        """아카이브 삭제"""
+        """아카이브 삭제 (연결된 모든 이미지 포함)"""
+        # 삭제 전에 연결된 모든 이미지 조회 및 삭제
+        images = self.client.table('archive_images').select('*').eq('archive_id', archive_id).execute()
+        if images.data:
+            from storage_helper import storage
+            for image in images.data:
+                if image.get('image_url'):
+                    storage.delete_file(image['image_url'])
+                # 이미지 레코드 삭제
+                self.client.table('archive_images').delete().eq('id', image['id']).execute()
+
+        # 아카이브 삭제
         response = self.client.table('archives').delete().eq('id', archive_id).execute()
         return len(response.data) > 0
 
@@ -375,6 +426,19 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_archive_image(self, image_id: int) -> bool:
-        """아카이브 이미지 삭제"""
+        """아카이브 이미지 삭제 (파일 포함)"""
+        # 삭제 전에 데이터 조회하여 이미지 URL 확인
+        image = self.get_archive_image_by_id(image_id)
+        if image and image.get('image_url'):
+            # 이미지 파일 삭제
+            from storage_helper import storage
+            storage.delete_file(image['image_url'])
+
+        # 데이터베이스에서 삭제
         response = self.client.table('archive_images').delete().eq('id', image_id).execute()
         return len(response.data) > 0
+
+    def get_archive_image_by_id(self, image_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 아카이브 이미지 조회"""
+        response = self.client.table('archive_images').select('*').eq('id', image_id).execute()
+        return response.data[0] if response.data else None
