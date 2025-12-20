@@ -16,6 +16,52 @@ class SupabaseHelper:
         self.client = get_supabase_client()
         self.admin_client = get_supabase_admin_client()
 
+    @staticmethod
+    def parse_datetime(date_string: str) -> Optional[datetime]:
+        """ISO 형식 문자열을 datetime 객체로 변환"""
+        if not date_string:
+            return None
+        try:
+            # ISO 형식 파싱 (Supabase에서 반환하는 형식)
+            return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+        except (ValueError, AttributeError):
+            return None
+
+    def convert_schedule_dates(self, schedule: Dict[str, Any]) -> Dict[str, Any]:
+        """일정 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if schedule:
+            if 'start_date' in schedule:
+                schedule['start_date'] = self.parse_datetime(schedule['start_date'])
+            if 'end_date' in schedule:
+                schedule['end_date'] = self.parse_datetime(schedule['end_date'])
+            if 'created_at' in schedule:
+                schedule['created_at'] = self.parse_datetime(schedule['created_at'])
+        return schedule
+
+    def convert_meeting_dates(self, meeting: Dict[str, Any]) -> Dict[str, Any]:
+        """회의록 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if meeting:
+            if 'meeting_date' in meeting:
+                meeting['meeting_date'] = self.parse_datetime(meeting['meeting_date'])
+            if 'created_at' in meeting:
+                meeting['created_at'] = self.parse_datetime(meeting['created_at'])
+        return meeting
+
+    def convert_program_dates(self, program: Dict[str, Any]) -> Dict[str, Any]:
+        """프로그램 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if program:
+            if 'start_date' in program:
+                program['start_date'] = self.parse_datetime(program['start_date'])
+            if 'end_date' in program:
+                program['end_date'] = self.parse_datetime(program['end_date'])
+            if 'application_start' in program:
+                program['application_start'] = self.parse_datetime(program['application_start'])
+            if 'application_end' in program:
+                program['application_end'] = self.parse_datetime(program['application_end'])
+            if 'created_at' in program:
+                program['created_at'] = self.parse_datetime(program['created_at'])
+        return program
+
     # ============ Admin 관련 ============
     def get_admin_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """사용자명으로 관리자 조회"""
@@ -41,18 +87,20 @@ class SupabaseHelper:
     def get_all_schedules(self, order_by: str = 'start_date', ascending: bool = False) -> List[Dict[str, Any]]:
         """모든 일정 조회"""
         response = self.client.table('schedules').select('*').order(order_by, desc=not ascending).execute()
-        return response.data
+        return [self.convert_schedule_dates(schedule) for schedule in response.data]
 
     def get_upcoming_schedules(self, limit: int = 2) -> List[Dict[str, Any]]:
         """다가오는 일정 조회"""
         now = datetime.now().isoformat()
         response = self.client.table('schedules').select('*').gte('start_date', now).order('start_date').limit(limit).execute()
-        return response.data
+        return [self.convert_schedule_dates(schedule) for schedule in response.data]
 
     def get_schedule_by_id(self, schedule_id: int) -> Optional[Dict[str, Any]]:
         """ID로 일정 조회"""
         response = self.client.table('schedules').select('*').eq('id', schedule_id).execute()
-        return response.data[0] if response.data else None
+        if response.data:
+            return self.convert_schedule_dates(response.data[0])
+        return None
 
     def create_schedule(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """일정 생성"""
@@ -120,17 +168,19 @@ class SupabaseHelper:
     def get_all_minutes(self, order_by: str = 'meeting_date', ascending: bool = False) -> List[Dict[str, Any]]:
         """모든 회의록 조회"""
         response = self.client.table('meeting_minutes').select('*').order(order_by, desc=not ascending).execute()
-        return response.data
+        return [self.convert_meeting_dates(meeting) for meeting in response.data]
 
     def get_recent_minutes(self, limit: int = 2) -> List[Dict[str, Any]]:
         """최근 회의록 조회"""
         response = self.client.table('meeting_minutes').select('*').order('meeting_date', desc=True).limit(limit).execute()
-        return response.data
+        return [self.convert_meeting_dates(meeting) for meeting in response.data]
 
     def get_minute_by_id(self, minute_id: int) -> Optional[Dict[str, Any]]:
         """ID로 회의록 조회"""
         response = self.client.table('meeting_minutes').select('*').eq('id', minute_id).execute()
-        return response.data[0] if response.data else None
+        if response.data:
+            return self.convert_meeting_dates(response.data[0])
+        return None
 
     def create_minute(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """회의록 생성"""
@@ -185,12 +235,14 @@ class SupabaseHelper:
         if is_active is not None:
             query = query.eq('is_active', is_active)
         response = query.order(order_by, desc=not ascending).execute()
-        return response.data
+        return [self.convert_program_dates(program) for program in response.data]
 
     def get_program_by_id(self, program_id: int) -> Optional[Dict[str, Any]]:
         """ID로 프로그램 조회"""
         response = self.client.table('programs').select('*').eq('id', program_id).execute()
-        return response.data[0] if response.data else None
+        if response.data:
+            return self.convert_program_dates(response.data[0])
+        return None
 
     def create_program(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """프로그램 생성"""
