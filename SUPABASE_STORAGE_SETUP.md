@@ -4,7 +4,9 @@
 
 Heroku의 임시(ephemeral) 파일 시스템 문제를 해결하기 위해 Supabase Storage를 통합했습니다. 이제 모든 파일(PDF, 이미지 등)이 클라우드에 저장되어 서버 재시작 후에도 유지됩니다.
 
-## 1단계: Supabase Storage 버킷 생성
+**`seed_to_supabase.py` 실행 시 기본 파일들도 자동으로 Supabase Storage에 업로드됩니다!**
+
+## 1단계: Supabase Storage 버킷 생성 (필수)
 
 ### Supabase 대시보드에서 설정:
 
@@ -26,9 +28,38 @@ Heroku의 임시(ephemeral) 파일 시스템 문제를 해결하기 위해 Supab
    - `Policies` 탭 확인
    - Public 버킷이므로 별도 정책 설정 불필요
 
-## 2단계: 로컬 파일 마이그레이션 (옵션)
+## 2단계: 데이터베이스 초기화 (기본 파일 자동 업로드)
 
-현재 로컬 PC에 있는 파일들을 Supabase Storage로 업로드하려면:
+**중요**: `seed_to_supabase.py`를 실행하면 **데이터와 함께 파일들도 자동으로 Supabase Storage에 업로드**됩니다!
+
+### seed_to_supabase.py 실행:
+
+```bash
+python seed_to_supabase.py
+```
+
+### 스크립트가 수행하는 작업:
+
+1. **버킷 존재 확인**
+   - `uploads` 버킷이 있는지 확인
+   - 없으면 생성 안내 메시지 표시 후 종료
+
+2. **데이터베이스 초기화**
+   - 기존 데이터 삭제 (Admin 제외)
+   - 일정, 공약, 회의록 등 기본 데이터 생성
+
+3. **파일 자동 업로드** ⭐
+   - `static/defaults/banners/` → Supabase Storage `uploads/banners/`
+   - `static/defaults/regulations/` → Supabase Storage `uploads/regulations/`
+   - 업로드된 파일의 URL을 데이터베이스에 자동 저장
+
+4. **업로드되는 파일들**:
+   - ✅ 배너 이미지 2개 (banner_1.png, banner_2.png)
+   - ✅ 회칙 PDF 8개 (총학생회, 단과대학, 특별기구)
+
+## 3단계: 추가 파일 마이그레이션 (옵션)
+
+이미 로컬에 다른 파일들이 있다면 별도로 마이그레이션할 수 있습니다:
 
 ### 마이그레이션 스크립트 실행:
 
@@ -65,7 +96,7 @@ python migrate_files_to_storage.py
 3. 각 폴더에 파일 드래그 앤 드롭
 4. 데이터베이스의 URL을 수동으로 업데이트
 
-## 3단계: 관리자 패널 파일 업로드 동작 확인
+## 4단계: 관리자 패널 파일 업로드 동작 확인
 
 ### 자동으로 Supabase Storage 사용:
 
@@ -89,7 +120,7 @@ python migrate_files_to_storage.py
 - 조직도 멤버 삭제 → 사진 파일도 삭제
 - 회의록 삭제 → 파일도 삭제
 
-## 4단계: Heroku 배포
+## 5단계: Heroku 배포
 
 변경사항을 Heroku에 배포:
 
@@ -98,6 +129,20 @@ git push heroku main
 ```
 
 또는 GitHub 연동이 되어있다면 자동 배포됩니다.
+
+## 빠른 시작 가이드
+
+```bash
+# 1. Supabase 대시보드에서 'uploads' 버킷 생성 (Public)
+
+# 2. 데이터베이스 초기화 + 파일 업로드
+python seed_to_supabase.py
+
+# 3. 서버 실행
+python app.py
+
+# 완료! 배너와 회칙 파일이 Supabase Storage에서 자동으로 로드됩니다.
+```
 
 ## 주요 변경사항
 
@@ -109,19 +154,29 @@ git push heroku main
    - 공개 URL 자동 생성
 
 2. **`migrate_files_to_storage.py`**
-   - 로컬 파일을 Supabase Storage로 일괄 마이그레이션
+   - 로컬 파일을 Supabase Storage로 일괄 마이그레이션 (옵션)
    - 데이터베이스 URL 자동 업데이트
    - 버킷 존재 확인
 
 ### 수정된 파일:
 
-1. **`app.py`**
+1. **`seed_to_supabase.py`** ⭐
+   - `upload_default_file()`: 기본 파일을 Storage에 업로드하는 헬퍼 함수
+   - `create_regulations()`: 회칙 PDF 파일 자동 업로드
+   - `create_banners()`: 배너 이미지 자동 업로드
+   - `verify_storage_bucket()`: 버킷 존재 확인
+
+2. **`app.py`**
    - `save_file()`: 로컬 저장 → Supabase Storage 업로드
    - `delete_file()`: Supabase Storage 파일 삭제 함수 추가
+   - `init_default_files()`: 불필요한 파일 복사 로직 제거
 
-2. **`supabase_helpers.py`**
+3. **`supabase_helpers.py`**
    - 모든 `delete_*()` 함수에 파일 삭제 로직 추가
    - 데이터베이스 레코드 삭제 시 Storage 파일도 함께 삭제
+
+4. **`templates/base.html`**
+   - 로고 경로를 `static/defaults/logo.png`로 변경 (로컬 서빙)
 
 ## 파일 저장 구조
 
