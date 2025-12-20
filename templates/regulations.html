@@ -195,9 +195,9 @@
                 </div>
 
                 <!-- 버튼 그룹 -->
-                {% if regulation.pdf_filename or regulation.file_url %}
+                {% if regulation.file_url %}
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; position: relative; z-index: 2;">
-                    {% set pdf_url = url_for('regulation_pdf', filename=regulation.pdf_filename) if regulation.pdf_filename else regulation.file_url %}
+                    {% set pdf_url = regulation.file_url %}
 
                     <!-- PDF 미리보기 버튼 -->
                     <button onclick="openPDFModal('{{ pdf_url }}', '{{ regulation.title | replace("'", "\\'") }}')" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 28px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); color: white; border: none; border-radius: 14px; font-size: clamp(0.9rem, 2.1vw, 1rem); font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 6px 20px rgba(150, 26, 50, 0.3);"

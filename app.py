@@ -172,10 +172,11 @@ def regulations():
         categories[regulation.category].append(regulation)
     return render_template('regulations.html', categories=categories)
 
-@app.route('/regulations/pdf/<filename>')
+@app.route('/regulations/pdf/<path:filename>')
 def regulation_pdf(filename):
-    """회칙 PDF 파일 뷰어"""
-    regulations_dir = os.path.join(app.root_path, 'static', 'regulations')
+    """회칙 PDF 파일 제공"""
+    # static/uploads/regulations 폴더에서 파일 제공
+    regulations_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'regulations')
     return send_from_directory(regulations_dir, filename)
 
 @app.route('/programs')
