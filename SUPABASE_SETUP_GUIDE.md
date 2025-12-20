@@ -86,15 +86,14 @@
 
 ```bash
 # Flask Configuration
-SECRET_KEY=your-random-secret-key-here-change-this
+SECRET_KEY=bf32b61e0273df89dc5495dbc43fe27f5d34d59ac217841cb42fc541a05b96e3
 FLASK_ENV=production
 FLASK_DEBUG=False
 
 # Supabase Configuration
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_KEY=your-anon-public-key-here
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
-
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_ValH8Hgov-HYb24DGLYlJQ_2gQaJrfr
 # Application Configuration
 PORT=1992
 ```
