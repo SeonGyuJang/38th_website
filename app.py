@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
-from sqlalchemy import or_
 from models import db, Admin, Schedule, Promise, PromiseProgress, MeetingMinutes, Regulation, Program, Organization, Banner, Archive, ArchiveImage
 from config import Config
 from datetime import datetime
@@ -75,13 +74,8 @@ def schedule():
 def organization():
     # 간략 보기용 데이터 (회장단)
     presidents = Organization.query.filter(Organization.position.contains('회장')).order_by(Organization.order).all()
-    # 위원장 및 부장
-    heads = Organization.query.filter(
-        or_(
-            Organization.position.contains('위원장'),
-            Organization.position.contains('부장')
-        )
-    ).order_by(Organization.order).all()
+    # 위원장
+    heads = Organization.query.filter(Organization.position.contains('위원장')).order_by(Organization.order).all()
 
     # 상세 보기용 데이터 (부서별 그룹화)
     all_members = Organization.query.order_by(Organization.order).all()

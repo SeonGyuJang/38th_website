@@ -694,73 +694,69 @@ def create_organization():
         # 1순위 - 산하위원회
         {'name': '박서준', 'position': '산하위원장', 'department': '산하위원회', 'major': '행정학과', 'student_id': '2022****', 'email': 'subcommittee@korea.ac.kr', 'phone': '010-****-****', 'order': 5},
 
-        # 산하위원회 부장들
-        {'name': '김민수', 'position': '인권/복지부장', 'department': '산하위원회 인권/복지부', 'major': '사회학과', 'student_id': '2022****', 'email': 'humanrights@korea.ac.kr', 'phone': '010-****-****', 'order': 6},
-        {'name': '이서연', 'position': '교육/복지부장', 'department': '산하위원회 교육/복지부', 'major': '교육학과', 'student_id': '2022****', 'email': 'education@korea.ac.kr', 'phone': '010-****-****', 'order': 7},
-
         # 2순위 - 중집위 국들
         # 미디어소통국
-        {'name': '박지훈', 'position': '국장', 'department': '중앙집행위원회 미디어소통국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'media@korea.ac.kr', 'phone': '010-1111-1111', 'order': 8},
-        {'name': '최유진', 'position': '차장', 'department': '중앙집행위원회 미디어소통국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'media_vice@korea.ac.kr', 'phone': '', 'order': 9},
-        {'name': '정민재', 'position': '국원', 'department': '중앙집행위원회 미디어소통국', 'major': '신문방송학과', 'student_id': '2023****', 'email': 'media_member@korea.ac.kr', 'phone': '', 'order': 10},
+        {'name': '박지훈', 'position': '국장', 'department': '중앙집행위원회 미디어소통국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'media@korea.ac.kr', 'phone': '010-1111-1111', 'order': 6},
+        {'name': '최유진', 'position': '차장', 'department': '중앙집행위원회 미디어소통국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'media_vice@korea.ac.kr', 'phone': '', 'order': 7},
+        {'name': '정민재', 'position': '국원', 'department': '중앙집행위원회 미디어소통국', 'major': '신문방송학과', 'student_id': '2023****', 'email': 'media_member@korea.ac.kr', 'phone': '', 'order': 8},
 
         # 사무국
-        {'name': '강현우', 'position': '국장', 'department': '중앙집행위원회 사무국', 'major': '행정학과', 'student_id': '2023****', 'email': 'admin@korea.ac.kr', 'phone': '010-2222-2222', 'order': 11},
-        {'name': '윤서희', 'position': '차장', 'department': '중앙집행위원회 사무국', 'major': '경영학과', 'student_id': '2023****', 'email': 'admin_vice@korea.ac.kr', 'phone': '', 'order': 12},
-        {'name': '임동현', 'position': '국원', 'department': '중앙집행위원회 사무국', 'major': '경제학과', 'student_id': '2023****', 'email': 'admin_member@korea.ac.kr', 'phone': '', 'order': 13},
+        {'name': '강현우', 'position': '국장', 'department': '중앙집행위원회 사무국', 'major': '행정학과', 'student_id': '2023****', 'email': 'admin@korea.ac.kr', 'phone': '010-2222-2222', 'order': 9},
+        {'name': '윤서희', 'position': '차장', 'department': '중앙집행위원회 사무국', 'major': '경영학과', 'student_id': '2023****', 'email': 'admin_vice@korea.ac.kr', 'phone': '', 'order': 10},
+        {'name': '임동현', 'position': '국원', 'department': '중앙집행위원회 사무국', 'major': '경제학과', 'student_id': '2023****', 'email': 'admin_member@korea.ac.kr', 'phone': '', 'order': 11},
 
         # 재정국
-        {'name': '조은비', 'position': '국장', 'department': '중앙집행위원회 재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'finance@korea.ac.kr', 'phone': '010-3333-3333', 'order': 14},
-        {'name': '신태양', 'position': '차장', 'department': '중앙집행위원회 재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'finance_vice@korea.ac.kr', 'phone': '', 'order': 15},
-        {'name': '한지민', 'position': '국원', 'department': '중앙집행위원회 재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'finance_member@korea.ac.kr', 'phone': '', 'order': 16},
+        {'name': '조은비', 'position': '국장', 'department': '중앙집행위원회 재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'finance@korea.ac.kr', 'phone': '010-3333-3333', 'order': 12},
+        {'name': '신태양', 'position': '차장', 'department': '중앙집행위원회 재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'finance_vice@korea.ac.kr', 'phone': '', 'order': 13},
+        {'name': '한지민', 'position': '국원', 'department': '중앙집행위원회 재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'finance_member@korea.ac.kr', 'phone': '', 'order': 14},
 
         # 기정위 국들
         # 문화기획국
-        {'name': '오성빈', 'position': '국장', 'department': '기획정책위원회 문화기획국', 'major': '문화콘텐츠학과', 'student_id': '2023****', 'email': 'culture@korea.ac.kr', 'phone': '010-4444-4444', 'order': 17},
-        {'name': '송민지', 'position': '차장', 'department': '기획정책위원회 문화기획국', 'major': '예술학과', 'student_id': '2023****', 'email': 'culture_vice@korea.ac.kr', 'phone': '', 'order': 18},
-        {'name': '배준혁', 'position': '국원', 'department': '기획정책위원회 문화기획국', 'major': '디자인학과', 'student_id': '2023****', 'email': 'culture_member@korea.ac.kr', 'phone': '', 'order': 19},
+        {'name': '오성빈', 'position': '국장', 'department': '기획정책위원회 문화기획국', 'major': '문화콘텐츠학과', 'student_id': '2023****', 'email': 'culture@korea.ac.kr', 'phone': '010-4444-4444', 'order': 15},
+        {'name': '송민지', 'position': '차장', 'department': '기획정책위원회 문화기획국', 'major': '예술학과', 'student_id': '2023****', 'email': 'culture_vice@korea.ac.kr', 'phone': '', 'order': 16},
+        {'name': '배준혁', 'position': '국원', 'department': '기획정책위원회 문화기획국', 'major': '디자인학과', 'student_id': '2023****', 'email': 'culture_member@korea.ac.kr', 'phone': '', 'order': 17},
 
         # 대외협력국
-        {'name': '고은아', 'position': '국장', 'department': '기획정책위원회 대외협력국', 'major': '국제관계학과', 'student_id': '2023****', 'email': 'external@korea.ac.kr', 'phone': '010-5555-5555', 'order': 20},
-        {'name': '남궁찬', 'position': '차장', 'department': '기획정책위원회 대외협력국', 'major': '정치외교학과', 'student_id': '2023****', 'email': 'external_vice@korea.ac.kr', 'phone': '', 'order': 21},
-        {'name': '류지현', 'position': '국원', 'department': '기획정책위원회 대외협력국', 'major': '글로벌비즈니스학과', 'student_id': '2023****', 'email': 'external_member@korea.ac.kr', 'phone': '', 'order': 22},
+        {'name': '고은아', 'position': '국장', 'department': '기획정책위원회 대외협력국', 'major': '국제관계학과', 'student_id': '2023****', 'email': 'external@korea.ac.kr', 'phone': '010-5555-5555', 'order': 18},
+        {'name': '남궁찬', 'position': '차장', 'department': '기획정책위원회 대외협력국', 'major': '정치외교학과', 'student_id': '2023****', 'email': 'external_vice@korea.ac.kr', 'phone': '', 'order': 19},
+        {'name': '류지현', 'position': '국원', 'department': '기획정책위원회 대외협력국', 'major': '글로벌비즈니스학과', 'student_id': '2023****', 'email': 'external_member@korea.ac.kr', 'phone': '', 'order': 20},
 
         # 정책국
-        {'name': '김태우', 'position': '국장', 'department': '기획정책위원회 정책국', 'major': '정책학과', 'student_id': '2023****', 'email': 'policy@korea.ac.kr', 'phone': '010-6666-6666', 'order': 23},
-        {'name': '박서연', 'position': '차장', 'department': '기획정책위원회 정책국', 'major': '행정학과', 'student_id': '2023****', 'email': 'policy_vice@korea.ac.kr', 'phone': '', 'order': 24},
-        {'name': '이민호', 'position': '국원', 'department': '기획정책위원회 정책국', 'major': '법학과', 'student_id': '2023****', 'email': 'policy_member@korea.ac.kr', 'phone': '', 'order': 25},
+        {'name': '김태우', 'position': '국장', 'department': '기획정책위원회 정책국', 'major': '정책학과', 'student_id': '2023****', 'email': 'policy@korea.ac.kr', 'phone': '010-6666-6666', 'order': 21},
+        {'name': '박서연', 'position': '차장', 'department': '기획정책위원회 정책국', 'major': '행정학과', 'student_id': '2023****', 'email': 'policy_vice@korea.ac.kr', 'phone': '', 'order': 22},
+        {'name': '이민호', 'position': '국원', 'department': '기획정책위원회 정책국', 'major': '법학과', 'student_id': '2023****', 'email': 'policy_member@korea.ac.kr', 'phone': '', 'order': 23},
 
         # 인권/복지부 국들
         # 홍보국
-        {'name': '정하늘', 'position': '국장', 'department': '인권/복지부 홍보국', 'major': '광고홍보학과', 'student_id': '2023****', 'email': 'hr_pr@korea.ac.kr', 'phone': '010-7777-7777', 'order': 26},
-        {'name': '최민준', 'position': '차장', 'department': '인권/복지부 홍보국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'hr_pr_vice@korea.ac.kr', 'phone': '', 'order': 27},
-        {'name': '강지우', 'position': '국원', 'department': '인권/복지부 홍보국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'hr_pr_member@korea.ac.kr', 'phone': '', 'order': 28},
+        {'name': '정하늘', 'position': '국장', 'department': '인권/복지부 홍보국', 'major': '광고홍보학과', 'student_id': '2023****', 'email': 'hr_pr@korea.ac.kr', 'phone': '010-7777-7777', 'order': 24},
+        {'name': '최민준', 'position': '차장', 'department': '인권/복지부 홍보국', 'major': '미디어학과', 'student_id': '2023****', 'email': 'hr_pr_vice@korea.ac.kr', 'phone': '', 'order': 25},
+        {'name': '강지우', 'position': '국원', 'department': '인권/복지부 홍보국', 'major': '커뮤니케이션학과', 'student_id': '2023****', 'email': 'hr_pr_member@korea.ac.kr', 'phone': '', 'order': 26},
 
         # 기획국
-        {'name': '윤태영', 'position': '국장', 'department': '인권/복지부 기획국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_planning@korea.ac.kr', 'phone': '010-8888-8888', 'order': 29},
-        {'name': '송예진', 'position': '차장', 'department': '인권/복지부 기획국', 'major': '경제학과', 'student_id': '2023****', 'email': 'hr_planning_vice@korea.ac.kr', 'phone': '', 'order': 30},
-        {'name': '임수빈', 'position': '국원', 'department': '인권/복지부 기획국', 'major': '행정학과', 'student_id': '2023****', 'email': 'hr_planning_member@korea.ac.kr', 'phone': '', 'order': 31},
+        {'name': '윤태영', 'position': '국장', 'department': '인권/복지부 기획국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_planning@korea.ac.kr', 'phone': '010-8888-8888', 'order': 27},
+        {'name': '송예진', 'position': '차장', 'department': '인권/복지부 기획국', 'major': '경제학과', 'student_id': '2023****', 'email': 'hr_planning_vice@korea.ac.kr', 'phone': '', 'order': 28},
+        {'name': '임수빈', 'position': '국원', 'department': '인권/복지부 기획국', 'major': '행정학과', 'student_id': '2023****', 'email': 'hr_planning_member@korea.ac.kr', 'phone': '', 'order': 29},
 
         # 사무재정국
-        {'name': '조현우', 'position': '국장', 'department': '인권/복지부 사무재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'hr_admin@korea.ac.kr', 'phone': '010-9999-9999', 'order': 32},
-        {'name': '백서현', 'position': '차장', 'department': '인권/복지부 사무재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'hr_admin_vice@korea.ac.kr', 'phone': '', 'order': 33},
-        {'name': '황준혁', 'position': '국원', 'department': '인권/복지부 사무재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_admin_member@korea.ac.kr', 'phone': '', 'order': 34},
+        {'name': '조현우', 'position': '국장', 'department': '인권/복지부 사무재정국', 'major': '회계학과', 'student_id': '2023****', 'email': 'hr_admin@korea.ac.kr', 'phone': '010-9999-9999', 'order': 30},
+        {'name': '백서현', 'position': '차장', 'department': '인권/복지부 사무재정국', 'major': '금융학과', 'student_id': '2023****', 'email': 'hr_admin_vice@korea.ac.kr', 'phone': '', 'order': 31},
+        {'name': '황준혁', 'position': '국원', 'department': '인권/복지부 사무재정국', 'major': '경영학과', 'student_id': '2023****', 'email': 'hr_admin_member@korea.ac.kr', 'phone': '', 'order': 32},
 
         # 교육/복지부 국들
         # 홍보국
-        {'name': '김다은', 'position': '국장', 'department': '교육/복지부 홍보국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_pr@korea.ac.kr', 'phone': '010-1010-1010', 'order': 35},
-        {'name': '박준영', 'position': '차장', 'department': '교육/복지부 홍보국', 'major': '특수교육학과', 'student_id': '2023****', 'email': 'edu_pr_vice@korea.ac.kr', 'phone': '', 'order': 36},
-        {'name': '이서아', 'position': '국원', 'department': '교육/복지부 홍보국', 'major': '교육심리학과', 'student_id': '2023****', 'email': 'edu_pr_member@korea.ac.kr', 'phone': '', 'order': 37},
+        {'name': '김다은', 'position': '국장', 'department': '교육/복지부 홍보국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_pr@korea.ac.kr', 'phone': '010-1010-1010', 'order': 33},
+        {'name': '박준영', 'position': '차장', 'department': '교육/복지부 홍보국', 'major': '특수교육학과', 'student_id': '2023****', 'email': 'edu_pr_vice@korea.ac.kr', 'phone': '', 'order': 34},
+        {'name': '이서아', 'position': '국원', 'department': '교육/복지부 홍보국', 'major': '교육심리학과', 'student_id': '2023****', 'email': 'edu_pr_member@korea.ac.kr', 'phone': '', 'order': 35},
 
         # 기획국
-        {'name': '최태민', 'position': '국장', 'department': '교육/복지부 기획국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_planning@korea.ac.kr', 'phone': '010-1111-1111', 'order': 38},
-        {'name': '장미래', 'position': '차장', 'department': '교육/복지부 기획국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_planning_vice@korea.ac.kr', 'phone': '', 'order': 39},
-        {'name': '노현준', 'position': '국원', 'department': '교육/복지부 기획국', 'major': '교육공학과', 'student_id': '2023****', 'email': 'edu_planning_member@korea.ac.kr', 'phone': '', 'order': 40},
+        {'name': '최태민', 'position': '국장', 'department': '교육/복지부 기획국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_planning@korea.ac.kr', 'phone': '010-1111-1111', 'order': 36},
+        {'name': '장미래', 'position': '차장', 'department': '교육/복지부 기획국', 'major': '교육학과', 'student_id': '2023****', 'email': 'edu_planning_vice@korea.ac.kr', 'phone': '', 'order': 37},
+        {'name': '노현준', 'position': '국원', 'department': '교육/복지부 기획국', 'major': '교육공학과', 'student_id': '2023****', 'email': 'edu_planning_member@korea.ac.kr', 'phone': '', 'order': 38},
 
         # 사무재정국
-        {'name': '서지훈', 'position': '국장', 'department': '교육/복지부 사무재정국', 'major': '교육재정학과', 'student_id': '2023****', 'email': 'edu_admin@korea.ac.kr', 'phone': '010-1212-1212', 'order': 41},
-        {'name': '안유진', 'position': '차장', 'department': '교육/복지부 사무재정국', 'major': '교육경제학과', 'student_id': '2023****', 'email': 'edu_admin_vice@korea.ac.kr', 'phone': '', 'order': 42},
-        {'name': '홍성민', 'position': '국원', 'department': '교육/복지부 사무재정국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_admin_member@korea.ac.kr', 'phone': '', 'order': 43},
+        {'name': '서지훈', 'position': '국장', 'department': '교육/복지부 사무재정국', 'major': '교육재정학과', 'student_id': '2023****', 'email': 'edu_admin@korea.ac.kr', 'phone': '010-1212-1212', 'order': 39},
+        {'name': '안유진', 'position': '차장', 'department': '교육/복지부 사무재정국', 'major': '교육경제학과', 'student_id': '2023****', 'email': 'edu_admin_vice@korea.ac.kr', 'phone': '', 'order': 40},
+        {'name': '홍성민', 'position': '국원', 'department': '교육/복지부 사무재정국', 'major': '교육행정학과', 'student_id': '2023****', 'email': 'edu_admin_member@korea.ac.kr', 'phone': '', 'order': 41},
     ]
 
     for data in organization_data:
