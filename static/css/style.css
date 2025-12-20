@@ -231,7 +231,7 @@ button {
 }
 
 .nav {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     height: 52px;
     display: flex;
@@ -373,7 +373,7 @@ button {
 @media (min-width: 768px) {
     .nav {
         height: 56px;
-        padding: 0 var(--spacing-xl);
+        padding: 0 clamp(24px, 4vw, 64px);
     }
 
     .logo {

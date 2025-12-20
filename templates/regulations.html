@@ -53,6 +53,9 @@
         background: rgba(0, 0, 0, 0.85);
         backdrop-filter: blur(10px);
         animation: fadeIn 0.3s ease-out;
+        /* 정중앙 배치 */
+        align-items: center;
+        justify-content: center;
     }
 
     @keyframes fadeIn {
@@ -62,10 +65,11 @@
 
     .pdf-modal-content {
         position: relative;
-        margin: 2% auto;
+        margin: 0;
         width: 90%;
         max-width: 1200px;
         height: 90vh;
+        max-height: 90vh;
         background: white;
         border-radius: 20px;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
@@ -127,7 +131,8 @@
         .pdf-modal-content {
             width: 95%;
             height: 85vh;
-            margin: 5% auto;
+            max-height: 85vh;
+            margin: 0;
         }
     }
 </style>
@@ -289,7 +294,7 @@
         const viewer = document.getElementById('pdfViewer');
 
         viewer.src = pdfUrl;
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         document.body.style.overflow = 'hidden'; // 스크롤 방지
     }
 
