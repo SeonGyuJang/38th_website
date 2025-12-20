@@ -5,7 +5,7 @@ Supabase 헬퍼 함수
 """
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from database import get_supabase_client
+from database import get_supabase_client, get_supabase_admin_client
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -14,11 +14,12 @@ class SupabaseHelper:
 
     def __init__(self):
         self.client = get_supabase_client()
+        self.admin_client = get_supabase_admin_client()
 
     # ============ Admin 관련 ============
     def get_admin_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """사용자명으로 관리자 조회"""
-        response = self.client.table('admins').select('*').eq('username', username).execute()
+        response = self.admin_client.table('admins').select('*').eq('username', username).execute()
         return response.data[0] if response.data else None
 
     def check_admin_password(self, password_hash: str, password: str) -> bool:
@@ -33,7 +34,7 @@ class SupabaseHelper:
             'name': name,
             'password_hash': password_hash
         }
-        response = self.client.table('admins').insert(data).execute()
+        response = self.admin_client.table('admins').insert(data).execute()
         return response.data[0] if response.data else None
 
     # ============ Schedule 관련 ============

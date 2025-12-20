@@ -25,7 +25,7 @@ login_manager.login_view = 'admin_login'
 @login_manager.user_loader
 def load_user(user_id):
     """Flask-Login user loader"""
-    admin_data = db_helper.client.table('admins').select('*').eq('id', int(user_id)).execute()
+    admin_data = db_helper.admin_client.table('admins').select('*').eq('id', int(user_id)).execute()
     if admin_data.data:
         return AdminUser(admin_data.data[0])
     return None
