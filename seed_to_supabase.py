@@ -2,15 +2,45 @@
 Supabase 데이터베이스에 seed 데이터를 삽입하는 스크립트
 
 기존 seed_data.py의 데이터를 Supabase로 마이그레이션합니다.
+파일들은 Supabase Storage에 업로드됩니다.
 """
 
 from database import get_supabase_admin_client
+from storage_helper import storage
 from datetime import datetime, timedelta
+import os
 import random
 
 def get_client():
     """Supabase 관리자 클라이언트 가져오기"""
     return get_supabase_admin_client()
+
+def upload_default_file(local_path: str, subfolder: str) -> str:
+    """
+    static/defaults/ 폴더의 파일을 Supabase Storage에 업로드
+
+    Args:
+        local_path: static/defaults/ 기준 상대 경로 (예: 'banners/banner_1.png')
+        subfolder: Storage 버킷 내 하위 폴더 (예: 'banners')
+
+    Returns:
+        업로드된 파일의 공개 URL
+    """
+    full_path = os.path.join('static', 'defaults', local_path)
+
+    if not os.path.exists(full_path):
+        print(f"  ⚠ 파일을 찾을 수 없습니다: {full_path}")
+        return None
+
+    # Supabase Storage에 업로드
+    url = storage.migrate_local_file(full_path, subfolder)
+
+    if url:
+        print(f"  ✓ 업로드: {local_path} -> Storage")
+    else:
+        print(f"  ❌ 업로드 실패: {local_path}")
+
+    return url
 
 def clear_all_data():
     """기존 데이터 모두 삭제 (Admin 제외)"""
@@ -514,89 +544,107 @@ def create_meeting_minutes():
     return result.data
 
 def create_regulations():
-    """회칙 데이터 생성"""
+    """회칙 데이터 생성 (파일을 Supabase Storage에 업로드)"""
     print("회칙 데이터 생성 중...")
     client = get_client()
 
-    regulations_data = [
+    # 회칙 정보 (파일명 포함)
+    regulations_info = [
         {
             'category': '총학생회',
             'title': '총학생회칙 및 세칙',
             'content': '고려대학교 세종캠퍼스 총학생회의 기본 회칙 및 세부 운영 세칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_sejong_main.pdf',
+            'file': 'regulations/regulation_sejong_main.pdf',
             'order': 1
         },
         {
             'category': '총학생회',
             'title': '총학생회 일반규칙',
             'content': '총학생회의 일반적인 운영 규칙과 절차를 정의합니다.',
-            'file_url': '/static/uploads/regulations/regulation_sejong_general_rules.pdf',
+            'file': 'regulations/regulation_sejong_general_rules.pdf',
             'order': 2
         },
         {
             'category': '총학생회',
             'title': '총학생회 세칙에 부수된 규칙',
             'content': '총학생회 세칙을 보완하는 부속 규칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_sejong_additional_rules.pdf',
+            'file': 'regulations/regulation_sejong_additional_rules.pdf',
             'order': 3
         },
         {
             'category': '단과대학',
             'title': '과학기술대학 학생회칙',
             'content': '과학기술대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_science_tech.pdf',
+            'file': 'regulations/regulation_science_tech.pdf',
             'order': 4
         },
         {
             'category': '단과대학',
             'title': '글로벌비즈니스대학 학생회칙',
             'content': '글로벌비즈니스대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_global_biz.pdf',
+            'file': 'regulations/regulation_global_biz.pdf',
             'order': 5
         },
         {
             'category': '단과대학',
             'title': '문화스포츠대학 학생회칙',
             'content': '문화스포츠대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_culture_sports.pdf',
+            'file': 'regulations/regulation_culture_sports.pdf',
             'order': 6
         },
         {
             'category': '단과대학',
             'title': '약학대학 학생회칙',
             'content': '약학대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '',
+            'file': None,
             'order': 7
         },
         {
             'category': '단과대학',
             'title': '공공정책대학 학생회칙',
             'content': '공공정책대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '',
+            'file': None,
             'order': 8
         },
         {
             'category': '단과대학',
             'title': '스마트도시대학 학생회칙',
             'content': '스마트도시대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '',
+            'file': None,
             'order': 9
         },
         {
             'category': '특별기구',
             'title': '총예비역회 학생회칙',
             'content': '총예비역회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '',
+            'file': None,
             'order': 10
         },
         {
             'category': '특별기구',
             'title': '총동아리연합회 학생회칙',
             'content': '총동아리연합회의 조직과 운영에 관한 회칙입니다.',
-            'file_url': '/static/uploads/regulations/regulation_club_union.pdf',
+            'file': 'regulations/regulation_club_union.pdf',
             'order': 11
         },
     ]
+
+    # 파일 업로드 및 데이터 생성
+    regulations_data = []
+    for reg_info in regulations_info:
+        # 파일 업로드
+        file_url = None
+        if reg_info.get('file'):
+            file_url = upload_default_file(reg_info['file'], 'regulations')
+
+        # 데이터베이스 레코드 준비
+        regulations_data.append({
+            'category': reg_info['category'],
+            'title': reg_info['title'],
+            'content': reg_info['content'],
+            'file_url': file_url or '',
+            'order': reg_info['order']
+        })
 
     result = client.table('regulations').insert(regulations_data).execute()
     print(f"✓ {len(result.data)}개의 회칙 생성 완료\n")
@@ -771,14 +819,15 @@ def create_organization():
     return result.data
 
 def create_banners():
-    """배너 데이터 생성"""
+    """배너 데이터 생성 (이미지를 Supabase Storage에 업로드)"""
     print("배너 데이터 생성 중...")
     client = get_client()
 
-    banners_data = [
+    # 배너 정보 (파일명 포함)
+    banners_info = [
         {
             'title': ' ',
-            'image_url': '/static/uploads/banners/banner_1.png',
+            'file': 'banners/banner_1.png',
             'link': '',
             'is_active': True,
             'is_event_banner': True,
@@ -786,7 +835,7 @@ def create_banners():
         },
         {
             'title': ' ',
-            'image_url': '/static/uploads/banners/banner_2.png',
+            'file': 'banners/banner_2.png',
             'link': '',
             'is_active': True,
             'is_event_banner': False,
@@ -794,15 +843,60 @@ def create_banners():
         },
     ]
 
+    # 파일 업로드 및 데이터 생성
+    banners_data = []
+    for banner_info in banners_info:
+        # 이미지 업로드
+        image_url = upload_default_file(banner_info['file'], 'banners')
+
+        # 데이터베이스 레코드 준비
+        banners_data.append({
+            'title': banner_info['title'],
+            'image_url': image_url or '',
+            'link': banner_info['link'],
+            'is_active': banner_info['is_active'],
+            'is_event_banner': banner_info['is_event_banner'],
+            'order': banner_info['order']
+        })
+
     result = client.table('banners').insert(banners_data).execute()
     print(f"✓ {len(result.data)}개의 배너 생성 완료\n")
     return result.data
+
+def verify_storage_bucket():
+    """Supabase Storage 버킷 확인"""
+    print("Supabase Storage 버킷 확인 중...")
+    try:
+        client = get_client()
+        buckets = client.storage.list_buckets()
+        bucket_names = [b.name for b in buckets]
+
+        if 'uploads' not in bucket_names:
+            print("❌ 'uploads' 버킷이 없습니다!")
+            print("\n⚠️  먼저 Supabase 대시보드에서 'uploads' 버킷을 생성해주세요:")
+            print("   1. https://app.supabase.com 에서 프로젝트 선택")
+            print("   2. Storage 메뉴 클릭")
+            print("   3. 'Create a new bucket' 클릭")
+            print("   4. 버킷 이름: uploads, Public bucket 체크")
+            print("   5. Create bucket 클릭\n")
+            return False
+        else:
+            print("✓ 'uploads' 버킷 확인 완료\n")
+            return True
+    except Exception as e:
+        print(f"❌ 버킷 확인 오류: {e}\n")
+        return False
 
 def main():
     """메인 실행 함수"""
     print("\n" + "="*60)
     print("고려대학교 38대 총학생회 - Supabase 데이터 마이그레이션")
     print("="*60 + "\n")
+
+    # Supabase Storage 버킷 확인
+    if not verify_storage_bucket():
+        print("⚠️  'uploads' 버킷을 먼저 생성한 후 다시 실행해주세요.")
+        return
 
     try:
         # 기존 데이터 삭제
@@ -812,10 +906,10 @@ def main():
         create_schedules()
         create_promises()
         create_meeting_minutes()
-        create_regulations()
+        create_regulations()  # 파일 업로드 포함
         create_programs()
         create_organization()
-        create_banners()
+        create_banners()  # 파일 업로드 포함
 
         print("="*60)
         print("✓ 모든 데이터 마이그레이션 완료!")
