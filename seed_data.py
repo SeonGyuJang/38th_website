@@ -512,77 +512,77 @@ def create_regulations():
             'category': '총학생회',
             'title': '총학생회칙 및 세칙',
             'content': '고려대학교 세종캠퍼스 총학생회의 기본 회칙 및 세부 운영 세칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_main.pdf',
+            'file_url': r'static\uploads\regulations\regulation_sejong_main.pdf',
             'order': 1
         },
         {
             'category': '총학생회',
             'title': '총학생회 일반규칙',
             'content': '총학생회의 일반적인 운영 규칙과 절차를 정의합니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_general_rules.pdf',
+            'file_url': r'static\uploads\regulations\regulation_sejong_general_rules.pdf',
             'order': 2
         },
         {
             'category': '총학생회',
             'title': '총학생회 세칙에 부수된 규칙',
             'content': '총학생회 세칙을 보완하는 부속 규칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_additional_rules.pdf',
+            'file_url': r'static\uploads\regulations\regulation_sejong_additional_rules.pdf',
             'order': 3
         },
         {
             'category': '단과대학',
             'title': '과학기술대학 학생회칙',
             'content': '과학기술대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_science_tech.pdf',
+            'file_url': r'static\uploads\regulations\regulation_science_tech.pdf',
             'order': 4
         },
         {
             'category': '단과대학',
             'title': '글로벌비즈니스대학 학생회칙',
             'content': '글로벌비즈니스대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_global_biz.pdf',
+            'file_url': r'static\uploads\regulations\regulation_global_biz.pdf',
             'order': 5
         },
         {
             'category': '단과대학',
             'title': '문화스포츠대학 학생회칙',
             'content': '문화스포츠대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_culture_sports.pdf',
+            'file_url': r'static\uploads\regulations\regulation_culture_sports.pdf',
             'order': 6
         },
         {
             'category': '단과대학',
             'title': '약학대학 학생회칙',
             'content': '약학대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_main.pdf',
+            'file_url': r'',
             'order': 7
         },
         {
             'category': '단과대학',
             'title': '공공정책대학 학생회칙',
             'content': '공공정책대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_main.pdf',
+            'file_url': r'',
             'order': 8
         },
         {
             'category': '단과대학',
             'title': '스마트도시대학 학생회칙',
             'content': '스마트도시대학 학생회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_main.pdf',
+            'file_url': r'',
             'order': 9
         },
         {
             'category': '특별기구',
             'title': '총예비역회 학생회칙',
             'content': '총예비역회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_sejong_main.pdf',
+            'file_url': r'',
             'order': 10
         },
         {
             'category': '특별기구',
             'title': '총동아리연합회 학생회칙',
             'content': '총동아리연합회의 조직과 운영에 관한 회칙입니다.',
-            'pdf_filename': r'static\uploads\regulations\regulation_club_union.pdf',
+            'file_url': r'static\uploads\regulations\regulation_club_union.pdf',
             'order': 11
         },
     ]
