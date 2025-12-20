@@ -50,11 +50,11 @@
             <span style="font-size: 0.75rem; font-weight: 700; color: var(--ku-crimson); letter-spacing: 0.15em; text-transform: uppercase;">Schedule & Events</span>
         </div>
         <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 24px; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.1;">
-            학생회<br class="show-mobile">
+            총학생회<br class="show-mobile">
             <span style="background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">일정</span>
         </h1>
         <p style="font-size: clamp(1rem, 2.3vw, 1.2rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7; font-weight: 500;">
-            학생회의 다양한 활동과 행사 일정을<br class="show-mobile"> 한눈에 확인하세요
+            총학생회의 다양한 활동과 행사 일정을<br class="show-mobile"> 한눈에 확인하세요
         </p>
     </div>
 
@@ -70,15 +70,22 @@
 
     <!-- 월별 필터 -->
     <div style="margin-bottom: 50px;">
-        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); max-width: 1000px; margin: 0 auto;">
-            <button onclick="filterMonth('all')" class="month-filter-btn active" data-month="all" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
-                전체
-            </button>
-            {% for month in schedules_by_month.keys() %}
-            <button onclick="filterMonth('{{ month }}')" class="month-filter-btn" data-month="{{ month }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
-                {{ month }}
-            </button>
-            {% endfor %}
+        <!-- 모바일: 가로 스크롤, PC: flex-wrap -->
+        <div style="max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.08); padding: clamp(16px, 3vw, 24px); overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <div style="display: flex; gap: 12px; min-width: min-content; justify-content: center; flex-wrap: wrap;">
+                <button onclick="filterMonth('all')" class="month-filter-btn active" data-month="all"
+                        style="flex-shrink: 0; padding: clamp(14px, 3vw, 16px) clamp(24px, 5vw, 32px); background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); color: white; border: none; border-radius: 14px; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
+                    전체
+                </button>
+                {% for month in schedules_by_month.keys() %}
+                <button onclick="filterMonth('{{ month }}')" class="month-filter-btn" data-month="{{ month }}"
+                        style="flex-shrink: 0; padding: clamp(14px, 3vw, 16px) clamp(24px, 5vw, 32px); background: #F5F5F7; color: var(--text-primary); border: 2px solid transparent; border-radius: 14px; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"
+                        onmouseover="if(!this.classList.contains('active')) { this.style.background='#E8E8ED'; this.style.borderColor='rgba(150, 26, 50, 0.2)'; this.style.transform='translateY(-2px)'; }"
+                        onmouseout="if(!this.classList.contains('active')) { this.style.background='#F5F5F7'; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; }">
+                    {{ month }}
+                </button>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
@@ -205,12 +212,17 @@
             btn.style.background = '#F5F5F7';
             btn.style.color = 'var(--text-primary)';
             btn.style.boxShadow = 'none';
+            btn.style.borderColor = 'transparent';
         });
 
-        // 클릭된 버튼에 active 클래스 추가
+        // 클릭된 버튼에 active 클래스 추가 및 스타일 적용
         const clickedBtn = document.querySelector(`[data-month="${month}"]`);
         if (clickedBtn && clickedBtn.classList.contains('month-filter-btn')) {
             clickedBtn.classList.add('active');
+            clickedBtn.style.background = 'linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%)';
+            clickedBtn.style.color = 'white';
+            clickedBtn.style.boxShadow = '0 4px 16px rgba(150, 26, 50, 0.3)';
+            clickedBtn.style.borderColor = 'transparent';
         }
 
         // 월별 그룹 필터링
