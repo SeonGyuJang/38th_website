@@ -55,5 +55,8 @@ logs/
 .coverage
 htmlcov/
 
-# Static uploads
+# Static uploads (업로드된 파일들)
 static/uploads/
+
+# 기본 파일들은 Git에 포함 (defaults 폴더는 제외하지 않음)
+!static/defaults/
