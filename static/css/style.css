@@ -247,7 +247,7 @@ button {
     letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     z-index: var(--z-modal);
     position: relative;
 }
@@ -257,9 +257,31 @@ button {
 }
 
 .logo-img {
-    height: 2rem;
+    height: 2.5rem;
     width: auto;
     display: block;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+}
+
+.logo-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.logo-subtitle {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
 }
 
 /* 햄버거 메뉴 버튼 (모바일) */
@@ -356,6 +378,19 @@ button {
 
     .logo {
         font-size: 1.2rem;
+        gap: 14px;
+    }
+
+    .logo-img {
+        height: 2.8rem;
+    }
+
+    .logo-title {
+        font-size: 1.05rem;
+    }
+
+    .logo-subtitle {
+        font-size: 0.7rem;
     }
 
     .menu-toggle {
