@@ -64,47 +64,21 @@ def delete_file(file_url):
     return False
 
 def init_default_files():
-    """서버 시작 시 defaults 폴더의 파일들을 uploads 폴더로 복사"""
-    defaults_dir = os.path.join(app.static_folder, 'defaults')
+    """
+    서버 시작 시 초기화 함수
+
+    Note: Supabase Storage를 사용하므로 파일 복사는 더 이상 필요하지 않습니다.
+    로고는 static/defaults/logo.png에서 직접 서빙됩니다.
+    기타 파일들은 Supabase Storage에서 관리됩니다.
+    """
+    # uploads 폴더 구조 생성 (로컬 개발 환경을 위해)
     uploads_dir = app.config['UPLOAD_FOLDER']
-
-    if not os.path.exists(defaults_dir):
-        print('defaults 폴더가 없습니다. 기본 파일 초기화를 건너뜁니다.')
-        return
-
-    # uploads 폴더 구조 생성
     for subfolder in ['banners', 'files', 'images', 'minutes', 'profiles', 'programs', 'regulations', 'archives']:
         os.makedirs(os.path.join(uploads_dir, subfolder), exist_ok=True)
 
-    # 로고 파일 복사 (logo.png)
-    logo_src = os.path.join(defaults_dir, 'logo.png')
-    logo_dest = os.path.join(uploads_dir, 'logo.png')
-    if os.path.exists(logo_src) and not os.path.exists(logo_dest):
-        shutil.copy2(logo_src, logo_dest)
-        print(f'✓ 로고 파일 복사: {logo_dest}')
-
-    # defaults 내 하위 폴더의 파일들 복사
-    for root, dirs, files in os.walk(defaults_dir):
-        # defaults 기준 상대 경로 계산
-        rel_path = os.path.relpath(root, defaults_dir)
-        if rel_path == '.':
-            continue
-
-        # uploads 내 대응 경로
-        dest_dir = os.path.join(uploads_dir, rel_path)
-        os.makedirs(dest_dir, exist_ok=True)
-
-        # 파일 복사
-        for filename in files:
-            src_file = os.path.join(root, filename)
-            dest_file = os.path.join(dest_dir, filename)
-
-            # 파일이 이미 존재하지 않으면 복사
-            if not os.path.exists(dest_file):
-                shutil.copy2(src_file, dest_file)
-                print(f'✓ 기본 파일 복사: {dest_file}')
-
-    print('기본 파일 초기화 완료')
+    print('✓ 서버 초기화 완료')
+    print('  - 로고: static/defaults/logo.png에서 서빙')
+    print('  - 업로드 파일: Supabase Storage에 저장')
 
 # ============================================
 # 공개 페이지
