@@ -62,6 +62,15 @@ class SupabaseHelper:
                 program['created_at'] = self.parse_datetime(program['created_at'])
         return program
 
+    def convert_promise_progress_dates(self, progress: Dict[str, Any]) -> Dict[str, Any]:
+        """공약 진행 상황 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if progress:
+            if 'date' in progress:
+                progress['date'] = self.parse_datetime(progress['date'])
+            if 'created_at' in progress:
+                progress['created_at'] = self.parse_datetime(progress['created_at'])
+        return progress
+
     # ============ Admin 관련 ============
     def get_admin_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """사용자명으로 관리자 조회"""
@@ -157,7 +166,7 @@ class SupabaseHelper:
     def get_promise_progress(self, promise_id: int) -> List[Dict[str, Any]]:
         """공약 진행 상황 조회"""
         response = self.client.table('promise_progress').select('*').eq('promise_id', promise_id).order('date', desc=True).execute()
-        return response.data
+        return [self.convert_promise_progress_dates(progress) for progress in response.data]
 
     def create_promise_progress(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """공약 진행 상황 생성"""
