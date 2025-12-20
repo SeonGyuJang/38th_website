@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from config import Config
 from database import init_supabase
 from supabase_helpers import SupabaseHelper
+from storage_helper import storage
 from admin_user import AdminUser
 from datetime import datetime
 import os
@@ -34,16 +35,33 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 def save_file(file, subfolder='files'):
+    """
+    파일을 Supabase Storage에 업로드
+
+    Args:
+        file: 업로드할 파일 객체
+        subfolder: 저장할 하위 폴더 (files, images, banners 등)
+
+    Returns:
+        업로드된 파일의 공개 URL 또는 None
+    """
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-        filename = timestamp + filename
-        save_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, filename)
-        file.save(save_path)
-        return url_for('static', filename=f'uploads/{subfolder}/{filename}')
+        return storage.upload_file(file, subfolder)
     return None
+
+def delete_file(file_url):
+    """
+    파일을 Supabase Storage에서 삭제
+
+    Args:
+        file_url: 삭제할 파일의 URL
+
+    Returns:
+        삭제 성공 여부
+    """
+    if file_url:
+        return storage.delete_file(file_url)
+    return False
 
 def init_default_files():
     """서버 시작 시 defaults 폴더의 파일들을 uploads 폴더로 복사"""
