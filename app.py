@@ -900,16 +900,15 @@ def admin_archive_image_delete(archive_id, image_id):
 
 @app.cli.command()
 def init_db():
-    """데이터베이스 초기화 및 기본 관리자 계정 생성"""
+    """데이터베이스 초기화"""
     print("Supabase를 사용하고 있습니다. supabase_schema.sql을 Supabase에 적용해주세요.")
-
-    # 기본 관리자 계정 확인 및 생성
-    admin_data = db_helper.get_admin_by_username('admin')
-    if not admin_data:
-        db_helper.create_admin('admin', '관리자', 'admin')
-        print('기본 관리자 계정 생성 완료 (admin / admin)')
-    else:
-        print('기본 관리자 계정이 이미 존재합니다.')
+    print("\n관리자 계정은 Supabase의 admins 테이블에서 직접 관리하세요.")
+    print("예시:")
+    print("  INSERT INTO admins (username, password_hash, name, created_at)")
+    print("  VALUES ('your_username', 'scrypt:...', '이름', NOW());")
+    print("\n비밀번호 해시 생성:")
+    print("  from werkzeug.security import generate_password_hash")
+    print("  print(generate_password_hash('your_password'))")
 
 if __name__ == '__main__':
     # 기본 파일 초기화
