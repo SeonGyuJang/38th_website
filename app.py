@@ -149,6 +149,8 @@ def promises():
         category = promise.get('category')
         if category not in categories:
             categories[category] = []
+        # 각 공약에 진행 상황 추가
+        promise['progress_updates'] = db_helper.get_promise_progress(promise['id'])
         categories[category].append(promise)
     total_progress = sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list) if promises_list else 0
     return render_template('promises.html', categories=categories, total_progress=round(total_progress))

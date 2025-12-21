@@ -29,108 +29,168 @@
 
     {% if minutes %}
     <!-- 회의 유형 필터 -->
+    {% set meeting_types = [] %}
+    {% for minute in minutes %}
+        {% if minute.meeting_type and minute.meeting_type not in meeting_types %}
+            {% set _ = meeting_types.append(minute.meeting_type) %}
+        {% endif %}
+    {% endfor %}
     <div style="margin-bottom: 50px;">
-        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
-            <button onclick="filterMeetingType('all')" class="meeting-filter-btn active" data-type="all" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3);">
-                전체
-            </button>
-            {% set meeting_types = [] %}
-            {% for minute in minutes %}
-                {% if minute.meeting_type and minute.meeting_type not in meeting_types %}
-                    {% set _ = meeting_types.append(minute.meeting_type) %}
-                {% endif %}
-            {% endfor %}
-            {% for meeting_type in meeting_types %}
-            <button onclick="filterMeetingType('{{ meeting_type }}')" class="meeting-filter-btn" data-type="{{ meeting_type }}" style="padding: 12px 24px; background: #F5F5F7; color: var(--text-primary); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
-                {{ meeting_type }}
-            </button>
-            {% endfor %}
+        <div style="display: flex; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">
+            <div style="position: relative; width: 100%; max-width: 400px;">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="var(--ku-crimson)" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;">
+                    <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <select onchange="filterMeetingType(this.value)" style="width: 100%; padding: 14px 20px 14px 48px; background: white; border: 2px solid rgba(150, 26, 50, 0.15); border-radius: 14px; font-size: clamp(0.95rem, 2.2vw, 1.05rem); font-weight: 700; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2716%27 height=%2716%27 viewBox=%270 0 16 16%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M4 6L8 10L12 6%27 stroke=%27%23961A32%27 stroke-width=%272.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 16px center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+                        onfocus="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 4px 16px rgba(150, 26, 50, 0.2)';"
+                        onblur="this.style.borderColor='rgba(150, 26, 50, 0.15)'; this.style.boxShadow='none';">
+                    <option value="all">전체</option>
+                    {% for meeting_type in meeting_types %}
+                    <option value="{{ meeting_type }}">{{ meeting_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
     {% endif %}
 
     {% if minutes %}
-    <div style="display: grid; gap: 20px; max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; flex-direction: column; gap: 20px; max-width: 900px; margin: 0 auto;">
         {% for minute in minutes %}
-        <a href="{{ url_for('minute_detail', minute_id=minute.id) }}"
-           class="minute-card"
+        <div class="minute-accordion-card"
+           data-minute-id="{{ minute.id }}"
            data-meeting-type="{{ minute.meeting_type if minute.meeting_type else '미분류' }}"
-           style="background: white; border-radius: 20px; padding: clamp(24px, 4vw, 32px); text-decoration: none; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: block; position: relative; overflow: hidden;"
-           onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 16px 48px rgba(150, 26, 50, 0.15)'; this.style.transform='translateY(-6px)'; this.querySelector('.arrow-icon').style.opacity='1'; this.querySelector('.arrow-icon').style.transform='translateX(4px)';"
-           onmouseout="this.style.borderColor='rgba(0,0,0,0.06)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.04)'; this.style.transform='translateY(0)'; this.querySelector('.arrow-icon').style.opacity='0.4'; this.querySelector('.arrow-icon').style.transform='translateX(0)';">
+           style="background: white; border-radius: 20px; border: 2px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
 
-            <div style="display: flex; gap: clamp(20px, 4vw, 28px); align-items: start;">
-                <!-- 날짜 박스 -->
-                <div style="text-align: center; min-width: clamp(80px, 12vw, 100px); padding: clamp(16px, 3vw, 20px); background: var(--ku-crimson); border-radius: var(--radius-lg); color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
-                    <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 4px;">
-                        {{ minute.meeting_date.strftime('%Y') }}
+            <!-- 카드 헤더 (클릭 가능) -->
+            <div class="minute-card-header" onclick="toggleMinuteAccordion({{ minute.id }})" style="padding: clamp(24px, 4vw, 32px); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;">
+                <div style="display: flex; gap: clamp(20px, 4vw, 28px); align-items: start;">
+                    <!-- 날짜 박스 -->
+                    <div style="text-align: center; min-width: clamp(80px, 12vw, 100px); padding: clamp(16px, 3vw, 20px); background: var(--ku-crimson); border-radius: var(--radius-lg); color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
+                        <div style="font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; margin-bottom: 4px;">
+                            {{ minute.meeting_date.strftime('%Y') }}
+                        </div>
+                        <div style="font-size: clamp(0.85rem, 1.8vw, 1rem); font-weight: 800; opacity: 0.9; margin-bottom: 2px;">
+                            {{ minute.meeting_date.strftime('%m') }}월
+                        </div>
+                        <div style="font-size: clamp(2.2rem, 5vw, 2.8rem); font-weight: 900; line-height: 1;">
+                            {{ minute.meeting_date.strftime('%d') }}
+                        </div>
                     </div>
-                    <div style="font-size: clamp(0.85rem, 1.8vw, 1rem); font-weight: 800; opacity: 0.9; margin-bottom: 2px;">
-                        {{ minute.meeting_date.strftime('%m') }}월
-                    </div>
-                    <div style="font-size: clamp(2.2rem, 5vw, 2.8rem); font-weight: 900; line-height: 1;">
-                        {{ minute.meeting_date.strftime('%d') }}
+
+                    <!-- 내용 -->
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <h3 style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.4; flex: 1;">
+                                {{ minute.title }}
+                            </h3>
+                            {% if minute.meeting_type %}
+                            <span style="flex-shrink: 0; padding: 8px 18px;
+                                {% if '정기' in minute.meeting_type %}background: #7D8590; box-shadow: 0 2px 8px rgba(125, 133, 144, 0.15);
+                                {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #CF222E; box-shadow: 0 2px 8px rgba(207, 34, 46, 0.15);
+                                {% elif '간담회' in minute.meeting_type %}background: #0550AE; box-shadow: 0 2px 8px rgba(5, 80, 174, 0.15);
+                                {% else %}background: #6639BA; box-shadow: 0 2px 8px rgba(102, 57, 186, 0.15);{% endif %}
+                                color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
+                                {{ minute.meeting_type }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                            {% if minute.attendees %}
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0;">
+                                    <path d="M13 14v-1.5c0-1.38-1.12-2.5-2.5-2.5h-5C4.12 10 3 11.12 3 12.5V14M8 7c-1.38 0-2.5-1.12-2.5-2.5S6.62 2 8 2s2.5 1.12 2.5 2.5S9.38 7 8 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span style="font-weight: 500;">{{ minute.attendees }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if minute.agenda %}
+                            <div style="display: flex; align-items: start; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; margin-top: 2px;">
+                                    <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <p style="margin: 0; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ minute.agenda }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                            {% if minute.file_url %}
+                            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ku-crimson-lighter); color: var(--ku-crimson); border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                    <path d="M9 2H3v12h10V7M9 2l4 5M9 2v5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                첨부파일
+                            </div>
+                            {% endif %}
+                            <!-- 펼치기 아이콘 -->
+                            <div class="expand-icon" style="margin-left: auto; width: 40px; height: 40px; border-radius: 50%; background: rgba(150, 26, 50, 0.08); display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                    <path d="M4 6L8 10L12 6" stroke="var(--ku-crimson)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 내용 -->
-                <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                        <h3 style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.4; flex: 1;">
-                            {{ minute.title }}
-                        </h3>
-                        {% if minute.meeting_type %}
-                        <span style="flex-shrink: 0; padding: 8px 18px;
-                            {% if '정기' in minute.meeting_type %}background: #7D8590; box-shadow: 0 2px 8px rgba(125, 133, 144, 0.15);
-                            {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #CF222E; box-shadow: 0 2px 8px rgba(207, 34, 46, 0.15);
-                            {% elif '간담회' in minute.meeting_type %}background: #0550AE; box-shadow: 0 2px 8px rgba(5, 80, 174, 0.15);
-                            {% else %}background: #6639BA; box-shadow: 0 2px 8px rgba(102, 57, 186, 0.15);{% endif %}
-                            color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
-                            {{ minute.meeting_type }}
-                        </span>
-                        {% endif %}
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                        {% if minute.attendees %}
-                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0;">
-                                <path d="M13 14v-1.5c0-1.38-1.12-2.5-2.5-2.5h-5C4.12 10 3 11.12 3 12.5V14M8 7c-1.38 0-2.5-1.12-2.5-2.5S6.62 2 8 2s2.5 1.12 2.5 2.5S9.38 7 8 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                            <span style="font-weight: 500;">{{ minute.attendees }}</span>
+            <!-- 확장 콘텐츠 (상세 내용) -->
+            <div class="minute-accordion-content" style="max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+                <div style="padding: 0 clamp(24px, 4vw, 32px) clamp(24px, 4vw, 32px); border-top: 2px solid rgba(150, 26, 50, 0.08);">
+                    <!-- 회의 내용 -->
+                    {% if minute.content %}
+                    <div style="margin: clamp(24px, 4vw, 32px) 0;">
+                        <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                    <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            회의 내용
+                        </h4>
+                        <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: clamp(20px, 4vw, 28px); border: 1px solid rgba(0, 0, 0, 0.04);">
+                            <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-wrap;">{{ minute.content }}</p>
                         </div>
-                        {% endif %}
-
-                        {% if minute.agenda %}
-                        <div style="display: flex; align-items: start; gap: 8px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; margin-top: 2px;">
-                                <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                            <p style="margin: 0; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ minute.agenda }}
-                            </p>
-                        </div>
-                        {% endif %}
                     </div>
+                    {% endif %}
 
+                    <!-- 결정 사항 -->
+                    {% if minute.decisions %}
+                    <div style="margin: clamp(24px, 4vw, 32px) 0;">
+                        <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; background: #0550AE; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            결정 사항
+                        </h4>
+                        <div style="background: linear-gradient(135deg, rgba(5, 80, 174, 0.08) 0%, rgba(5, 80, 174, 0.04) 100%); border-radius: 16px; padding: clamp(20px, 4vw, 28px); border: 1px solid rgba(5, 80, 174, 0.12);">
+                            <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-wrap;">{{ minute.decisions }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- 첨부파일 다운로드 -->
                     {% if minute.file_url %}
-                    <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--ku-crimson-lighter); color: var(--ku-crimson); border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="M9 2H3v12h10V7M9 2l4 5M9 2v5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        첨부파일
+                    <div style="margin: clamp(24px, 4vw, 32px) 0;">
+                        <a href="{{ minute.file_url }}" download style="display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: var(--ku-crimson); color: white; text-decoration: none; border-radius: 14px; font-size: clamp(0.9rem, 2.1vw, 1rem); font-weight: 700; transition: all 0.3s; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.3);"
+                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(150, 26, 50, 0.4)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.3)';">
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                                <path d="M14 9v2.67c0 .73-.6 1.33-1.33 1.33H3.33c-.73 0-1.33-.6-1.33-1.33V9m8-4L8 8m0 0L6 5m2 3V2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            회의록 다운로드
+                        </a>
                     </div>
                     {% endif %}
                 </div>
-
-                <!-- 화살표 아이콘 -->
-                <div style="display: flex; align-items: center; flex-shrink: 0;">
-                    <svg class="arrow-icon" width="20" height="20" viewBox="0 0 16 16" fill="none" style="opacity: 0.4; transition: all var(--transition-base); color: var(--ku-crimson);">
-                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                </div>
             </div>
-        </a>
+        </div>
         {% endfor %}
     </div>
     {% else %}
@@ -147,6 +207,32 @@
 </div>
 
 <script>
+    function toggleMinuteAccordion(minuteId) {
+        const card = document.querySelector(`.minute-accordion-card[data-minute-id="${minuteId}"]`);
+        if (!card) return;
+
+        const content = card.querySelector('.minute-accordion-content');
+        const expandIcon = card.querySelector('.expand-icon svg');
+
+        const isExpanded = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+        if (isExpanded) {
+            content.style.maxHeight = '0px';
+            card.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)';
+            card.style.borderColor = 'rgba(0,0,0,0.06)';
+            if (expandIcon) expandIcon.style.transform = 'rotate(0deg)';
+        } else {
+            content.style.maxHeight = content.scrollHeight + 'px';
+            card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
+            card.style.borderColor = 'rgba(150, 26, 50, 0.2)';
+            if (expandIcon) expandIcon.style.transform = 'rotate(180deg)';
+
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    }
+
     function filterMeetingType(type) {
         // 모든 버튼의 active 클래스 제거
         document.querySelectorAll('.meeting-filter-btn').forEach(btn => {
@@ -163,7 +249,7 @@
         }
 
         // 회의록 카드 필터링
-        const cards = document.querySelectorAll('.minute-card');
+        const cards = document.querySelectorAll('.minute-accordion-card');
         cards.forEach(card => {
             if (type === 'all' || card.dataset.meetingType === type) {
                 card.style.display = 'block';
