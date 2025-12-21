@@ -226,19 +226,19 @@
 .korea-text {
     stroke-dasharray: 1200;
     stroke-dashoffset: 1200;
-    animation: drawKorea 3s ease-in-out forwards;
+    animation: drawKorea 2.2s ease-in-out forwards;
 }
 
 .univ-text {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
     opacity: 0;
-    animation: drawUniv 2.5s ease-in-out 1.5s forwards;
+    animation: drawUniv 1.8s ease-in-out 0.8s forwards;
 }
 
 /* 전체 SVG 페이드아웃 */
 .korea-watermark-svg {
-    animation: svgFadeOut 1.2s ease-out 5.0s forwards;
+    animation: svgFadeOut 0.8s ease-out 2.8s forwards;
 }
 
 @keyframes svgFadeOut {
@@ -828,36 +828,36 @@ document.addEventListener('DOMContentLoaded', function() {
                             connectBadge.style.opacity = '1';
                             connectBadge.style.transform = 'translateY(0)';
                         }
-                    }, 6500);
+                    }, 2900);
 
                     setTimeout(() => {
                         if (connectTitle) {
                             connectTitle.style.opacity = '1';
                             connectTitle.style.transform = 'translateY(0)';
                         }
-                    }, 6700);
+                    }, 3050);
 
                     setTimeout(() => {
                         if (connectDescription) {
                             connectDescription.style.opacity = '1';
                             connectDescription.style.transform = 'translateY(0)';
                         }
-                    }, 6900);
+                    }, 3200);
 
                     setTimeout(() => {
                         if (connectCards) {
                             connectCards.style.opacity = '1';
                             connectCards.style.transform = 'translateY(0)';
                         }
-                    }, 7100);
+                    }, 3350);
 
                     setTimeout(() => {
                         if (connectCta) {
                             connectCta.style.opacity = '1';
                             connectCta.style.transform = 'translateY(0)';
                         }
-                    }, 7300);
-                }, 800);
+                    }, 3500);
+                }, 400);
                 observer.unobserve(entry.target);
             }
         });
