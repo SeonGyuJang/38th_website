@@ -249,6 +249,7 @@
 
 /* 전체 SVG 페이드아웃 */
 .korea-watermark-svg {
+    opacity: 0.4;
     animation: svgFadeOut 0.8s ease-out 2.8s forwards;
 }
 
@@ -265,6 +266,7 @@
 /* PC에서 SVG 더 크게 */
 @media (min-width: 769px) {
     .korea-watermark-svg {
+        opacity: 0.3 !important;
         max-width: clamp(1200px, 150vw, 1800px) !important;
         width: 110% !important;
     }
@@ -289,19 +291,19 @@
     0% {
         stroke-dashoffset: 1200;
         fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 0.65);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
     }
     70% {
         stroke-dashoffset: 0;
         fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 0.65);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
     }
     100% {
         stroke-dashoffset: 0;
         fill: rgba(150, 26, 50, 0.28);
-        stroke: rgba(150, 26, 50, 0.45);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 2.5;
     }
 }
@@ -310,7 +312,7 @@
     0% {
         stroke-dashoffset: 1000;
         fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 0.65);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
         opacity: 0;
     }
@@ -320,14 +322,14 @@
     70% {
         stroke-dashoffset: 0;
         fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 0.65);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
         opacity: 1;
     }
     100% {
         stroke-dashoffset: 0;
         fill: rgba(150, 26, 50, 0.28);
-        stroke: rgba(150, 26, 50, 0.45);
+        stroke: rgba(150, 26, 50, 1);
         stroke-width: 2.5;
         opacity: 1;
     }
@@ -665,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="position: absolute; bottom: -15%; left: -8%; width: clamp(500px, 80vw, 900px); height: clamp(500px, 80vw, 900px); background: radial-gradient(circle, rgba(150, 26, 50, 0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(120px); animation: float 35s ease-in-out infinite reverse;"></div>
 
     <!-- 고려대 로고 워터마크 - SVG 텍스트 그리기 애니메이션 (PC에서 더 크게) -->
-    <svg class="korea-watermark-svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: clamp(90%, 95%, 100%); max-width: clamp(900px, 120vw, 1400px); height: auto; user-select: none; pointer-events: none; z-index: 10; filter: drop-shadow(0 0 80px rgba(150, 26, 50, 0.25));" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
+    <svg class="korea-watermark-svg" style="shape-rendering: geometricPrecision; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: clamp(90%, 95%, 100%); max-width: clamp(900px, 120vw, 1400px); height: auto; user-select: none; pointer-events: none; z-index: 10; filter: drop-shadow(0 0 80px rgba(150, 26, 50, 0.25));" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
         <!-- KOREA 텍스트 -->
         <text x="50%" y="38%"
               text-anchor="middle"
