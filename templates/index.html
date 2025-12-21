@@ -677,24 +677,24 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="container" style="position: relative; z-index: 20;">
         <!-- 헤더 -->
         <div style="text-align: center; margin-bottom: clamp(64px, 12vw, 96px);">
-            <div class="connect-badge" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 36px; border: 2px solid rgba(150, 26, 50, 0.3); box-shadow: 0 8px 32px rgba(150, 26, 50, 0.25); opacity: 0; animation: fadeInUp 0.8s ease-out 6.3s forwards;">
+            <div class="connect-badge" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 36px; border: 2px solid rgba(150, 26, 50, 0.3); box-shadow: 0 8px 32px rgba(150, 26, 50, 0.25); opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;">
                 <div style="width: 10px; height: 10px; background: white; border-radius: 50%; animation: pulse 2s ease-in-out infinite;"></div>
                 <span style="font-size: clamp(0.8rem, 1.8vw, 0.95rem); font-weight: 800; color: white; letter-spacing: 0.15em; text-transform: uppercase;">Connect With Us</span>
             </div>
 
-            <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; margin-bottom: clamp(24px, 5vw, 40px); letter-spacing: -0.04em; line-height: 1; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0; animation: fadeInUp 0.8s ease-out 6.5s forwards;">
+            <h2 class="connect-title" style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; margin-bottom: clamp(24px, 5vw, 40px); letter-spacing: -0.04em; line-height: 1; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;">
                 함께 만드는<br>
                 더 나은 내일
             </h2>
 
-            <p style="font-size: clamp(1.15rem, 3vw, 1.6rem); color: var(--text-secondary); max-width: 750px; margin: 0 auto; line-height: 1.7; font-weight: 600; opacity: 0; animation: fadeInUp 0.8s ease-out 6.7s forwards;">
+            <p class="connect-description" style="font-size: clamp(1.15rem, 3vw, 1.6rem); color: var(--text-secondary); max-width: 750px; margin: 0 auto; line-height: 1.7; font-weight: 600; opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;">
                 제38대 총학생회 '비범'은<br class="show-mobile">
                 <span style="color: var(--ku-crimson); font-weight: 800;">언제나 여러분의 목소리</span>를 기다립니다
             </p>
         </div>
 
         <!-- 연락 카드 그리드 - 3단 레이아웃 -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 5vw, 32px); max-width: 1200px; margin: 0 auto clamp(64px, 12vw, 96px); opacity: 0; animation: fadeInUp 0.8s ease-out 6.9s forwards;">
+        <div class="connect-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 5vw, 32px); max-width: 1200px; margin: 0 auto clamp(64px, 12vw, 96px); opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;">
             <!-- 카카오톡 채널 카드 -->
             <div class="contact-card" style="background: white; border-radius: 28px; padding: clamp(36px, 7vw, 48px); text-decoration: none; border: 2px solid rgba(150, 26, 50, 0.12); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); cursor: pointer;"
                  onmouseover="this.style.transform='translateY(-12px) scale(1.02)'; this.style.borderColor='#FEE500'; this.style.boxShadow='0 32px 80px rgba(254, 229, 0, 0.3)';"
@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- CTA 섹션 -->
-        <div style="text-align: center; max-width: 1200px; margin: 0 auto; padding: clamp(48px, 10vw, 72px); background: linear-gradient(135deg, rgba(150, 26, 50, 0.08) 0%, rgba(150, 26, 50, 0.04) 100%); border-radius: 32px; border: 2px solid rgba(150, 26, 50, 0.15); position: relative; overflow: hidden; opacity: 0; animation: fadeInUp 0.8s ease-out 7.1s forwards;">
+        <div class="connect-cta" style="text-align: center; max-width: 1200px; margin: 0 auto; padding: clamp(48px, 10vw, 72px); background: linear-gradient(135deg, rgba(150, 26, 50, 0.08) 0%, rgba(150, 26, 50, 0.04) 100%); border-radius: 32px; border: 2px solid rgba(150, 26, 50, 0.15); position: relative; overflow: hidden; opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;">
             <!-- 배경 패턴 -->
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle, rgba(150, 26, 50, 0.05) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5;"></div>
 
@@ -795,6 +795,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const univText = document.querySelector('.univ-text');
     const koreaWatermarkSvg = document.querySelector('.korea-watermark-svg');
 
+    // Connect With Us 요소들
+    const connectBadge = document.querySelector('.connect-badge');
+    const connectTitle = document.querySelector('.connect-title');
+    const connectDescription = document.querySelector('.connect-description');
+    const connectCards = document.querySelector('.connect-cards');
+    const connectCta = document.querySelector('.connect-cta');
+
     // 초기 상태 설정 (애니메이션 중지)
     if (koreaText && univText && koreaWatermarkSvg) {
         koreaText.style.animationPlayState = 'paused';
@@ -806,11 +813,50 @@ document.addEventListener('DOMContentLoaded', function() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting && koreaText && univText && koreaWatermarkSvg) {
-                // 사용자가 섹션을 충분히 볼 수 있도록 1초 딜레이 후 애니메이션 시작
+                // 사용자가 섹션을 충분히 볼 수 있도록 0.8초 딜레이 후 애니메이션 시작
                 setTimeout(() => {
                     koreaText.style.animationPlayState = 'running';
                     univText.style.animationPlayState = 'running';
                     koreaWatermarkSvg.style.animationPlayState = 'running';
+
+                    // SVG fadeout 완료 후 Connect With Us 요소들을 순차적으로 표시
+                    // KOREA: 3초, UNIV: 2.5초(1.5초 후 시작), fadeout: 1.2초(5.0초 후 시작)
+                    // 총 5.0 + 1.2 = 6.2초 후 SVG 완전히 사라짐
+                    // 안전하게 6.5초 후부터 요소 표시 시작
+                    setTimeout(() => {
+                        if (connectBadge) {
+                            connectBadge.style.opacity = '1';
+                            connectBadge.style.transform = 'translateY(0)';
+                        }
+                    }, 6500);
+
+                    setTimeout(() => {
+                        if (connectTitle) {
+                            connectTitle.style.opacity = '1';
+                            connectTitle.style.transform = 'translateY(0)';
+                        }
+                    }, 6700);
+
+                    setTimeout(() => {
+                        if (connectDescription) {
+                            connectDescription.style.opacity = '1';
+                            connectDescription.style.transform = 'translateY(0)';
+                        }
+                    }, 6900);
+
+                    setTimeout(() => {
+                        if (connectCards) {
+                            connectCards.style.opacity = '1';
+                            connectCards.style.transform = 'translateY(0)';
+                        }
+                    }, 7100);
+
+                    setTimeout(() => {
+                        if (connectCta) {
+                            connectCta.style.opacity = '1';
+                            connectCta.style.transform = 'translateY(0)';
+                        }
+                    }, 7300);
                 }, 800);
                 observer.unobserve(entry.target);
             }
