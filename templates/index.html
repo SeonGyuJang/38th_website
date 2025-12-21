@@ -226,14 +226,25 @@
 .korea-text {
     stroke-dasharray: 1200;
     stroke-dashoffset: 1200;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     animation: drawKorea 2.2s ease-in-out forwards;
 }
 
 .univ-text {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     opacity: 0;
     animation: drawUniv 1.8s ease-in-out 0.8s forwards;
+}
+
+/* 모바일 전용 최적화 */
+@media (max-width: 768px) {
+    .korea-text, .univ-text {
+        stroke-width: 1.8 !important;
+    }
 }
 
 /* 전체 SVG 페이드아웃 */
@@ -265,6 +276,12 @@
         top: 20% !important;
         max-width: 95% !important;
         width: 95% !important;
+    }
+
+    .korea-text, .univ-text {
+        stroke-width: 1.8 !important;
+        stroke-linecap: round;
+        stroke-linejoin: round;
     }
 }
 
