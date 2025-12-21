@@ -222,6 +222,25 @@
     }
 }
 
+@keyframes koreaFloat {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 0.06;
+    }
+    25% {
+        transform: translateX(-50%) translateY(-15px) scale(1.03);
+        opacity: 0.08;
+    }
+    50% {
+        transform: translateX(-50%) translateY(-25px) scale(1.05);
+        opacity: 0.1;
+    }
+    75% {
+        transform: translateX(-50%) translateY(-15px) scale(1.03);
+        opacity: 0.08;
+    }
+}
+
 .show-mobile {
     display: none;
 }
@@ -553,8 +572,10 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="position: absolute; top: -10%; right: -5%; width: clamp(400px, 70vw, 800px); height: clamp(400px, 70vw, 800px); background: radial-gradient(circle, rgba(150, 26, 50, 0.08) 0%, transparent 70%); border-radius: 50%; filter: blur(100px); animation: float 30s ease-in-out infinite;"></div>
     <div style="position: absolute; bottom: -15%; left: -8%; width: clamp(500px, 80vw, 900px); height: clamp(500px, 80vw, 900px); background: radial-gradient(circle, rgba(150, 26, 50, 0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(120px); animation: float 35s ease-in-out infinite reverse;"></div>
 
-    <!-- 고려대 로고 워터마크 -->
-    <div style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: clamp(150px, 30vw, 300px); font-weight: 900; color: rgba(150, 26, 50, 0.02); letter-spacing: -0.05em; line-height: 1; user-select: none; pointer-events: none;">KOREA</div>
+    <!-- 고려대 로고 워터마크 - 애니메이션 포함 -->
+    <div class="korea-watermark" style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: clamp(150px, 30vw, 300px); font-weight: 900; color: rgba(150, 26, 50, 0.06); letter-spacing: -0.05em; line-height: 0.9; user-select: none; pointer-events: none; text-align: center; animation: koreaFloat 8s ease-in-out infinite;">
+        KOREA<br>UNIV.
+    </div>
 
     <div class="container" style="position: relative; z-index: 2;">
         <!-- 헤더 -->
