@@ -226,13 +226,36 @@
 .korea-text {
     stroke-dasharray: 1200;
     stroke-dashoffset: 1200;
-    animation: drawKorea 3s ease-in-out forwards, koreaGlow 4s ease-in-out 3s infinite;
+    animation: drawKorea 3s ease-in-out forwards;
 }
 
 .univ-text {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
-    animation: drawUniv 2.5s ease-in-out 1.5s forwards, univGlow 4s ease-in-out 4s infinite;
+    animation: drawUniv 2.5s ease-in-out 1.5s forwards;
+}
+
+/* 전체 SVG 페이드아웃 */
+.korea-watermark-svg {
+    animation: svgFadeOut 1s ease-out 4.8s forwards;
+}
+
+@keyframes svgFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* 모바일에서 SVG 위치 조정 */
+@media (max-width: 768px) {
+    .korea-watermark-svg {
+        top: 20% !important;
+        max-width: 95% !important;
+    }
 }
 
 @keyframes drawKorea {
@@ -274,28 +297,6 @@
         fill: rgba(150, 26, 50, 0.28);
         stroke: rgba(150, 26, 50, 0.45);
         stroke-width: 2.5;
-    }
-}
-
-@keyframes koreaGlow {
-    0%, 100% {
-        filter: drop-shadow(0 0 20px rgba(150, 26, 50, 0.3));
-        opacity: 1;
-    }
-    50% {
-        filter: drop-shadow(0 0 40px rgba(150, 26, 50, 0.5));
-        opacity: 0.9;
-    }
-}
-
-@keyframes univGlow {
-    0%, 100% {
-        filter: drop-shadow(0 0 20px rgba(150, 26, 50, 0.3));
-        opacity: 1;
-    }
-    50% {
-        filter: drop-shadow(0 0 40px rgba(150, 26, 50, 0.5));
-        opacity: 0.9;
     }
 }
 
@@ -631,9 +632,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="position: absolute; bottom: -15%; left: -8%; width: clamp(500px, 80vw, 900px); height: clamp(500px, 80vw, 900px); background: radial-gradient(circle, rgba(150, 26, 50, 0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(120px); animation: float 35s ease-in-out infinite reverse;"></div>
 
     <!-- 고려대 로고 워터마크 - SVG 텍스트 그리기 애니메이션 (PC에서 더 크게) -->
-    <svg class="korea-watermark-svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: clamp(90%, 95%, 100%); max-width: clamp(900px, 120vw, 1400px); height: auto; user-select: none; pointer-events: none; z-index: 1; filter: drop-shadow(0 0 80px rgba(150, 26, 50, 0.25));" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+    <svg class="korea-watermark-svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: clamp(90%, 95%, 100%); max-width: clamp(900px, 120vw, 1400px); height: auto; user-select: none; pointer-events: none; z-index: 10; filter: drop-shadow(0 0 80px rgba(150, 26, 50, 0.25));" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
         <!-- KOREA 텍스트 -->
-        <text x="50%" y="45%"
+        <text x="50%" y="38%"
               text-anchor="middle"
               dominant-baseline="middle"
               font-size="140"
@@ -645,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
               class="korea-text">KOREA</text>
 
         <!-- UNIV. 텍스트 -->
-        <text x="50%" y="70%"
+        <text x="50%" y="62%"
               text-anchor="middle"
               dominant-baseline="middle"
               font-size="140"
@@ -657,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
               class="univ-text">UNIV.</text>
     </svg>
 
-    <div class="container" style="position: relative; z-index: 2;">
+    <div class="container" style="position: relative; z-index: 20;">
         <!-- 헤더 -->
         <div style="text-align: center; margin-bottom: clamp(64px, 12vw, 96px);">
             <div class="connect-badge" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 36px; border: 2px solid rgba(150, 26, 50, 0.3); box-shadow: 0 8px 32px rgba(150, 26, 50, 0.25); opacity: 0; animation: fadeInUp 0.8s ease-out 4.5s forwards;">
