@@ -46,19 +46,26 @@ function initPageLoad() {
 // ============ Header 스크롤 효과 ============
 function initHeaderScroll() {
     const header = document.querySelector('.header');
-    let lastScrollTop = 0;
+    if (!header) return;
+
+    let ticking = false;
 
     window.addEventListener('scroll', function() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        if (scrollTop > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                if (scrollTop > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+
+                ticking = false;
+            });
+            ticking = true;
         }
-        
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    });
+    }, { passive: true });
 }
 
 // ============ 스크롤 애니메이션 ============
@@ -463,7 +470,7 @@ function initScrollToTop() {
         } else {
             scrollToTopBtn.classList.remove('visible');
         }
-    });
+    }, { passive: true });
 
     // 버튼 클릭 시 맨 위로 스크롤
     scrollToTopBtn.addEventListener('click', function() {
@@ -471,21 +478,6 @@ function initScrollToTop() {
             top: 0,
             behavior: 'smooth'
         });
-    });
-}
-
-// ============ Header 스크롤 효과 ============
-function initHeaderScroll() {
-    const header = document.querySelector('.header');
-
-    if (!header) return;
-
-    window.addEventListener('scroll', function() {
-        if (window.pageYOffset > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
     });
 }
 
