@@ -153,22 +153,20 @@
     {% if categories %}
         <!-- 카테고리 필터 -->
         <div style="margin-bottom: clamp(40px, 8vw, 60px); opacity: 0; animation: fadeInUp 0.8s ease-out 0.4s forwards;">
-            <!-- 모바일: 가로 스크롤, PC: flex-wrap -->
-            <div style="background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.08); padding: clamp(16px, 3vw, 24px); overflow-x: auto; -webkit-overflow-scrolling: touch;">
-                <div style="display: flex; gap: 12px; min-width: min-content; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="filterRegulations('all')" class="category-filter active" data-category="all"
-                            style="flex-shrink: 0; padding: clamp(14px, 3vw, 16px) clamp(24px, 5vw, 32px); background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); color: white; border: none; border-radius: 14px; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;">
-                        전체
-                    </button>
-                    {% for category in categories.keys() %}
-                    {% set clean_category = category | replace('/n', '') | replace('\\n', '') | replace('\n', '') | replace('\r\n', '') | replace('\r', '') | trim %}
-                    <button onclick="filterRegulations('{{ clean_category }}')" class="category-filter" data-category="{{ clean_category }}"
-                            style="flex-shrink: 0; padding: clamp(14px, 3vw, 16px) clamp(24px, 5vw, 32px); background: #F5F5F7; color: var(--text-primary); border: 2px solid transparent; border-radius: 14px; font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;"
-                            onmouseover="if(!this.classList.contains('active')) { this.style.background='#E8E8ED'; this.style.borderColor='rgba(150, 26, 50, 0.2)'; this.style.transform='translateY(-2px)'; }"
-                            onmouseout="if(!this.classList.contains('active')) { this.style.background='#F5F5F7'; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; }">
-                        {{ clean_category }}
-                    </button>
-                    {% endfor %}
+            <div style="display: flex; justify-content: center; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.08);">
+                <div style="position: relative; width: 100%; max-width: 400px;">
+                    <svg width="20" height="20" viewBox="0 0 16 16" fill="var(--ku-crimson)" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;">
+                        <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <select onchange="filterRegulations(this.value)" style="width: 100%; padding: 14px 20px 14px 48px; background: white; border: 2px solid rgba(150, 26, 50, 0.15); border-radius: 14px; font-size: clamp(0.95rem, 2.2vw, 1.05rem); font-weight: 700; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2716%27 height=%2716%27 viewBox=%270 0 16 16%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M4 6L8 10L12 6%27 stroke=%27%23961A32%27 stroke-width=%272.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 16px center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+                            onfocus="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 4px 16px rgba(150, 26, 50, 0.2)';"
+                            onblur="this.style.borderColor='rgba(150, 26, 50, 0.15)'; this.style.boxShadow='none';">
+                        <option value="all">전체</option>
+                        {% for category in categories.keys() %}
+                        {% set clean_category = category | replace('/n', '') | replace('\\n', '') | replace('\n', '') | replace('\r\n', '') | replace('\r', '') | trim %}
+                        <option value="{{ clean_category }}">{{ clean_category }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </div>
@@ -270,25 +268,6 @@
 <script>
     // 카테고리 필터링
     function filterRegulations(category) {
-        // 모든 버튼의 active 클래스 제거
-        document.querySelectorAll('.category-filter').forEach(btn => {
-            btn.classList.remove('active');
-            btn.style.background = '#F5F5F7';
-            btn.style.color = 'var(--text-primary)';
-            btn.style.boxShadow = 'none';
-            btn.style.borderColor = 'transparent';
-        });
-
-        // 클릭된 버튼에 active 클래스 추가 및 스타일 적용
-        const clickedBtn = document.querySelector(`.category-filter[data-category="${category}"]`);
-        if (clickedBtn) {
-            clickedBtn.classList.add('active');
-            clickedBtn.style.background = 'linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%)';
-            clickedBtn.style.color = 'white';
-            clickedBtn.style.boxShadow = '0 4px 16px rgba(150, 26, 50, 0.3)';
-            clickedBtn.style.borderColor = 'transparent';
-        }
-
         // 카드 필터링
         const cards = document.querySelectorAll('.regulation-card');
         cards.forEach(card => {
