@@ -222,22 +222,74 @@
     }
 }
 
-@keyframes koreaFloat {
-    0%, 100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.12;
+/* SVG 텍스트 그리기 애니메이션 */
+.korea-text {
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    animation: drawKorea 3s ease-in-out forwards, koreaGlow 4s ease-in-out 3s infinite;
+}
+
+.univ-text {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawUniv 2.5s ease-in-out 1.5s forwards, univGlow 4s ease-in-out 4s infinite;
+}
+
+@keyframes drawKorea {
+    0% {
+        stroke-dashoffset: 1200;
+        fill: rgba(150, 26, 50, 0);
+        stroke: rgba(150, 26, 50, 0.6);
     }
-    25% {
-        transform: translate(-50%, calc(-50% - 20px)) scale(1.05);
-        opacity: 0.15;
+    70% {
+        stroke-dashoffset: 0;
+        fill: rgba(150, 26, 50, 0);
+        stroke: rgba(150, 26, 50, 0.6);
+    }
+    100% {
+        stroke-dashoffset: 0;
+        fill: rgba(150, 26, 50, 0.25);
+        stroke: rgba(150, 26, 50, 0.4);
+    }
+}
+
+@keyframes drawUniv {
+    0% {
+        stroke-dashoffset: 1000;
+        fill: rgba(150, 26, 50, 0);
+        stroke: rgba(150, 26, 50, 0.6);
+    }
+    70% {
+        stroke-dashoffset: 0;
+        fill: rgba(150, 26, 50, 0);
+        stroke: rgba(150, 26, 50, 0.6);
+    }
+    100% {
+        stroke-dashoffset: 0;
+        fill: rgba(150, 26, 50, 0.25);
+        stroke: rgba(150, 26, 50, 0.4);
+    }
+}
+
+@keyframes koreaGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(150, 26, 50, 0.3));
+        opacity: 1;
     }
     50% {
-        transform: translate(-50%, calc(-50% - 30px)) scale(1.08);
-        opacity: 0.18;
+        filter: drop-shadow(0 0 40px rgba(150, 26, 50, 0.5));
+        opacity: 0.9;
     }
-    75% {
-        transform: translate(-50%, calc(-50% - 20px)) scale(1.05);
-        opacity: 0.15;
+}
+
+@keyframes univGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(150, 26, 50, 0.3));
+        opacity: 1;
+    }
+    50% {
+        filter: drop-shadow(0 0 40px rgba(150, 26, 50, 0.5));
+        opacity: 0.9;
     }
 }
 
@@ -572,10 +624,32 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="position: absolute; top: -10%; right: -5%; width: clamp(400px, 70vw, 800px); height: clamp(400px, 70vw, 800px); background: radial-gradient(circle, rgba(150, 26, 50, 0.08) 0%, transparent 70%); border-radius: 50%; filter: blur(100px); animation: float 30s ease-in-out infinite;"></div>
     <div style="position: absolute; bottom: -15%; left: -8%; width: clamp(500px, 80vw, 900px); height: clamp(500px, 80vw, 900px); background: radial-gradient(circle, rgba(150, 26, 50, 0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(120px); animation: float 35s ease-in-out infinite reverse;"></div>
 
-    <!-- 고려대 로고 워터마크 - 애니메이션 포함 -->
-    <div class="korea-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: clamp(120px, 25vw, 280px); font-weight: 900; color: rgba(150, 26, 50, 0.12); letter-spacing: -0.03em; line-height: 1.1; user-select: none; pointer-events: none; text-align: center; z-index: 1; text-shadow: 0 0 40px rgba(150, 26, 50, 0.1); animation: koreaFloat 8s ease-in-out infinite;">
-        KOREA<br>UNIV.
-    </div>
+    <!-- 고려대 로고 워터마크 - SVG 텍스트 그리기 애니메이션 -->
+    <svg class="korea-watermark-svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 1000px; height: auto; user-select: none; pointer-events: none; z-index: 1; filter: drop-shadow(0 0 60px rgba(150, 26, 50, 0.2));" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+        <!-- KOREA 텍스트 -->
+        <text x="50%" y="45%"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              font-size="140"
+              font-weight="900"
+              letter-spacing="-3"
+              fill="rgba(150, 26, 50, 0.25)"
+              stroke="rgba(150, 26, 50, 0.4)"
+              stroke-width="2"
+              class="korea-text">KOREA</text>
+
+        <!-- UNIV. 텍스트 -->
+        <text x="50%" y="70%"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              font-size="140"
+              font-weight="900"
+              letter-spacing="-3"
+              fill="rgba(150, 26, 50, 0.25)"
+              stroke="rgba(150, 26, 50, 0.4)"
+              stroke-width="2"
+              class="univ-text">UNIV.</text>
+    </svg>
 
     <div class="container" style="position: relative; z-index: 2;">
         <!-- 헤더 -->
@@ -690,4 +764,36 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </section>
+
+<script>
+// KOREA UNIV. 텍스트 애니메이션을 스크롤 시 시작
+document.addEventListener('DOMContentLoaded', function() {
+    const koreaText = document.querySelector('.korea-text');
+    const univText = document.querySelector('.univ-text');
+
+    // 초기 상태 설정 (애니메이션 중지)
+    if (koreaText && univText) {
+        koreaText.style.animationPlayState = 'paused';
+        univText.style.animationPlayState = 'paused';
+    }
+
+    // Intersection Observer로 섹션이 보일 때 애니메이션 시작
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && koreaText && univText) {
+                // 애니메이션 시작
+                koreaText.style.animationPlayState = 'running';
+                univText.style.animationPlayState = 'running';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+
+    const contactSection = document.querySelector('.contact-section');
+    if (contactSection) {
+        observer.observe(contactSection);
+    }
+});
+</script>
+
 {% endblock %}
