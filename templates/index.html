@@ -237,7 +237,7 @@
 
 /* 전체 SVG 페이드아웃 */
 .korea-watermark-svg {
-    animation: svgFadeOut 1s ease-out 4.8s forwards;
+    animation: svgFadeOut 1s ease-out 5.6s forwards;
 }
 
 @keyframes svgFadeOut {
@@ -250,11 +250,20 @@
     }
 }
 
+/* PC에서 SVG 더 크게 */
+@media (min-width: 769px) {
+    .korea-watermark-svg {
+        max-width: clamp(1200px, 150vw, 1800px) !important;
+        width: 110% !important;
+    }
+}
+
 /* 모바일에서 SVG 위치 조정 */
 @media (max-width: 768px) {
     .korea-watermark-svg {
         top: 20% !important;
         max-width: 95% !important;
+        width: 95% !important;
     }
 }
 
@@ -661,24 +670,24 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="container" style="position: relative; z-index: 20;">
         <!-- 헤더 -->
         <div style="text-align: center; margin-bottom: clamp(64px, 12vw, 96px);">
-            <div class="connect-badge" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 36px; border: 2px solid rgba(150, 26, 50, 0.3); box-shadow: 0 8px 32px rgba(150, 26, 50, 0.25); opacity: 0; animation: fadeInUp 0.8s ease-out 4.5s forwards;">
+            <div class="connect-badge" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 32px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); backdrop-filter: blur(10px); border-radius: 100px; margin-bottom: 36px; border: 2px solid rgba(150, 26, 50, 0.3); box-shadow: 0 8px 32px rgba(150, 26, 50, 0.25); opacity: 0; animation: fadeInUp 0.8s ease-out 5.3s forwards;">
                 <div style="width: 10px; height: 10px; background: white; border-radius: 50%; animation: pulse 2s ease-in-out infinite;"></div>
                 <span style="font-size: clamp(0.8rem, 1.8vw, 0.95rem); font-weight: 800; color: white; letter-spacing: 0.15em; text-transform: uppercase;">Connect With Us</span>
             </div>
 
-            <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; margin-bottom: clamp(24px, 5vw, 40px); letter-spacing: -0.04em; line-height: 1; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0; animation: fadeInUp 0.8s ease-out 4.7s forwards;">
+            <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; margin-bottom: clamp(24px, 5vw, 40px); letter-spacing: -0.04em; line-height: 1; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0; animation: fadeInUp 0.8s ease-out 5.5s forwards;">
                 함께 만드는<br>
                 더 나은 내일
             </h2>
 
-            <p style="font-size: clamp(1.15rem, 3vw, 1.6rem); color: var(--text-secondary); max-width: 750px; margin: 0 auto; line-height: 1.7; font-weight: 600; opacity: 0; animation: fadeInUp 0.8s ease-out 4.9s forwards;">
+            <p style="font-size: clamp(1.15rem, 3vw, 1.6rem); color: var(--text-secondary); max-width: 750px; margin: 0 auto; line-height: 1.7; font-weight: 600; opacity: 0; animation: fadeInUp 0.8s ease-out 5.7s forwards;">
                 제38대 총학생회 '비범'은<br class="show-mobile">
                 <span style="color: var(--ku-crimson); font-weight: 800;">언제나 여러분의 목소리</span>를 기다립니다
             </p>
         </div>
 
         <!-- 연락 카드 그리드 - 3단 레이아웃 -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 5vw, 32px); max-width: 1200px; margin: 0 auto clamp(64px, 12vw, 96px); opacity: 0; animation: fadeInUp 0.8s ease-out 5.1s forwards;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(24px, 5vw, 32px); max-width: 1200px; margin: 0 auto clamp(64px, 12vw, 96px); opacity: 0; animation: fadeInUp 0.8s ease-out 5.9s forwards;">
             <!-- 카카오톡 채널 카드 -->
             <div class="contact-card" style="background: white; border-radius: 28px; padding: clamp(36px, 7vw, 48px); text-decoration: none; border: 2px solid rgba(150, 26, 50, 0.12); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); cursor: pointer;"
                  onmouseover="this.style.transform='translateY(-12px) scale(1.02)'; this.style.borderColor='#FEE500'; this.style.boxShadow='0 32px 80px rgba(254, 229, 0, 0.3)';"
@@ -739,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- CTA 섹션 -->
-        <div style="text-align: center; max-width: 1200px; margin: 0 auto; padding: clamp(48px, 10vw, 72px); background: linear-gradient(135deg, rgba(150, 26, 50, 0.08) 0%, rgba(150, 26, 50, 0.04) 100%); border-radius: 32px; border: 2px solid rgba(150, 26, 50, 0.15); position: relative; overflow: hidden; opacity: 0; animation: fadeInUp 0.8s ease-out 5.3s forwards;">
+        <div style="text-align: center; max-width: 1200px; margin: 0 auto; padding: clamp(48px, 10vw, 72px); background: linear-gradient(135deg, rgba(150, 26, 50, 0.08) 0%, rgba(150, 26, 50, 0.04) 100%); border-radius: 32px; border: 2px solid rgba(150, 26, 50, 0.15); position: relative; overflow: hidden; opacity: 0; animation: fadeInUp 0.8s ease-out 6.1s forwards;">
             <!-- 배경 패턴 -->
             <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle, rgba(150, 26, 50, 0.05) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5;"></div>
 
@@ -777,20 +786,25 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const koreaText = document.querySelector('.korea-text');
     const univText = document.querySelector('.univ-text');
+    const koreaWatermarkSvg = document.querySelector('.korea-watermark-svg');
 
     // 초기 상태 설정 (애니메이션 중지)
-    if (koreaText && univText) {
+    if (koreaText && univText && koreaWatermarkSvg) {
         koreaText.style.animationPlayState = 'paused';
         univText.style.animationPlayState = 'paused';
+        koreaWatermarkSvg.style.animationPlayState = 'paused';
     }
 
     // Intersection Observer로 섹션이 보일 때 애니메이션 시작
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting && koreaText && univText) {
-                // 애니메이션 시작
-                koreaText.style.animationPlayState = 'running';
-                univText.style.animationPlayState = 'running';
+            if (entry.isIntersecting && koreaText && univText && koreaWatermarkSvg) {
+                // 사용자가 섹션을 충분히 볼 수 있도록 1초 딜레이 후 애니메이션 시작
+                setTimeout(() => {
+                    koreaText.style.animationPlayState = 'running';
+                    univText.style.animationPlayState = 'running';
+                    koreaWatermarkSvg.style.animationPlayState = 'running';
+                }, 800);
                 observer.unobserve(entry.target);
             }
         });
