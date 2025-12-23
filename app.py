@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_compress import Compress
 from werkzeug.utils import secure_filename
 from config import Config
 from database import init_supabase
@@ -13,6 +14,22 @@ import shutil
 app = Flask(__name__)
 app.config.from_object(Config)
 Config.init_app(app)
+
+# 압축 활성화 (gzip) - 응답 크기를 60-80% 감소
+compress = Compress()
+compress.init_app(app)
+
+# WhiteNoise 설정 - 정적 파일 효율적 서빙 및 캐싱
+try:
+    from whitenoise import WhiteNoise
+    app.wsgi_app = WhiteNoise(
+        app.wsgi_app,
+        root=os.path.join(os.path.dirname(__file__), 'static'),
+        prefix='static/',
+        max_age=31536000 if not app.debug else 0  # 1년 캐싱 (프로덕션)
+    )
+except ImportError:
+    pass  # WhiteNoise 없으면 기본 설정 사용
 
 # Supabase 초기화
 init_supabase(app)
@@ -895,6 +912,29 @@ def admin_archive_image_delete(archive_id, image_id):
     db_helper.delete_archive_image(image_id)
     flash('이미지가 삭제되었습니다.', 'success')
     return redirect(url_for('admin_archive_edit', archive_id=archive_id))
+
+# ============================================
+# 성능 최적화: 캐싱 헤더 추가
+# ============================================
+
+@app.after_request
+def add_header(response):
+    """응답에 캐싱 및 보안 헤더 추가"""
+    # 정적 파일 캐싱 (1년)
+    if 'static' in request.path or any(ext in request.path for ext in ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2']):
+        response.cache_control.max_age = 31536000  # 1년
+        response.cache_control.public = True
+    # HTML 페이지는 짧은 캐싱
+    elif request.path.endswith('.html') or request.path == '/':
+        response.cache_control.max_age = 300  # 5분
+        response.cache_control.public = True
+
+    # 보안 헤더
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+
+    return response
 
 # ============================================
 # CLI 명령어
