@@ -379,11 +379,15 @@ def admin_promises():
 @login_required
 def admin_promise_add():
     if request.method == 'POST':
+        # 텍스트 필드는 앞뒤 공백 제거 (줄바꿈은 유지)
+        description = request.form['description'].strip()
+        detailed_description = request.form.get('detailed_description', '').strip() if request.form.get('detailed_description') else None
+
         data = {
-            'category': request.form['category'],
-            'title': request.form['title'],
-            'description': request.form['description'],
-            'detailed_description': request.form.get('detailed_description'),
+            'category': request.form['category'].strip(),
+            'title': request.form['title'].strip(),
+            'description': description,
+            'detailed_description': detailed_description,
             'progress_rate': int(request.form.get('progress_rate', 0)),
             'status': request.form.get('status', '진행중'),
             'order': int(request.form.get('order', 0))
@@ -402,11 +406,15 @@ def admin_promise_edit(promise_id):
         return redirect(url_for('admin_promises'))
 
     if request.method == 'POST':
+        # 텍스트 필드는 앞뒤 공백 제거 (줄바꿈은 유지)
+        description = request.form['description'].strip()
+        detailed_description = request.form.get('detailed_description', '').strip() if request.form.get('detailed_description') else None
+
         data = {
-            'category': request.form['category'],
-            'title': request.form['title'],
-            'description': request.form['description'],
-            'detailed_description': request.form.get('detailed_description'),
+            'category': request.form['category'].strip(),
+            'title': request.form['title'].strip(),
+            'description': description,
+            'detailed_description': detailed_description,
             'progress_rate': int(request.form.get('progress_rate', 0)),
             'status': request.form.get('status', '진행중'),
             'order': int(request.form.get('order', 0))
@@ -432,10 +440,11 @@ def admin_promise_progress_add(promise_id):
         return redirect(url_for('admin_promises'))
 
     if request.method == 'POST':
+        # 텍스트 필드는 앞뒤 공백 제거 (줄바꿈은 유지)
         data = {
             'promise_id': promise_id,
-            'title': request.form['title'],
-            'content': request.form['content'],
+            'title': request.form['title'].strip(),
+            'content': request.form['content'].strip(),
             'date': request.form['date']
         }
         db_helper.create_promise_progress(data)
