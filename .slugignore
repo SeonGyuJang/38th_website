@@ -1,0 +1,20 @@
+# Heroku 빌드 시 제외할 파일들 (슬러그 크기 감소)
+*.md
+*.log
+.git
+.gitignore
+.env.example
+tests/
+docs/
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
