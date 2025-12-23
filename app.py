@@ -139,6 +139,22 @@ def schedule():
 
 @app.route('/organization')
 def organization():
+    # 부서명 매핑: 축약형 → 풀네임
+    DEPT_MAPPING = {
+        '중집위_미디어소통국': '중앙집행위원회 미디어소통국',
+        '중집위_사무국': '중앙집행위원회 사무국',
+        '중집위_재정국': '중앙집행위원회 재정국',
+        '기정위_문화기획국': '기획정책위원회 문화기획국',
+        '기정위_대외협력국': '기획정책위원회 대외협력국',
+        '기정위_정책국': '기획정책위원회 정책국',
+        '인복위_홍보국': '인권/복지부 홍보국',
+        '인복위_기획국': '인권/복지부 기획국',
+        '인복위_사무재정국': '인권/복지부 사무재정국',
+        '교복위_홍보국': '교육/복지부 홍보국',
+        '교복위_기획국': '교육/복지부 기획국',
+        '교복위_사무재정국': '교육/복지부 사무재정국'
+    }
+
     # 간략 보기용 데이터 (회장단)
     presidents = db_helper.get_organizations_by_position('회장')
     # 위원장
@@ -148,10 +164,33 @@ def organization():
     all_members = db_helper.get_all_organizations()
     departments = {}
     for m in all_members:
+        # 데이터 정규화: position과 department의 공백 제거
+        if m.get('position'):
+            m['position'] = m['position'].strip()
+        if m.get('department'):
+            m['department'] = m['department'].strip()
+            # 축약형이면 풀네임으로 변환
+            m['department'] = DEPT_MAPPING.get(m['department'], m['department'])
+
         dept = m.get('department') or "회장단 및 중앙기구"
         if dept not in departments:
             departments[dept] = []
         departments[dept].append(m)
+
+    # presidents와 heads도 정규화
+    for p in presidents:
+        if p.get('position'):
+            p['position'] = p['position'].strip()
+        if p.get('department'):
+            p['department'] = p['department'].strip()
+            p['department'] = DEPT_MAPPING.get(p['department'], p['department'])
+
+    for h in heads:
+        if h.get('position'):
+            h['position'] = h['position'].strip()
+        if h.get('department'):
+            h['department'] = h['department'].strip()
+            h['department'] = DEPT_MAPPING.get(h['department'], h['department'])
 
     return render_template('organization.html',
                            presidents=presidents,
@@ -758,10 +797,30 @@ def admin_organization_add():
 @app.route('/admin/organization/edit/<int:member_id>', methods=['GET', 'POST'])
 @login_required
 def admin_organization_edit(member_id):
+    # 부서명 매핑: 축약형 → 풀네임
+    DEPT_MAPPING = {
+        '중집위_미디어소통국': '중앙집행위원회 미디어소통국',
+        '중집위_사무국': '중앙집행위원회 사무국',
+        '중집위_재정국': '중앙집행위원회 재정국',
+        '기정위_문화기획국': '기획정책위원회 문화기획국',
+        '기정위_대외협력국': '기획정책위원회 대외협력국',
+        '기정위_정책국': '기획정책위원회 정책국',
+        '인복위_홍보국': '인권/복지부 홍보국',
+        '인복위_기획국': '인권/복지부 기획국',
+        '인복위_사무재정국': '인권/복지부 사무재정국',
+        '교복위_홍보국': '교육/복지부 홍보국',
+        '교복위_기획국': '교육/복지부 기획국',
+        '교복위_사무재정국': '교육/복지부 사무재정국'
+    }
+
     member = db_helper.get_organization_by_id(member_id)
     if not member:
         flash('조직도 멤버를 찾을 수 없습니다.', 'error')
         return redirect(url_for('admin_organization'))
+
+    # 기존 데이터의 department를 풀네임으로 변환 (폼에서 올바르게 선택되도록)
+    if member.get('department'):
+        member['department'] = DEPT_MAPPING.get(member['department'], member['department'])
 
     if request.method == 'POST':
         photo_url = member.get('photo_url')

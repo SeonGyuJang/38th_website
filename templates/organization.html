@@ -83,7 +83,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(16px, 3vw, 24px); flex: 1;">
                     <!-- 산하위원장 -->
                     {% for h in heads %}
-                    {% if h.position == '산하위원장' %}
+                    {% if '산하위원장' in h.position %}
                     <div class="apple-card" style="grid-column: 1 / -1; text-align: center; padding: clamp(20px, 4vw, 24px);">
                         <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">{{ h.position }}</div>
                         <div style="font-size: clamp(1.15rem, 2.8vw, 1.4rem); font-weight: 800; margin-bottom: 4px;">{{ h.name }}</div>
