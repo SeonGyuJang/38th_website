@@ -173,6 +173,27 @@ class SupabaseHelper:
         response = self.client.table('promise_progress').insert(data).execute()
         return response.data[0] if response.data else None
 
+    def get_promise_progress_by_id(self, progress_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 공약 진행 상황 조회"""
+        response = self.client.table('promise_progress').select('*').eq('id', progress_id).execute()
+        if response.data:
+            return self.convert_promise_progress_dates(response.data[0])
+        return None
+
+    def update_promise_progress(self, progress_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """공약 진행 상황 수정"""
+        response = self.client.table('promise_progress').update(data).eq('id', progress_id).execute()
+        return response.data[0] if response.data else None
+
+    def delete_promise_progress(self, progress_id: int) -> bool:
+        """공약 진행 상황 삭제"""
+        try:
+            self.client.table('promise_progress').delete().eq('id', progress_id).execute()
+            return True
+        except Exception as e:
+            print(f"Error deleting promise progress: {e}")
+            return False
+
     # ============ MeetingMinutes 관련 ============
     def get_all_minutes(self, order_by: str = 'meeting_date', ascending: bool = False) -> List[Dict[str, Any]]:
         """모든 회의록 조회"""

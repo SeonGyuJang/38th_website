@@ -220,6 +220,31 @@ def promise_detail(promise_id):
     progress_updates = db_helper.get_promise_progress(promise_id)
     return render_template('promise_detail.html', promise=promise, progress_updates=progress_updates)
 
+@app.route('/api/promise/<int:promise_id>/details')
+def api_promise_details(promise_id):
+    """공약 상세 정보 API (Ajax 요청용)"""
+    promise = db_helper.get_promise_by_id(promise_id)
+    if not promise:
+        return jsonify({'error': 'Promise not found'}), 404
+
+    progress_updates = db_helper.get_promise_progress(promise_id)
+
+    # 날짜 포맷팅
+    formatted_updates = []
+    for update in progress_updates:
+        formatted_updates.append({
+            'id': update['id'],
+            'title': update['title'],
+            'content': update['content'],
+            'date': update['date'].strftime('%Y년 %m월 %d일')
+        })
+
+    return jsonify({
+        'id': promise['id'],
+        'detailed_description': promise.get('detailed_description', ''),
+        'progress_updates': formatted_updates
+    })
+
 @app.route('/minutes')
 def minutes():
     meeting_minutes = db_helper.get_all_minutes()
@@ -373,6 +398,9 @@ def admin_schedule_delete(schedule_id):
 @login_required
 def admin_promises():
     promises_list = db_helper.get_all_promises()
+    # 각 공약의 진행 상황 추가
+    for promise in promises_list:
+        promise['progress_updates'] = db_helper.get_promise_progress(promise['id'])
     return render_template('admin/promises.html', promises=promises_list)
 
 @app.route('/admin/promises/add', methods=['GET', 'POST'])
@@ -451,6 +479,40 @@ def admin_promise_progress_add(promise_id):
         flash('진행상황이 추가되었습니다.', 'success')
         return redirect(url_for('admin_promises'))
     return render_template('admin/promise_progress_form.html', promise=promise)
+
+@app.route('/admin/promises/progress/<int:progress_id>/edit', methods=['GET', 'POST'])
+@login_required
+def admin_promise_progress_edit(progress_id):
+    progress = db_helper.get_promise_progress_by_id(progress_id)
+    if not progress:
+        flash('진행상황을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_promises'))
+
+    promise = db_helper.get_promise_by_id(progress['promise_id'])
+    if not promise:
+        flash('공약을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_promises'))
+
+    if request.method == 'POST':
+        data = {
+            'title': request.form['title'].strip(),
+            'content': request.form['content'].strip(),
+            'date': request.form['date']
+        }
+        db_helper.update_promise_progress(progress_id, data)
+        flash('진행상황이 수정되었습니다.', 'success')
+        return redirect(url_for('admin_promises'))
+
+    return render_template('admin/promise_progress_form.html', promise=promise, progress=progress, is_edit=True)
+
+@app.route('/admin/promises/progress/<int:progress_id>/delete', methods=['POST'])
+@login_required
+def admin_promise_progress_delete(progress_id):
+    if db_helper.delete_promise_progress(progress_id):
+        flash('진행상황이 삭제되었습니다.', 'success')
+    else:
+        flash('진행상황 삭제에 실패했습니다.', 'error')
+    return redirect(url_for('admin_promises'))
 
 # ============================================
 # 회의록 관리

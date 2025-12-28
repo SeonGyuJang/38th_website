@@ -14,7 +14,7 @@
                 공약 관리로 돌아가기
             </a>
             <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">
-                공약 진행상황 추가
+                {% if is_edit %}공약 진행상황 수정{% else %}공약 진행상황 추가{% endif %}
             </h1>
             <p style="color: var(--text-secondary); margin-top: 12px; font-size: 1rem;">
                 {{ promise.title }}
@@ -33,6 +33,7 @@
                         id="title"
                         name="title"
                         required
+                        value="{% if progress %}{{ progress.title }}{% endif %}"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
                         onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
@@ -49,6 +50,7 @@
                         id="date"
                         name="date"
                         required
+                        value="{% if progress %}{{ progress.date.strftime('%Y-%m-%d') }}{% endif %}"
                         style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
                         onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
@@ -68,7 +70,7 @@
                         onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                         onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
                         placeholder="진행상황에 대한 상세 내용을 입력하세요"
-                    ></textarea>
+                    >{% if progress %}{{ progress.content }}{% endif %}</textarea>
                 </div>
 
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -78,7 +80,7 @@
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';"
                     >
-                        추가하기
+                        {% if is_edit %}수정하기{% else %}추가하기{% endif %}
                     </button>
                     <a
                         href="{{ url_for('admin_promises') }}"
