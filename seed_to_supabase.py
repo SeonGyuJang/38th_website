@@ -747,7 +747,7 @@ def create_organization():
         {'name': '서가연', 'position': '기획정책위원장', 'department': '본부', 'major': '정부행정학부23', 'student_id': '2023****', 'email': 'sgy0120@korea.ac.kr', 'phone': '010-7139-1782', 'order': 4},
 
         # 1순위 - 산하위원회
-        {'name': '서홍욱', 'position': '산하위원장', 'department': '산하위원회', 'major': '문화유산융합학부21', 'student_id': '202140041', 'email': 'hongwook5179@naver.com', 'phone': '010-3068-5179', 'order': 5},
+        {'name': '서홍욱', 'position': '학생복지위원장', 'department': '산하위원회', 'major': '문화유산융합학부21', 'student_id': '202140041', 'email': 'hongwook5179@naver.com', 'phone': '010-3068-5179', 'order': 5},
 
         # 2순위 - 중집위 국들
         # 미디어소통국
