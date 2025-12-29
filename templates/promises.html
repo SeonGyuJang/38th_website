@@ -588,6 +588,33 @@
         }
     }
 
+    // 페이지 로딩 상태 추적
+    let contentReady = false;
+    let pageLoaded = false;
+
+    // 링크 클릭 시점부터의 시간을 계산 (sessionStorage에서 가져옴)
+    const storedStartTime = sessionStorage.getItem('promisesLoadStartTime');
+    const pageStartTime = storedStartTime ? parseInt(storedStartTime, 10) : Date.now();
+
+    // sessionStorage 정리
+    if (storedStartTime) {
+        sessionStorage.removeItem('promisesLoadStartTime');
+    }
+
+    const minLoadingTime = 1500; // 최소 로딩 시간 (사용자가 로딩창을 확실히 보도록)
+
+    // 모든 조건이 충족되었는지 확인하고 로딩창 숨김
+    function checkAndHideLoading() {
+        if (!contentReady || !pageLoaded) return;
+
+        const elapsed = Date.now() - pageStartTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsed);
+
+        setTimeout(() => {
+            hideLoadingScreen();
+        }, remainingTime);
+    }
+
     // 초기화
     document.addEventListener('DOMContentLoaded', () => {
         animateOverallProgress();
@@ -597,19 +624,18 @@
             sectionObserver.observe(section);
         });
 
-        // 모든 콘텐츠가 로드되면 로딩 화면 숨김
-        // 최소 0.8초는 로딩 화면 유지 (너무 빨리 사라지는 것 방지)
-        const minLoadingTime = 800;
-        const startTime = performance.now();
+        // DOM 콘텐츠가 준비되면 contentReady 설정
+        // 약간의 지연을 두어 렌더링이 완료되도록 함
+        setTimeout(() => {
+            contentReady = true;
+            checkAndHideLoading();
+        }, 300);
+    });
 
-        window.addEventListener('load', () => {
-            const elapsed = performance.now() - startTime;
-            const remainingTime = Math.max(0, minLoadingTime - elapsed);
-
-            setTimeout(() => {
-                hideLoadingScreen();
-            }, remainingTime);
-        });
+    // 모든 리소스 로드 완료
+    window.addEventListener('load', () => {
+        pageLoaded = true;
+        checkAndHideLoading();
     });
 })();
 </script>

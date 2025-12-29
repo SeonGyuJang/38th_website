@@ -147,5 +147,24 @@
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- 공약 페이지 로딩 시작 시간 추적 -->
+    <script>
+    (function() {
+        'use strict';
+
+        // 공약 페이지로의 모든 링크에 클릭 이벤트 추가
+        document.addEventListener('DOMContentLoaded', function() {
+            const promisesLinks = document.querySelectorAll('a[href*="/promises"]');
+
+            promisesLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    // 공약 페이지 로딩 시작 시간을 sessionStorage에 저장
+                    sessionStorage.setItem('promisesLoadStartTime', Date.now().toString());
+                });
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
