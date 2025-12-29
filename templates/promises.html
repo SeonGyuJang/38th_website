@@ -468,22 +468,6 @@
         });
     };
 
-    // 로딩 화면 숨기기
-    function hideLoadingScreen() {
-        const loadingScreen = document.getElementById('globalPromisesLoading');
-        if (loadingScreen) {
-            loadingScreen.classList.add('hidden');
-            // 애니메이션이 끝난 후 DOM에서 제거
-            setTimeout(() => {
-                loadingScreen.remove();
-            }, 500);
-        }
-    }
-
-    // 최소 로딩 시간
-    const minLoadingTime = 1200;
-    const pageStartTime = Date.now();
-
     // 초기화
     document.addEventListener('DOMContentLoaded', () => {
         animateOverallProgress();
@@ -492,16 +476,6 @@
         document.querySelectorAll('.promise-section').forEach(section => {
             sectionObserver.observe(section);
         });
-    });
-
-    // 모든 리소스 로드 완료 후 로딩창 숨김
-    window.addEventListener('load', () => {
-        const elapsed = Date.now() - pageStartTime;
-        const remainingTime = Math.max(0, minLoadingTime - elapsed);
-
-        setTimeout(() => {
-            hideLoadingScreen();
-        }, remainingTime);
     });
 })();
 </script>
