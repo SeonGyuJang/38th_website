@@ -15,31 +15,122 @@
         }
     }
 
-    .category-filter-btn {
+    /* 성능 최적화: 공통 스타일 클래스화 */
+    .promise-header {
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .promise-title {
+        font-size: clamp(2.5rem, 6vw, 3.5rem);
+        font-weight: 800;
+        margin-bottom: 20px;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+
+    .promise-subtitle {
+        font-size: clamp(1rem, 2vw, 1.15rem);
+        color: var(--text-secondary);
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .category-card {
+        background: white;
+        border-radius: 24px;
+        padding: clamp(32px, 6vw, 48px);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        border: 2px solid rgba(0, 0, 0, 0.06);
+        margin-bottom: 36px;
+        position: relative;
+        overflow: hidden;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .category-filter-btn:hover {
-        transform: translateY(-2px);
+    .category-card:hover {
+        transform: translateY(-4px);
     }
 
-    .category-filter-btn.active {
-        background: var(--ku-crimson) !important;
-        color: white !important;
-        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
+    .promise-card {
+        background: white;
+        border-radius: 20px;
+        border: 2px solid rgba(0,0,0,0.06);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        opacity: 0;
+    }
+
+    .promise-card.loaded {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .promise-card-header {
+        padding: clamp(24px, 5vw, 32px);
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .promise-card-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .promise-card.expanded .promise-card-content {
+        max-height: 3000px;
+    }
+
+    .promise-card.expanded {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border-color: rgba(150, 26, 50, 0.2);
+    }
+
+    .expand-icon svg {
+        transition: transform 0.3s ease;
+    }
+
+    .promise-card.expanded .expand-icon svg {
+        transform: rotate(180deg);
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border-radius: 100px;
     }
 
     .promise-section {
-        animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+    }
+
+    .promise-section.loaded {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    /* 로딩 스켈레톤 */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 </style>
 
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
-    <div style="margin-bottom: 50px; text-align: center;">
+    <div class="promise-header">
         <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
-        <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">공약 이행 현황</h1>
-        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">학우 여러분과의 약속을 투명하게 공개하고, 지켜나가겠습니다</p>
+        <h1 class="promise-title">공약 이행 현황</h1>
+        <p class="promise-subtitle">학우 여러분과의 약속을 투명하게 공개하고, 지켜나가겠습니다</p>
     </div>
 
     <!-- 카테고리 필터 -->
@@ -50,9 +141,7 @@
                 <svg width="20" height="20" viewBox="0 0 16 16" fill="var(--ku-crimson)" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1;">
                     <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
-                <select onchange="filterCategory(this.value)" style="width: 100%; padding: 14px 20px 14px 48px; background: white; border: 2px solid rgba(150, 26, 50, 0.15); border-radius: 14px; font-size: clamp(0.95rem, 2.2vw, 1.05rem); font-weight: 700; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2716%27 height=%2716%27 viewBox=%270 0 16 16%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M4 6L8 10L12 6%27 stroke=%27%23961A32%27 stroke-width=%272.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 16px center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
-                        onfocus="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 4px 16px rgba(150, 26, 50, 0.2)';"
-                        onblur="this.style.borderColor='rgba(150, 26, 50, 0.15)'; this.style.boxShadow='none';">
+                <select onchange="filterCategory(this.value)" style="width: 100%; padding: 14px 20px 14px 48px; background: white; border: 2px solid rgba(150, 26, 50, 0.15); border-radius: 14px; font-size: clamp(0.95rem, 2.2vw, 1.05rem); font-weight: 700; color: var(--text-primary); cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2716%27 height=%2716%27 viewBox=%270 0 16 16%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M4 6L8 10L12 6%27 stroke=%27%23961A32%27 stroke-width=%272.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 16px center; transition: all 0.2s ease;">
                     <option value="all">전체</option>
                     {% for category in categories.keys() %}
                     <option value="{{ category }}">{{ category }}</option>
@@ -65,70 +154,28 @@
 
     <!-- 전체 이행률 히어로 카드 -->
     <div id="overall-achievement-card" style="background: white; border-radius: 24px; padding: clamp(60px, 10vw, 100px) clamp(40px, 8vw, 80px); text-align: center; box-shadow: 0 4px 40px rgba(150, 26, 50, 0.08); margin-bottom: 80px; position: relative; overflow: hidden; border: 1px solid rgba(150, 26, 50, 0.08);">
-        <!-- 배경 장식 -->
-        <div style="position: absolute; top: -50%; right: -20%; width: clamp(300px, 50vw, 500px); height: clamp(300px, 50vw, 500px); background: radial-gradient(circle, rgba(150, 26, 50, 0.04) 0%, transparent 70%); border-radius: 50%; filter: blur(80px);"></div>
-        <div style="position: absolute; bottom: -50%; left: -20%; width: clamp(400px, 60vw, 600px); height: clamp(400px, 60vw, 600px); background: radial-gradient(circle, rgba(150, 26, 50, 0.03) 0%, transparent 70%); border-radius: 50%; filter: blur(100px);"></div>
-
         <div style="position: relative; z-index: 2;">
-            <!-- 상단 배지 -->
             <div style="display: inline-block; padding: 8px 20px; background: rgba(150, 26, 50, 0.08); border-radius: 100px; margin-bottom: clamp(32px, 6vw, 40px); border: 1px solid rgba(150, 26, 50, 0.12);">
                 <span style="font-size: clamp(0.75rem, 1.8vw, 0.85rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ku-crimson);">Overall Achievement</span>
             </div>
 
-            <!-- 진행률 원형 그래프 -->
             <div style="position: relative; width: clamp(220px, 45vw, 320px); height: clamp(220px, 45vw, 320px); margin: 0 auto clamp(40px, 8vw, 56px);">
-                <svg viewBox="0 0 36 36" style="transform: rotate(-90deg); width: 100%; height: 100%; filter: drop-shadow(0 8px 32px rgba(150, 26, 50, 0.15));">
+                <svg viewBox="0 0 36 36" style="transform: rotate(-90deg); width: 100%; height: 100%;">
                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(150, 26, 50, 0.08)" stroke-width="2.5" />
-                    <path class="overall-progress-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="url(#overallGradient)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;" />
-                    <defs>
-                        <linearGradient id="overallGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color: var(--ku-crimson); stop-opacity: 1" />
-                            <stop offset="100%" style="stop-color: #b02a44; stop-opacity: 1" />
-                        </linearGradient>
-                    </defs>
+                    <path class="overall-progress-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ku-crimson)" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.2s ease 0.3s;" />
                 </svg>
                 <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                    <span class="overall-percentage" style="font-size: clamp(3.5rem, 12vw, 6rem); font-weight: 900; background: linear-gradient(135deg, var(--ku-crimson) 0%, #b02a44 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">0%</span>
+                    <span class="overall-percentage" style="font-size: clamp(3.5rem, 12vw, 6rem); font-weight: 900; color: var(--ku-crimson); line-height: 1;">0%</span>
                     <span style="font-size: clamp(0.85rem, 2vw, 1.1rem); color: var(--text-secondary); font-weight: 700; letter-spacing: 0.1em; margin-top: 12px; text-transform: uppercase;">Achieved</span>
                 </div>
             </div>
 
-            <!-- 타이틀 -->
             <h3 style="font-size: clamp(1.8rem, 4.5vw, 2.8rem); font-weight: 900; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.02em;">전체 공약 이행률</h3>
             <p style="font-size: clamp(1.05rem, 2.5vw, 1.35rem); color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7; font-weight: 500;">
-                학우 여러분과의 약속을 투명하게 공개하고,<br class="show-mobile"> 하나하나 실천해 나가고 있습니다.
+                학우 여러분과의 약속을 투명하게 공개하고, 하나하나 실천해 나가고 있습니다.
             </p>
         </div>
     </div>
-
-    <script>
-    // Overall Achievement 애니메이션
-    document.addEventListener('DOMContentLoaded', function() {
-        const totalProgress = {{ total_progress }};
-        const progressRing = document.querySelector('.overall-progress-ring');
-        const percentageText = document.querySelector('.overall-percentage');
-
-        setTimeout(() => {
-            if (progressRing) {
-                progressRing.style.strokeDasharray = `${totalProgress}, 100`;
-            }
-
-            // 숫자 카운트업 애니메이션
-            let currentRate = 0;
-            const increment = totalProgress / 80;
-            const counter = setInterval(() => {
-                currentRate += increment;
-                if (currentRate >= totalProgress) {
-                    currentRate = totalProgress;
-                    clearInterval(counter);
-                }
-                if (percentageText) {
-                    percentageText.textContent = Math.round(currentRate) + '%';
-                }
-            }, 20);
-        }, 500);
-    });
-    </script>
 
     <!-- 카테고리별 공약 -->
     {% if categories %}
@@ -150,8 +197,7 @@
 
         <section class="promise-section" data-category="{{ category }}" style="margin-bottom: 100px;">
             <!-- 카테고리 헤더 카드 -->
-            <div style="background: white; border-radius: 24px; padding: clamp(32px, 6vw, 48px); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06); border: 2px solid rgba(0, 0, 0, 0.06); margin-bottom: 36px; position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px {{ colors.glow }}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 24px rgba(0, 0, 0, 0.06)';">
-
+            <div class="category-card">
                 <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 250px;">
                         <div style="display: inline-block; padding: 6px 18px; background: {{ colors.light }}; border-radius: 100px; margin-bottom: 20px;">
@@ -166,14 +212,13 @@
                         </p>
                     </div>
 
-                    <!-- 원형 프로그레스 -->
                     <div style="position: relative; width: 140px; height: 140px; flex-shrink: 0;">
                         <svg width="140" height="140" style="transform: rotate(-90deg);">
                             <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.light }}" stroke-width="12"/>
                             <circle cx="70" cy="70" r="60" fill="none" stroke="{{ colors.solid }}" stroke-width="12"
                                     stroke-dasharray="{{ (category_progress * 3.77)|round(2) }} 377"
                                     stroke-linecap="round"
-                                    style="transition: stroke-dasharray 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); filter: drop-shadow(0 2px 8px {{ colors.glow }});"/>
+                                    style="transition: stroke-dasharray 0.8s ease;"/>
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
                             <div style="font-size: 2.2rem; font-weight: 900; color: {{ colors.solid }}; line-height: 1;">{{ category_progress }}</div>
@@ -183,28 +228,22 @@
                 </div>
             </div>
 
-            <!-- 공약 카드 그리드 (아코디언 방식) -->
+            <!-- 공약 카드 그리드 -->
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 {% for promise in promises_list %}
-                <div class="promise-accordion-card" data-promise-id="{{ promise.id }}" style="background: white; border-radius: 20px; border: 2px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;">
-                    <!-- 카드 헤더 (클릭 가능) -->
-                    <div class="promise-card-header" onclick="togglePromiseAccordion({{ promise.id }})" style="padding: clamp(24px, 5vw, 32px); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;">
+                <div class="promise-card" data-promise-id="{{ promise.id }}" data-color-solid="{{ colors.solid }}" data-color-light="{{ colors.light }}" data-color-glow="{{ colors.glow }}">
+                    <div class="promise-card-header" onclick="togglePromiseAccordion({{ promise.id }})">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
                             <div style="flex: 1; min-width: 0;">
                                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
                                     <h3 style="font-size: clamp(1.15rem, 2.8vw, 1.35rem); font-weight: 800; line-height: 1.3; color: var(--text-primary); margin: 0; flex: 1; min-width: 200px;">{{ promise.title }}</h3>
-                                    <span class="badge
-                                        {% if promise.status == '완료' %}badge-success
-                                        {% elif promise.status == '진행중' %}badge-info
-                                        {% elif promise.status == '보류' %}badge-warning
-                                        {% else %}badge-secondary{% endif %}"
+                                    <span class="badge badge-{% if promise.status == '완료' %}success{% elif promise.status == '진행중' %}info{% elif promise.status == '보류' %}warning{% else %}secondary{% endif %}"
                                         style="flex-shrink: 0; font-size: clamp(0.75rem, 1.8vw, 0.85rem); padding: 8px 16px; font-weight: 700;">
                                         {{ promise.status }}
                                     </span>
                                 </div>
                                 <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.7; color: var(--text-secondary); margin: 0 0 16px;">{{ promise.description }}</p>
 
-                                <!-- 이행률 미리보기 -->
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <div style="flex: 1; max-width: 300px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -212,12 +251,11 @@
                                             <span style="font-size: clamp(1.1rem, 2.6vw, 1.4rem); font-weight: 900; color: {{ colors.solid }};">{{ promise.progress_rate }}%</span>
                                         </div>
                                         <div style="background: {{ colors.light }}; border-radius: 100px; height: 8px; overflow: hidden; position: relative;">
-                                            <div style="position: absolute; top: 0; left: 0; height: 100%; background: {{ colors.solid }}; width: {{ promise.progress_rate }}%; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 100px; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
+                                            <div class="progress-bar-fill" style="background: {{ colors.solid }}; width: {{ promise.progress_rate }}%; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
                                         </div>
                                     </div>
-                                    <!-- 펼치기 아이콘 -->
-                                    <div class="expand-icon" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: {{ colors.light }}; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
-                                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                    <div class="expand-icon" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: {{ colors.light }}; display: flex; align-items: center; justify-content: center;">
+                                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
                                             <path d="M4 6L8 10L12 6" stroke="{{ colors.solid }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </div>
@@ -226,63 +264,10 @@
                         </div>
                     </div>
 
-                    <!-- 확장 콘텐츠 (상세 정보 + 진행 상황) -->
-                    <div class="promise-accordion-content" style="max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
-                        <div style="padding: 0 clamp(24px, 5vw, 32px) clamp(24px, 5vw, 32px); border-top: 2px solid {{ colors.light }};">
-                            <!-- 상세 설명 -->
-                            {% if promise.detailed_description %}
-                            <div style="margin: clamp(24px, 5vw, 32px) 0;">
-                                <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 32px; height: 32px; background: {{ colors.solid }}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                                            <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                        </svg>
-                                    </div>
-                                    상세 설명
-                                </h4>
-                                <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: clamp(20px, 4vw, 28px); border: 1px solid rgba(0, 0, 0, 0.04);">
-                                    <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-wrap;">{{ promise.detailed_description }}</p>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- 진행 상황 타임라인 -->
-                            {% if promise.progress_updates %}
-                            <div style="margin: clamp(24px, 5vw, 32px) 0;">
-                                <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 32px; height: 32px; background: {{ colors.solid }}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </div>
-                                    진행 상황
-                                </h4>
-                                <div style="position: relative; padding-left: clamp(24px, 5vw, 32px);">
-                                    <!-- 타임라인 라인 -->
-                                    <div style="position: absolute; left: 9px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, {{ colors.solid }} 0%, {{ colors.light }} 100%); border-radius: 2px;"></div>
-
-                                    {% for update in promise.progress_updates %}
-                                    <div style="position: relative; margin-bottom: clamp(20px, 4vw, 28px); padding-left: clamp(20px, 4vw, 28px);">
-                                        <!-- 타임라인 도트 -->
-                                        <div style="position: absolute; left: 0; top: 6px; width: 22px; height: 22px; background: white; border: 4px solid {{ colors.solid }}; border-radius: 50%; box-shadow: 0 2px 8px {{ colors.glow }};"></div>
-
-                                        <!-- 콘텐츠 -->
-                                        <div style="background: white; border-radius: 14px; padding: clamp(16px, 3.5vw, 20px); border: 1.5px solid rgba(0, 0, 0, 0.08); transition: all 0.3s;">
-                                            <div style="font-size: clamp(0.75rem, 1.8vw, 0.85rem); color: {{ colors.solid }}; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-                                                {{ update.date.strftime('%Y년 %m월 %d일') }}
-                                            </div>
-                                            <h5 style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 800; color: var(--text-primary); margin-bottom: 10px; letter-spacing: -0.01em;">
-                                                {{ update.title }}
-                                            </h5>
-                                            <p style="font-size: clamp(0.85rem, 2vw, 0.95rem); line-height: 1.75; color: var(--text-secondary); margin: 0; white-space: pre-wrap;">
-                                                {{ update.content }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
+                    <div class="promise-card-content" data-loaded="false">
+                        <div class="content-placeholder" style="padding: clamp(24px, 5vw, 32px); text-align: center; color: var(--text-secondary);">
+                            <div class="skeleton" style="height: 20px; border-radius: 4px; margin-bottom: 12px;"></div>
+                            <div class="skeleton" style="height: 20px; border-radius: 4px; width: 80%; margin: 0 auto;"></div>
                         </div>
                     </div>
                 </div>
@@ -291,8 +276,7 @@
         </section>
         {% endfor %}
     {% else %}
-    <!-- 빈 상태 -->
-    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: var(--radius-2xl); box-shadow: var(--shadow-sm);">
+    <div style="text-align: center; padding: 100px 20px; background: white; border-radius: 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.04);">
         <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%); margin: 0 auto 32px; display: flex; align-items: center; justify-content: center;">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -304,89 +288,186 @@
 </div>
 
 <script>
-    function filterCategory(category) {
-        // 모든 버튼의 active 클래스 제거
-        document.querySelectorAll('.category-filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-            btn.style.background = '#F5F5F7';
-            btn.style.color = 'var(--text-primary)';
-            btn.style.boxShadow = 'none';
+(function() {
+    'use strict';
+
+    // 전역 변수
+    const promiseData = new Map();
+    let loadedSections = new Set();
+
+    // Overall Achievement 애니메이션
+    function animateOverallProgress() {
+        const totalProgress = {{ total_progress }};
+        const progressRing = document.querySelector('.overall-progress-ring');
+        const percentageText = document.querySelector('.overall-percentage');
+
+        if (!progressRing || !percentageText) return;
+
+        setTimeout(() => {
+            progressRing.style.strokeDasharray = `${totalProgress}, 100`;
+
+            let current = 0;
+            const duration = 1200;
+            const start = performance.now();
+
+            function update(timestamp) {
+                const elapsed = timestamp - start;
+                current = Math.min((elapsed / duration) * totalProgress, totalProgress);
+                percentageText.textContent = Math.round(current) + '%';
+
+                if (current < totalProgress) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }, 300);
+    }
+
+    // Intersection Observer로 Lazy Loading
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !loadedSections.has(entry.target)) {
+                entry.target.classList.add('loaded');
+                loadedSections.add(entry.target);
+                loadCardsInSection(entry.target);
+            }
         });
+    }, { rootMargin: '50px' });
 
-        // 클릭된 버튼에 active 클래스 추가
-        const clickedBtn = document.querySelector(`[data-category="${category}"]`);
-        if (clickedBtn) {
-            clickedBtn.classList.add('active');
-        }
+    function loadCardsInSection(section) {
+        const cards = section.querySelectorAll('.promise-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('loaded');
+            }, index * 50);
+        });
+    }
 
-        // 전체 이행률 카드 표시/숨김
-        const overallCard = document.getElementById('overall-achievement-card');
-        if (overallCard) {
-            if (category === 'all') {
-                overallCard.style.display = 'block';
-            } else {
-                overallCard.style.display = 'none';
+    // 아코디언 토글
+    window.togglePromiseAccordion = function(promiseId) {
+        const card = document.querySelector(`.promise-card[data-promise-id="${promiseId}"]`);
+        if (!card) return;
+
+        const content = card.querySelector('.promise-card-content');
+        const isExpanded = card.classList.contains('expanded');
+
+        if (isExpanded) {
+            card.classList.remove('expanded');
+        } else {
+            card.classList.add('expanded');
+
+            if (content.dataset.loaded === 'false') {
+                loadPromiseDetails(promiseId, card);
             }
         }
+    };
 
-        // 섹션 필터링
+    // 공약 상세 정보 로드
+    function loadPromiseDetails(promiseId, card) {
+        const content = card.querySelector('.promise-card-content');
+        const colorSolid = card.dataset.colorSolid;
+        const colorLight = card.dataset.colorLight;
+
+        fetch(`/api/promise/${promiseId}/details`)
+            .then(response => response.json())
+            .then(data => {
+                content.innerHTML = renderPromiseDetails(data, colorSolid, colorLight);
+                content.dataset.loaded = 'true';
+            })
+            .catch(error => {
+                console.error('Error loading promise details:', error);
+                content.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-secondary);">상세 정보를 불러올 수 없습니다.</div>';
+            });
+    }
+
+    // 공약 상세 정보 렌더링
+    function renderPromiseDetails(data, colorSolid, colorLight) {
+        let html = '<div style="padding: 0 clamp(24px, 5vw, 32px) clamp(24px, 5vw, 32px); border-top: 2px solid ' + colorLight + ';">';
+
+        if (data.detailed_description) {
+            html += `
+                <div style="margin: clamp(24px, 5vw, 32px) 0;">
+                    <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; background: ${colorSolid}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                <path d="M9 12h6m-6 4h6m-6-8h6m-7 13h8a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 1H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        상세 설명
+                    </h4>
+                    <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: clamp(20px, 4vw, 28px); border: 1px solid rgba(0, 0, 0, 0.04);">
+                        <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-line;">${data.detailed_description}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (data.progress_updates && data.progress_updates.length > 0) {
+            html += `
+                <div style="margin: clamp(24px, 5vw, 32px) 0;">
+                    <h4 style="font-size: clamp(1.05rem, 2.4vw, 1.2rem); font-weight: 800; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; background: ${colorSolid}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        진행 상황
+                    </h4>
+                    <div style="position: relative; padding-left: clamp(24px, 5vw, 32px);">
+                        <div style="position: absolute; left: 9px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, ${colorSolid} 0%, ${colorLight} 100%); border-radius: 2px;"></div>
+            `;
+
+            data.progress_updates.forEach(update => {
+                html += `
+                    <div style="position: relative; margin-bottom: clamp(20px, 4vw, 28px); padding-left: clamp(20px, 4vw, 28px);">
+                        <div style="position: absolute; left: 0; top: 6px; width: 22px; height: 22px; background: white; border: 4px solid ${colorSolid}; border-radius: 50%; box-shadow: 0 2px 8px ${colorLight};"></div>
+                        <div style="background: white; border-radius: 14px; padding: clamp(16px, 3.5vw, 20px); border: 1.5px solid rgba(0, 0, 0, 0.08);">
+                            <div style="font-size: clamp(0.75rem, 1.8vw, 0.85rem); color: ${colorSolid}; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                                ${update.date}
+                            </div>
+                            <h5 style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 800; color: var(--text-primary); margin-bottom: 10px; letter-spacing: -0.01em;">
+                                ${update.title}
+                            </h5>
+                            <p style="font-size: clamp(0.85rem, 2vw, 0.95rem); line-height: 1.75; color: var(--text-secondary); margin: 0; white-space: pre-line;">${update.content}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div></div>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    // 카테고리 필터링
+    window.filterCategory = function(category) {
+        const overallCard = document.getElementById('overall-achievement-card');
+        if (overallCard) {
+            overallCard.style.display = category === 'all' ? 'block' : 'none';
+        }
+
         const sections = document.querySelectorAll('.promise-section');
         sections.forEach(section => {
             if (category === 'all' || section.dataset.category === category) {
                 section.style.display = 'block';
-                // 페이드인 애니메이션 재실행
-                section.style.animation = 'none';
-                setTimeout(() => {
-                    section.style.animation = 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-                }, 10);
             } else {
                 section.style.display = 'none';
             }
         });
+    };
 
-        // 부드러운 스크롤
-        window.scrollTo({
-            top: document.querySelector('.promise-section[style*="display: block"]')?.offsetTop - 120 || 0,
-            behavior: 'smooth'
+    // 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+        animateOverallProgress();
+
+        // Section lazy loading 설정
+        document.querySelectorAll('.promise-section').forEach(section => {
+            sectionObserver.observe(section);
         });
-    }
-
-    // 아코디언 토글 함수
-    function togglePromiseAccordion(promiseId) {
-        const card = document.querySelector(`.promise-accordion-card[data-promise-id="${promiseId}"]`);
-        if (!card) return;
-
-        const content = card.querySelector('.promise-accordion-content');
-        const header = card.querySelector('.promise-card-header');
-        const expandIcon = card.querySelector('.expand-icon svg');
-        const expandIconBg = card.querySelector('.expand-icon');
-
-        // 현재 열려 있는지 확인
-        const isExpanded = content.style.maxHeight && content.style.maxHeight !== '0px';
-
-        if (isExpanded) {
-            // 닫기
-            content.style.maxHeight = '0px';
-            content.style.padding = '0';
-            card.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)';
-            card.style.borderColor = 'rgba(0,0,0,0.06)';
-            if (expandIcon) {
-                expandIcon.style.transform = 'rotate(0deg)';
-            }
-        } else {
-            // 열기
-            content.style.maxHeight = content.scrollHeight + 'px';
-            card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
-            card.style.borderColor = 'rgba(150, 26, 50, 0.2)';
-            if (expandIcon) {
-                expandIcon.style.transform = 'rotate(180deg)';
-            }
-
-            // 부드러운 스크롤
-            setTimeout(() => {
-                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
-        }
-    }
+    });
+})();
 </script>
 {% endblock %}
