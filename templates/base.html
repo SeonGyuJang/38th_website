@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"></noscript>
 
-    <!-- 공약 페이지 로딩 화면 스타일 (전역) -->
     <style>
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -33,7 +32,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            display: none; /* 기본적으로 숨김 */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -43,10 +42,11 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        #globalPromisesLoading.visible {
-            display: flex;
-            opacity: 1;
-            visibility: visible;
+        /* 클래스로 제어 */
+        #globalPromisesLoading.active {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         .global-loading-content {
@@ -76,18 +76,27 @@
             line-height: 1.5;
         }
 
-        .global-loading-dots {
-            display: inline-block;
-        }
-
         .global-loading-dots::after {
             content: '';
             animation: dots 1.5s steps(4, end) infinite;
         }
     </style>
+
+    <script>
+        (function() {
+            // 상세 페이지(/promises/숫자)를 포함한 모든 공약 관련 경로에서 로딩 체크
+            var isPromisesPath = window.location.pathname.includes('/promises');
+            if (isPromisesPath && sessionStorage.getItem('showPromisesLoading') === 'true') {
+                document.documentElement.style.overflow = 'hidden'; // 스크롤 방지
+                var style = document.createElement('style');
+                style.id = 'critical-loading-style';
+                style.textContent = '#globalPromisesLoading { display: flex !important; opacity: 1 !important; visibility: visible !important; }';
+                document.head.appendChild(style);
+            }
+        })();
+    </script>
 </head>
 <body>
-    <!-- 공약 페이지 전역 로딩 화면 (모든 페이지에서 사용 가능) -->
     <div id="globalPromisesLoading">
         <div class="global-loading-content">
             <img src="{{ url_for('static', filename='defaults/hoi_loading.gif') }}"
@@ -99,25 +108,10 @@
                 로딩에 시간이 걸리고 있어요<span class="global-loading-dots"></span>
             </div>
             <div class="global-loading-submessage">
-                잠시만 기다려 주세요!
+                잠시만 기다려 주세요! 🎓
             </div>
         </div>
     </div>
-
-    <!-- 공약 페이지 로딩창 즉시 표시 (페이지 로드 전) -->
-    {% if request.path == '/promises' %}
-    <script>
-        // sessionStorage에서 로딩 플래그 확인
-        if (sessionStorage.getItem('showPromisesLoading') === 'true') {
-            // 즉시 실행 - DOM 로드 기다리지 않음
-            (function() {
-                var style = document.createElement('style');
-                style.textContent = '#globalPromisesLoading { display: flex !important; opacity: 1 !important; visibility: visible !important; }';
-                document.head.appendChild(style);
-            })();
-        }
-    </script>
-    {% endif %}
 
     <header class="header">
         <nav class="nav">
@@ -128,15 +122,9 @@
                     <div class="logo-subtitle" style="white-space: nowrap; font-size: clamp(0.55rem, 1.3vw, 0.7rem);">Korea University Sejong Campus Student Council BIBEOM</div>
                 </div>
             </a>
-
-            <!-- 햄버거 메뉴 버튼 (모바일) -->
             <button class="menu-toggle" aria-label="메뉴 열기">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </button>
-
-            <!-- 네비게이션 메뉴 -->
             <div class="nav-menu">
                 <a href="{{ url_for('index') }}">홈</a>
                 <a href="{{ url_for('organization') }}">조직도</a>
@@ -165,141 +153,107 @@
                 {% endfor %}
             </div>
         {% endif %}
-
         {% block content %}{% endblock %}
     </main>
 
-    <footer style="background: linear-gradient(180deg, #fafafa 0%, #f5f5f7 100%); padding: clamp(64px, 14vw, 100px) 0 clamp(32px, 7vw, 48px); margin-top: 0; color: var(--text-secondary); font-size: clamp(0.8rem, 1.8vw, 0.85rem); border-top: 1px solid var(--border-light); position: relative;">
+    <footer style="background: linear-gradient(180deg, #fafafa 0%, #f5f5f7 100%); padding: clamp(64px, 14vw, 100px) 0 clamp(32px, 7vw, 48px); border-top: 1px solid var(--border-light);">
         <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 60px);">
-            <!-- 메인 푸터 콘텐츠 -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(40px, 8vw, 60px); margin-bottom: clamp(48px, 10vw, 64px);">
-                <!-- 브랜드 섹션 -->
                 <div style="text-align: left;">
-                    <h3 style="color: var(--ku-crimson); margin-bottom: clamp(12px, 2.5vw, 16px); font-size: clamp(1.1rem, 2.4vw, 1.35rem); font-weight: 900; letter-spacing: -0.02em;">비범 BIBEOM</h3>
-                    <p style="color: var(--text-primary); font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 600; line-height: 1.6; margin-bottom: 12px;">고려대학교 세종캠퍼스 제38대 총학생회</p>
-                    <p style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem); line-height: 1.7; margin-top: 16px;">여러분의 평범한 하루를, 비범한 순간으로!</p>
+                    <h3 style="color: var(--ku-crimson); margin-bottom: 16px; font-size: 1.35rem; font-weight: 900;">비범 BIBEOM</h3>
+                    <p style="color: var(--text-primary); font-size: 1rem; font-weight: 600;">고려대학교 세종캠퍼스 제38대 총학생회</p>
+                    <p style="color: var(--text-secondary); margin-top: 16px;">여러분의 평범한 하루를, 비범한 순간으로!</p>
                 </div>
-
-                <!-- 연락처 섹션 -->
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: clamp(16px, 3.5vw, 20px); font-size: clamp(0.95rem, 2.1vw, 1.05rem); font-weight: 700; letter-spacing: -0.01em;">Contact</h4>
-                    <div style="color: var(--text-secondary); font-size: clamp(0.85rem, 1.9vw, 0.9rem); line-height: 1.9;">
-                        <p style="margin: 0 0 10px; display: flex; align-items: flex-start; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-top: 3px; flex-shrink: 0; opacity: 0.6;">
-                                <path d="M8 0C5.2 0 3 2.2 3 5c0 3.9 5 11 5 11s5-7.1 5-11c0-2.8-2.2-5-5-5zm0 7c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-                            </svg>
-                            <span>세종특별자치시 조치원읍 세종로 2511, 학술정보원 B105-C</span>
-                        </p>
-                        <p style="margin: 10px 0 0; display: flex; align-items: center; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="flex-shrink: 0; opacity: 0.6;">
-                                <path d="M0 3c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H2c-1.1 0-2-.9-2-2V3zm2 0l6 4 6-4H2zm0 2v8h12V5l-6 4-6-4z"/>
-                            </svg>
-                            <span>dsng3419@korea.ac.kr</span>
-                        </p>
-                    </div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Contact</h4>
+                    <p>세종특별자치시 조치원읍 세종로 2511, 학술정보원 B105-C</p>
+                    <p>dsng3419@korea.ac.kr</p>
                 </div>
-
-                <!-- SNS 섹션 -->
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: clamp(16px, 3.5vw, 20px); font-size: clamp(0.95rem, 2.1vw, 1.05rem); font-weight: 700; letter-spacing: -0.01em;">Connect With Us</h4>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <!-- 인스타그램 버튼 -->
-                        <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" rel="noopener noreferrer"
-                           style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; text-decoration: none; border-radius: 12px; font-size: clamp(0.85rem, 1.9vw, 0.9rem); font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);"
-                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(225, 48, 108, 0.4)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(225, 48, 108, 0.3)';">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                                <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153.509.5.902 1.105 1.153 1.772.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 01-1.153 1.772c-.5.509-1.105.902-1.772 1.153-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 01-1.772-1.153 4.904 4.904 0 01-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 011.153-1.772A4.897 4.897 0 015.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.25a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"/>
-                            </svg>
-                            Instagram
-                        </a>
-                        <!-- 카카오톡 버튼 -->
-                        <a href="javascript:void(0)" onclick="alert('카카오톡 채널을 준비 중입니다.');"
-                           style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: #FEE500; color: #3C1E1E; text-decoration: none; border-radius: 12px; font-size: clamp(0.85rem, 1.9vw, 0.9rem); font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(254, 229, 0, 0.3);"
-                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(254, 229, 0, 0.4)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(254, 229, 0, 0.3)';">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E">
-                                <path d="M12 2C6.48 2 2 5.88 2 10.72c0 3.24 2.16 6.08 5.38 7.64.24.12.56.38.64.62.08.24.04.6 0 .84l-.28 1.68c-.04.24-.2.96.84.52 1.04-.44 5.6-3.28 7.64-5.64C19.52 14.6 22 12.8 22 10.72 22 5.88 17.52 2 12 2z"/>
-                            </svg>
-                            KakaoTalk
-                        </a>
-                    </div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Connect With Us</h4>
+                    <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="text-decoration: none; color: #bc1888; font-weight: 600;">Instagram</a>
                 </div>
             </div>
-
-            <!-- 푸터 하단 -->
-            <div style="padding-top: clamp(24px, 5vw, 32px); border-top: 1px solid var(--border-light); text-align: center;">
-                <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
-                    <p style="margin: 0; font-size: clamp(0.75rem, 1.7vw, 0.82rem); font-weight: 500; color: var(--text-secondary); letter-spacing: 0.01em;">
-                        제작 및 관리책임자 : 제38대 부총학생회장 장선규
-                    </p>
-                    <p style="margin: 0; font-size: clamp(0.75rem, 1.7vw, 0.8rem); font-weight: 600; color: var(--text-tertiary); letter-spacing: 0.02em; opacity: 0.8;">
-                        © 2025 KOREA UNIVERSITY STUDENT COUNCIL. <br> All rights reserved.
-                    </p>
-                    {% if not current_user.is_authenticated %}
-                    <a href="{{ url_for('admin_login') }}"
-                       style="display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 8px 16px; color: var(--text-secondary); opacity: 0.5; transition: all 0.3s; font-size: clamp(0.75rem, 1.7vw, 0.8rem); text-decoration: none; border-radius: 8px; background: transparent;"
-                       onmouseover="this.style.opacity='1'; this.style.background='rgba(150, 26, 50, 0.08)';"
-                       onmouseout="this.style.opacity='0.5'; this.style.background='transparent';">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.3 0-6 2.7-6 6v1h12v-1c0-3.3-2.7-6-6-6z"/>
-                        </svg>
-                        관리자 로그인
-                    </a>
-                    {% endif %}
-                </div>
+            <div style="padding-top: 32px; border-top: 1px solid var(--border-light); text-align: center;">
+                <p>© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-    <!-- 공약 페이지 로딩 제어 스크립트 -->
     <script>
     (function() {
         'use strict';
 
-        // 공약 페이지 링크 클릭 시 즉시 로딩창 표시
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadingScreen = document.getElementById('globalPromisesLoading');
-            if (!loadingScreen) return;
+        const loadingScreen = document.getElementById('globalPromisesLoading');
+        const minLoadingTime = 1000; // 최소 노출 시간 1초
 
-            // 공약 페이지로 가는 모든 링크 찾기
-            const promisesLinks = document.querySelectorAll('a[href*="/promises"]');
+        // 1. 링크 클릭 감시 (모든 페이지 공통)
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link) return;
 
-            promisesLinks.forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    // 현재 페이지가 이미 공약 페이지가 아닌 경우에만
-                    if (!window.location.pathname.includes('/promises')) {
-                        // sessionStorage에 플래그 설정
-                        sessionStorage.setItem('showPromisesLoading', 'true');
-                        sessionStorage.setItem('promisesLoadStartTime', Date.now().toString());
-                        // 즉시 로딩창 표시
-                        loadingScreen.classList.add('visible');
-                    }
-                });
-            });
-
-            // 공약 페이지에서 로드 완료 시 로딩창 제거
-            if (window.location.pathname.includes('/promises')) {
-                // sessionStorage에서 시작 시간 가져오기
-                var storedStartTime = sessionStorage.getItem('promisesLoadStartTime');
-                var pageStartTime = storedStartTime ? parseInt(storedStartTime, 10) : Date.now();
-                var minLoadingTime = 1200; // 최소 1.2초는 보여주기
-
-                window.addEventListener('load', function() {
-                    var elapsed = Date.now() - pageStartTime;
-                    var remainingTime = Math.max(0, minLoadingTime - elapsed);
-
-                    setTimeout(function() {
-                        loadingScreen.classList.remove('visible');
-                        // sessionStorage 정리
-                        sessionStorage.removeItem('showPromisesLoading');
-                        sessionStorage.removeItem('promisesLoadStartTime');
-                    }, remainingTime);
-                });
+            const href = link.getAttribute('href');
+            // '공약' 메뉴 혹은 공약 상세 링크(/promises) 클릭 시
+            if (href && (href.includes('/promises') || href === "{{ url_for('promises') }}")) {
+                // 새 탭 이동이나 관리자 페이지 이동이 아닐 때만 실행
+                if (!e.ctrlKey && !e.shiftKey && !e.metaKey && link.target !== '_blank') {
+                    sessionStorage.setItem('showPromisesLoading', 'true');
+                    sessionStorage.setItem('promisesLoadStartTime', Date.now().toString());
+                    if (loadingScreen) loadingScreen.classList.add('active');
+                }
             }
         });
+
+        // 2. 로딩 해제 함수
+        function hideLoading() {
+            if (!loadingScreen) return;
+
+            const startTime = parseInt(sessionStorage.getItem('promisesLoadStartTime') || Date.now());
+            const elapsed = Date.now() - startTime;
+            const delay = Math.max(0, minLoadingTime - elapsed);
+
+            setTimeout(() => {
+                loadingScreen.classList.remove('active');
+                document.documentElement.style.overflow = ''; // 스크롤 복구
+                
+                // 인라인으로 넣었던 스타일 제거
+                const criticalStyle = document.getElementById('critical-loading-style');
+                if (criticalStyle) criticalStyle.remove();
+
+                // 상태 초기화
+                sessionStorage.removeItem('showPromisesLoading');
+                sessionStorage.removeItem('promisesLoadStartTime');
+            }, delay);
+        }
+
+        // 3. 페이지가 보여질 때 (캐시 이동 포함 모든 상황) 로딩 해제 체크
+        window.addEventListener('pageshow', function(event) {
+            // 현재 페이지가 공약 관련 페이지라면
+            if (window.location.pathname.includes('/promises')) {
+                // 로드 완료 후 실행 (이미 완료된 경우 즉시 실행)
+                if (document.readyState === 'complete') {
+                    hideLoading();
+                } else {
+                    window.addEventListener('load', hideLoading);
+                }
+            } else {
+                // 공약 페이지가 아니면 무조건 로딩창 숨김 (방어 코드)
+                if (loadingScreen) loadingScreen.classList.remove('active');
+                sessionStorage.removeItem('showPromisesLoading');
+            }
+        });
+
+        // 4. 뒤로가기 버튼 등으로 나갈 때 로딩 플래그 강제 삭제
+        window.addEventListener('pagehide', function() {
+            // 이동이 시작되면 플래그를 지워야 다음 페이지에서 영향이 없음
+            // (클릭 시점에 다시 생기므로 안전함)
+            setTimeout(() => {
+                sessionStorage.removeItem('showPromisesLoading');
+            }, 100);
+        });
+
     })();
     </script>
 </body>
