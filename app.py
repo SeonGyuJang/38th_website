@@ -199,15 +199,19 @@ def organization():
 
 @app.route('/promises')
 def promises():
+    # N+1 쿼리 방지: 모든 데이터를 한 번에 가져오기
     promises_list = db_helper.get_all_promises()
+    all_progress = db_helper.get_all_promise_progress()  # 한 번에 모든 진행 상황 조회
+
     categories = {}
     for promise in promises_list:
         category = promise.get('category')
         if category not in categories:
             categories[category] = []
-        # 각 공약에 진행 상황 추가
-        promise['progress_updates'] = db_helper.get_promise_progress(promise['id'])
+        # 그룹화된 데이터에서 해당 공약의 진행 상황 가져오기 (DB 쿼리 없음)
+        promise['progress_updates'] = all_progress.get(promise['id'], [])
         categories[category].append(promise)
+
     total_progress = sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list) if promises_list else 0
     return render_template('promises.html', categories=categories, total_progress=round(total_progress))
 

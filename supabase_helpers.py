@@ -168,6 +168,20 @@ class SupabaseHelper:
         response = self.client.table('promise_progress').select('*').eq('promise_id', promise_id).order('date', desc=True).execute()
         return [self.convert_promise_progress_dates(progress) for progress in response.data]
 
+    def get_all_promise_progress(self) -> Dict[int, List[Dict[str, Any]]]:
+        """모든 공약의 진행 상황을 한 번에 조회하여 promise_id로 그룹화 (N+1 쿼리 방지)"""
+        response = self.client.table('promise_progress').select('*').order('date', desc=True).execute()
+
+        # promise_id로 그룹화
+        grouped = {}
+        for progress in response.data:
+            promise_id = progress['promise_id']
+            if promise_id not in grouped:
+                grouped[promise_id] = []
+            grouped[promise_id].append(self.convert_promise_progress_dates(progress))
+
+        return grouped
+
     def create_promise_progress(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """공약 진행 상황 생성"""
         response = self.client.table('promise_progress').insert(data).execute()
