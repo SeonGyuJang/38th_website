@@ -33,7 +33,7 @@
         }
     }
 
-    /* 로딩 화면 */
+    /* 로딩 화면 - 초기에 보이도록 설정 */
     .loading-screen {
         position: fixed;
         top: 0;
@@ -46,12 +46,25 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
+        opacity: 1;
+        visibility: visible;
         transition: opacity 0.5s ease, visibility 0.5s ease;
     }
 
     .loading-screen.hidden {
         opacity: 0;
         visibility: hidden;
+        pointer-events: none;
+    }
+
+    /* 메인 컨테이너는 로딩 중에 숨김 */
+    body.loading .main-content {
+        opacity: 0;
+    }
+
+    body:not(.loading) .main-content {
+        opacity: 1;
+        transition: opacity 0.5s ease;
     }
 
     .loading-content {
@@ -207,6 +220,11 @@
     }
 </style>
 
+<!-- 즉시 실행: body에 loading 클래스 추가 -->
+<script>
+    document.body.classList.add('loading');
+</script>
+
 <!-- 로딩 화면 -->
 <div class="loading-screen" id="loadingScreen">
     <div class="loading-content">
@@ -221,7 +239,7 @@
     </div>
 </div>
 
-<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+<div class="container main-content" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
     <div class="promise-header">
         <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
@@ -559,6 +577,9 @@
     function hideLoadingScreen() {
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
+            // body에서 loading 클래스 제거하여 main-content 표시
+            document.body.classList.remove('loading');
+            // 로딩 화면 숨김
             loadingScreen.classList.add('hidden');
             // 애니메이션이 끝난 후 DOM에서 제거
             setTimeout(() => {
