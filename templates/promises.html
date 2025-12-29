@@ -24,92 +24,6 @@
         }
     }
 
-    @keyframes bounce {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px);
-        }
-    }
-
-    /* 로딩 화면 - 초기에 보이도록 설정 */
-    .loading-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-
-    .loading-screen.hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
-
-    /* 메인 컨테이너는 로딩 중에 숨김 */
-    body.loading .main-content {
-        opacity: 0;
-    }
-
-    body:not(.loading) .main-content {
-        opacity: 1;
-        transition: opacity 0.5s ease;
-    }
-
-    .loading-content {
-        text-align: center;
-        max-width: 500px;
-        padding: 20px;
-    }
-
-    .loading-gif {
-        width: 200px;
-        height: 200px;
-        margin-bottom: 32px;
-        animation: bounce 1.5s ease-in-out infinite;
-    }
-
-    .loading-message {
-        font-size: clamp(1.1rem, 3vw, 1.4rem);
-        font-weight: 700;
-        color: var(--ku-crimson);
-        margin-bottom: 16px;
-        line-height: 1.6;
-    }
-
-    .loading-submessage {
-        font-size: clamp(0.9rem, 2vw, 1rem);
-        color: var(--text-secondary);
-        line-height: 1.5;
-    }
-
-    .loading-dots {
-        display: inline-block;
-    }
-
-    .loading-dots::after {
-        content: '';
-        animation: dots 1.5s steps(4, end) infinite;
-    }
-
-    @keyframes dots {
-        0%, 20% { content: ''; }
-        40% { content: '.'; }
-        60% { content: '..'; }
-        80%, 100% { content: '...'; }
-    }
-
     /* 성능 최적화: 공통 스타일 클래스화 */
     .promise-header {
         margin-bottom: 50px;
@@ -220,26 +134,7 @@
     }
 </style>
 
-<!-- 즉시 실행: body에 loading 클래스 추가 -->
-<script>
-    document.body.classList.add('loading');
-</script>
-
-<!-- 로딩 화면 -->
-<div class="loading-screen" id="loadingScreen">
-    <div class="loading-content">
-        <img src="{{ url_for('static', filename='defaults/hoi_loading.gif') }}" alt="Loading..." class="loading-gif" onerror="this.style.display='none'">
-        <div class="loading-message">
-            총학생회가 준비한 공약이 많아서,<br>
-            로딩에 시간이 걸리고 있어요<span class="loading-dots"></span>
-        </div>
-        <div class="loading-submessage">
-            잠시만 기다려 주세요! 🎓
-        </div>
-    </div>
-</div>
-
-<div class="container main-content" style="padding-top: 100px; padding-bottom: 100px;">
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
     <!-- 헤더 -->
     <div class="promise-header">
         <p style="color: var(--ku-crimson); font-weight: 600; letter-spacing: 0.15em; margin-bottom: 16px; text-transform: uppercase; font-size: 0.75rem;">Promises & Commitments</p>
@@ -575,11 +470,8 @@
 
     // 로딩 화면 숨기기
     function hideLoadingScreen() {
-        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingScreen = document.getElementById('globalPromisesLoading');
         if (loadingScreen) {
-            // body에서 loading 클래스 제거하여 main-content 표시
-            document.body.classList.remove('loading');
-            // 로딩 화면 숨김
             loadingScreen.classList.add('hidden');
             // 애니메이션이 끝난 후 DOM에서 제거
             setTimeout(() => {
@@ -588,32 +480,9 @@
         }
     }
 
-    // 페이지 로딩 상태 추적
-    let contentReady = false;
-    let pageLoaded = false;
-
-    // 링크 클릭 시점부터의 시간을 계산 (sessionStorage에서 가져옴)
-    const storedStartTime = sessionStorage.getItem('promisesLoadStartTime');
-    const pageStartTime = storedStartTime ? parseInt(storedStartTime, 10) : Date.now();
-
-    // sessionStorage 정리
-    if (storedStartTime) {
-        sessionStorage.removeItem('promisesLoadStartTime');
-    }
-
-    const minLoadingTime = 1500; // 최소 로딩 시간 (사용자가 로딩창을 확실히 보도록)
-
-    // 모든 조건이 충족되었는지 확인하고 로딩창 숨김
-    function checkAndHideLoading() {
-        if (!contentReady || !pageLoaded) return;
-
-        const elapsed = Date.now() - pageStartTime;
-        const remainingTime = Math.max(0, minLoadingTime - elapsed);
-
-        setTimeout(() => {
-            hideLoadingScreen();
-        }, remainingTime);
-    }
+    // 최소 로딩 시간
+    const minLoadingTime = 1200;
+    const pageStartTime = Date.now();
 
     // 초기화
     document.addEventListener('DOMContentLoaded', () => {
@@ -623,19 +492,16 @@
         document.querySelectorAll('.promise-section').forEach(section => {
             sectionObserver.observe(section);
         });
-
-        // DOM 콘텐츠가 준비되면 contentReady 설정
-        // 약간의 지연을 두어 렌더링이 완료되도록 함
-        setTimeout(() => {
-            contentReady = true;
-            checkAndHideLoading();
-        }, 300);
     });
 
-    // 모든 리소스 로드 완료
+    // 모든 리소스 로드 완료 후 로딩창 숨김
     window.addEventListener('load', () => {
-        pageLoaded = true;
-        checkAndHideLoading();
+        const elapsed = Date.now() - pageStartTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsed);
+
+        setTimeout(() => {
+            hideLoadingScreen();
+        }, remainingTime);
     });
 })();
 </script>
