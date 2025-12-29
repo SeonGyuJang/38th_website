@@ -88,7 +88,7 @@
 </head>
 <body>
     <!-- 공약 페이지 전역 로딩 화면 (모든 페이지에서 사용 가능) -->
-    <div id="globalPromisesLoading" {% if request.path == '/promises' %}class="visible"{% endif %}>
+    <div id="globalPromisesLoading">
         <div class="global-loading-content">
             <img src="{{ url_for('static', filename='defaults/hoi_loading.gif') }}"
                  alt="Loading..."
@@ -103,6 +103,21 @@
             </div>
         </div>
     </div>
+
+    <!-- 공약 페이지 로딩창 즉시 표시 (페이지 로드 전) -->
+    {% if request.path == '/promises' %}
+    <script>
+        // sessionStorage에서 로딩 플래그 확인
+        if (sessionStorage.getItem('showPromisesLoading') === 'true') {
+            // 즉시 실행 - DOM 로드 기다리지 않음
+            (function() {
+                var style = document.createElement('style');
+                style.textContent = '#globalPromisesLoading { display: flex !important; opacity: 1 !important; visibility: visible !important; }';
+                document.head.appendChild(style);
+            })();
+        }
+    </script>
+    {% endif %}
 
     <header class="header">
         <nav class="nav">
@@ -254,8 +269,12 @@
 
             promisesLinks.forEach(function(link) {
                 link.addEventListener('click', function(e) {
-                    // 현재 페이지가 이미 공약 페이지가 아닌 경우에만 로딩창 표시
+                    // 현재 페이지가 이미 공약 페이지가 아닌 경우에만
                     if (!window.location.pathname.includes('/promises')) {
+                        // sessionStorage에 플래그 설정
+                        sessionStorage.setItem('showPromisesLoading', 'true');
+                        sessionStorage.setItem('promisesLoadStartTime', Date.now().toString());
+                        // 즉시 로딩창 표시
                         loadingScreen.classList.add('visible');
                     }
                 });
@@ -263,7 +282,9 @@
 
             // 공약 페이지에서 로드 완료 시 로딩창 제거
             if (window.location.pathname.includes('/promises')) {
-                var pageStartTime = Date.now();
+                // sessionStorage에서 시작 시간 가져오기
+                var storedStartTime = sessionStorage.getItem('promisesLoadStartTime');
+                var pageStartTime = storedStartTime ? parseInt(storedStartTime, 10) : Date.now();
                 var minLoadingTime = 1200; // 최소 1.2초는 보여주기
 
                 window.addEventListener('load', function() {
@@ -272,6 +293,9 @@
 
                     setTimeout(function() {
                         loadingScreen.classList.remove('visible');
+                        // sessionStorage 정리
+                        sessionStorage.removeItem('showPromisesLoading');
+                        sessionStorage.removeItem('promisesLoadStartTime');
                     }, remainingTime);
                 });
             }
