@@ -40,9 +40,9 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
+            will-change: opacity, visibility; /* 성능 최적화 */
         }
 
-        /* 클래스로 제어 */
         #globalPromisesLoading.active {
             display: flex !important;
             opacity: 1 !important;
@@ -55,11 +55,14 @@
             padding: 20px;
         }
 
+        /* GIF 멈춤 현상 대비 CSS 애니메이션 강화 */
         .global-loading-gif {
             width: 200px;
             height: 200px;
             margin-bottom: 32px;
-            animation: bounce 1.5s ease-in-out infinite;
+            /* 모바일에서 GIF가 멈춰 보여도 요송 자체가 움직이도록 함 */
+            animation: bounce 1.5s ease-in-out infinite; 
+            object-fit: contain;
         }
 
         .global-loading-message {
@@ -84,10 +87,9 @@
 
     <script>
         (function() {
-            // 상세 페이지(/promises/숫자)를 포함한 모든 공약 관련 경로에서 로딩 체크
             var isPromisesPath = window.location.pathname.includes('/promises');
             if (isPromisesPath && sessionStorage.getItem('showPromisesLoading') === 'true') {
-                document.documentElement.style.overflow = 'hidden'; // 스크롤 방지
+                document.documentElement.style.overflow = 'hidden';
                 var style = document.createElement('style');
                 style.id = 'critical-loading-style';
                 style.textContent = '#globalPromisesLoading { display: flex !important; opacity: 1 !important; visibility: visible !important; }';
@@ -102,6 +104,8 @@
             <img src="{{ url_for('static', filename='defaults/hoi_loading.gif') }}"
                  alt="Loading..."
                  class="global-loading-gif"
+                 loading="eager"
+                 decoding="async"
                  onerror="this.style.display='none'">
             <div class="global-loading-message">
                 총학생회가 준비한 공약이 많아서,<br>
@@ -187,18 +191,20 @@
         'use strict';
 
         const loadingScreen = document.getElementById('globalPromisesLoading');
-        const minLoadingTime = 1000; // 최소 노출 시간 1초
+        const minLoadingTime = 1200; // 최소 노출 시간 상향 조정
 
-        // 1. 링크 클릭 감시 (모든 페이지 공통)
+        // 1. 링크 클릭 감시
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
             if (!link) return;
 
             const href = link.getAttribute('href');
-            // '공약' 메뉴 혹은 공약 상세 링크(/promises) 클릭 시
             if (href && (href.includes('/promises') || href === "{{ url_for('promises') }}")) {
-                // 새 탭 이동이나 관리자 페이지 이동이 아닐 때만 실행
                 if (!e.ctrlKey && !e.shiftKey && !e.metaKey && link.target !== '_blank') {
+                    // 즉시 애니메이션 초기화를 위한 GIF 강제 리로드 기법
+                    const img = loadingScreen.querySelector('img');
+                    if (img) img.src = img.src.split('?')[0] + '?t=' + Date.now();
+                    
                     sessionStorage.setItem('showPromisesLoading', 'true');
                     sessionStorage.setItem('promisesLoadStartTime', Date.now().toString());
                     if (loadingScreen) loadingScreen.classList.add('active');
@@ -216,44 +222,40 @@
 
             setTimeout(() => {
                 loadingScreen.classList.remove('active');
-                document.documentElement.style.overflow = ''; // 스크롤 복구
+                document.documentElement.style.overflow = '';
                 
-                // 인라인으로 넣었던 스타일 제거
                 const criticalStyle = document.getElementById('critical-loading-style');
                 if (criticalStyle) criticalStyle.remove();
 
-                // 상태 초기화
                 sessionStorage.removeItem('showPromisesLoading');
                 sessionStorage.removeItem('promisesLoadStartTime');
             }, delay);
         }
 
-        // 3. 페이지가 보여질 때 (캐시 이동 포함 모든 상황) 로딩 해제 체크
+        // 3. 페이지가 보여질 때 로딩 해제 체크 (Back-Forward Cache 대응)
         window.addEventListener('pageshow', function(event) {
-            // 현재 페이지가 공약 관련 페이지라면
             if (window.location.pathname.includes('/promises')) {
-                // 로드 완료 후 실행 (이미 완료된 경우 즉시 실행)
+                // 모바일 브라우저 캐시로 인해 GIF가 멈추는 현상 방지
+                const img = loadingScreen.querySelector('img');
+                if (img) img.src = img.src;
+
                 if (document.readyState === 'complete') {
                     hideLoading();
                 } else {
                     window.addEventListener('load', hideLoading);
                 }
             } else {
-                // 공약 페이지가 아니면 무조건 로딩창 숨김 (방어 코드)
                 if (loadingScreen) loadingScreen.classList.remove('active');
                 sessionStorage.removeItem('showPromisesLoading');
             }
         });
 
-        // 4. 뒤로가기 버튼 등으로 나갈 때 로딩 플래그 강제 삭제
-        window.addEventListener('pagehide', function() {
-            // 이동이 시작되면 플래그를 지워야 다음 페이지에서 영향이 없음
-            // (클릭 시점에 다시 생기므로 안전함)
-            setTimeout(() => {
-                sessionStorage.removeItem('showPromisesLoading');
-            }, 100);
-        });
-
+        // 4. 안전장치: 10초 이상 로딩 시 강제 해제
+        setTimeout(() => {
+            if (loadingScreen && loadingScreen.classList.contains('active')) {
+                hideLoading();
+            }
+        }, 10000);
     })();
     </script>
 </body>
