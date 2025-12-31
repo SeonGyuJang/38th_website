@@ -413,50 +413,6 @@ function initSearchFilter() {
 
 initSearchFilter();
 
-// ============ 로딩 인디케이터 ============
-function showLoading() {
-    const loader = document.createElement('div');
-    loader.id = 'loading-overlay';
-    loader.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    `;
-    loader.innerHTML = '<div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #961A32; border-radius: 50%; animation: spin 1s linear infinite;"></div>';
-
-    // 스피너 애니메이션 추가
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-    document.head.appendChild(style);
-
-    document.body.appendChild(loader);
-}
-
-function hideLoading() {
-    const loader = document.getElementById('loading-overlay');
-    if (loader) {
-        loader.remove();
-    }
-}
-
-// 전역 함수로 노출
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-
-// ============ 폼 제출 시 로딩 표시 ============
-document.querySelectorAll('form[data-loading]').forEach(form => {
-    form.addEventListener('submit', function() {
-        showLoading();
-    });
-});
-
 // ============ Scroll to Top 버튼 ============
 function initScrollToTop() {
     const scrollToTopBtn = document.getElementById('scrollToTop');

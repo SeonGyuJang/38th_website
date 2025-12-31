@@ -120,18 +120,6 @@
     .promise-section.loaded {
         animation: fadeIn 0.5s ease-out forwards;
     }
-
-    /* 로딩 스켈레톤 */
-    .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s ease-in-out infinite;
-    }
-
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
 </style>
 
 <div class="container" style="padding-top: 100px; padding-bottom: 100px;">
@@ -275,8 +263,7 @@
 
                     <div class="promise-card-content" data-loaded="false">
                         <div class="content-placeholder" style="padding: clamp(24px, 5vw, 32px); text-align: center; color: var(--text-secondary);">
-                            <div class="skeleton" style="height: 20px; border-radius: 4px; margin-bottom: 12px;"></div>
-                            <div class="skeleton" style="height: 20px; border-radius: 4px; width: 80%; margin: 0 auto;"></div>
+                            로딩 중...
                         </div>
                     </div>
                 </div>
