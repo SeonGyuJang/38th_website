@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지 수정 작업 중 - 고려대학교 38대 총학생회</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='defaults/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #fafafa 0%, #f5f5f7 50%, #e8e8ed 100%); padding: 20px; position: relative; overflow: hidden;">
+    <!-- 배경 패턴 -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle at 20% 80%, rgba(150, 26, 50, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(0, 122, 255, 0.05) 0%, transparent 50%); pointer-events: none;"></div>
+
+    <div style="max-width: 600px; width: 100%; position: relative; z-index: 1;">
+        <!-- 로고 및 헤더 -->
+        <div style="text-align: center; margin-bottom: 40px; animation: fadeInUp 0.6s ease-out;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px; background: linear-gradient(135deg, var(--ku-crimson) 0%, var(--ku-crimson-dark) 100%); border-radius: 30px; margin-bottom: 32px; box-shadow: 0 16px 48px rgba(150, 26, 50, 0.3);">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+            </div>
+            <div style="display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, #FF9500 0%, #FF6B22 100%); border-radius: 100px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);">
+                <span style="color: white; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.75rem;">Under Maintenance</span>
+            </div>
+            <h1 style="font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; color: var(--text-primary); margin-bottom: 16px; letter-spacing: -0.02em; line-height: 1.2;">
+                홈페이지 수정 작업 중입니다
+            </h1>
+            <p style="color: var(--text-secondary); font-size: clamp(1rem, 2.5vw, 1.1rem); font-weight: 500; line-height: 1.7;">
+                더 나은 서비스 제공을 위해<br>잠시 홈페이지 작업을 진행하고 있습니다.
+            </p>
+        </div>
+
+        <!-- 안내 카드 -->
+        <div style="background: white; border-radius: 24px; padding: clamp(32px, 5vw, 40px); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.04); animation: fadeInUp 0.6s ease-out 0.1s backwards;">
+            <div style="display: flex; align-items: start; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(0, 0, 0, 0.06);">
+                <div style="width: 40px; height: 40px; background: rgba(255, 149, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 8px 0;">작업 안내</h3>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+                        홈페이지 업데이트 및 개선 작업을 진행 중입니다.<br>
+                        빠른 시일 내에 다시 찾아뵙겠습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
+                <div style="padding: 20px; background: rgba(150, 26, 50, 0.04); border-radius: 16px; text-align: center;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #999; margin-bottom: 8px;">문의 메일</div>
+                    <a href="mailto:dsng3419@korea.ac.kr" style="font-size: 0.9rem; font-weight: 700; color: var(--ku-crimson); text-decoration: none; word-break: break-all;">dsng3419@<br>korea.ac.kr</a>
+                </div>
+                <div style="padding: 20px; background: rgba(150, 26, 50, 0.04); border-radius: 16px; text-align: center;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #999; margin-bottom: 8px;">SNS</div>
+                    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 8px;">
+                        <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="width: 32px; height: 32px; background: rgba(188, 24, 136, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(188, 24, 136, 0.2)';" onmouseout="this.style.background='rgba(188, 24, 136, 0.1)';">
+                            <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 20px; height: 20px;">
+                        </a>
+                        <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" style="width: 32px; height: 32px; background: rgba(254, 229, 0, 0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(254, 229, 0, 0.3)';" onmouseout="this.style.background='rgba(254, 229, 0, 0.2)';">
+                            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 20px; height: 20px;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 정보 -->
+        <div style="text-align: center; margin-top: 32px; animation: fadeInUp 0.6s ease-out 0.2s backwards;">
+            <div style="display: inline-flex; align-items: center; gap: 12px; padding: 16px 24px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border-radius: 100px; border: 1px solid rgba(0, 0, 0, 0.06);">
+                <img src="{{ url_for('static', filename='defaults/logo.png') }}" alt="고려대학교 로고" style="width: 24px; height: 24px;">
+                <span style="font-size: 0.9rem; font-weight: 700; color: var(--ku-crimson);">고려대학교 38대 총학생회 비범</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+</html>

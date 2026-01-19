@@ -98,6 +98,47 @@ def init_default_files():
     print('  - 업로드 파일: Supabase Storage에 저장')
 
 # ============================================
+# 유지보수 모드
+# ============================================
+
+MAINTENANCE_MODE_FILE = os.path.join(os.path.dirname(__file__), 'maintenance_mode.txt')
+
+def is_maintenance_mode():
+    """유지보수 모드 활성화 여부 확인"""
+    return os.path.exists(MAINTENANCE_MODE_FILE)
+
+def set_maintenance_mode(enabled):
+    """유지보수 모드 활성화/비활성화"""
+    if enabled:
+        # 파일 생성으로 유지보수 모드 활성화
+        with open(MAINTENANCE_MODE_FILE, 'w') as f:
+            f.write(f'Enabled at: {datetime.now()}')
+        return True
+    else:
+        # 파일 삭제로 유지보수 모드 비활성화
+        if os.path.exists(MAINTENANCE_MODE_FILE):
+            os.remove(MAINTENANCE_MODE_FILE)
+        return True
+
+@app.before_request
+def check_maintenance_mode():
+    """
+    모든 요청 전에 유지보수 모드 확인
+    관리자 경로(/admin/)와 정적 파일은 제외
+    """
+    # 관리자 경로나 정적 파일은 유지보수 모드에서도 접근 가능
+    if request.path.startswith('/admin') or request.path.startswith('/static'):
+        return None
+
+    # 유지보수 페이지 자체는 항상 접근 가능
+    if request.path == '/maintenance':
+        return None
+
+    # 유지보수 모드가 활성화되어 있으면 유지보수 페이지로 리다이렉트
+    if is_maintenance_mode():
+        return render_template('maintenance.html'), 503
+
+# ============================================
 # 공개 페이지
 # ============================================
 
@@ -336,7 +377,30 @@ def admin_dashboard():
         'minutes': db_helper.count_minutes(),
         'programs': db_helper.count_active_programs()
     }
-    return render_template('admin/dashboard.html', stats=stats)
+    maintenance_mode = is_maintenance_mode()
+    return render_template('admin/dashboard.html', stats=stats, maintenance_mode=maintenance_mode)
+
+@app.route('/admin/maintenance/toggle', methods=['POST'])
+@login_required
+def admin_maintenance_toggle():
+    """유지보수 모드 토글 (Super Admin 전용)"""
+    # Super Admin 권한 체크 (is_super_admin이 True인 경우만 허용)
+    if not current_user.is_super_admin:
+        flash('Super Admin만 유지보수 모드를 변경할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    current_mode = is_maintenance_mode()
+    new_mode = not current_mode
+
+    if set_maintenance_mode(new_mode):
+        if new_mode:
+            flash('유지보수 모드가 활성화되었습니다. 관리자를 제외한 모든 사용자는 유지보수 페이지를 보게 됩니다.', 'success')
+        else:
+            flash('유지보수 모드가 비활성화되었습니다. 모든 사용자가 정상적으로 사이트에 접근할 수 있습니다.', 'success')
+    else:
+        flash('유지보수 모드 변경에 실패했습니다.', 'error')
+
+    return redirect(url_for('admin_dashboard'))
 
 # ============================================
 # 일정 관리

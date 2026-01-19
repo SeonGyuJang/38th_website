@@ -3,133 +3,141 @@
 {% block title %}조직도 관리 - 관리자{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 100px; padding-bottom: 80px;">
-    <!-- 헤더 -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 32px;">
-        <div>
-            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 0.9rem; text-decoration: none; margin-bottom: 12px; transition: var(--transition-base);" onmouseover="this.style.color='var(--apple-blue)';" onmouseout="this.style.color='var(--text-secondary)';">
+<div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
+    <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: #666; font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: color 0.2s;" onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='#666';">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
                 대시보드로 돌아가기
             </a>
-            <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 700; color: var(--text-primary);">조직도 관리</h1>
-        </div>
-        <a href="{{ url_for('admin_organization_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2); transition: var(--transition-base);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(150, 26, 50, 0.2)';">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            멤버 추가
-        </a>
-    </div>
-
-    {% if members %}
-    <div style="display: grid; gap: 16px;">
-        {% for member in members %}
-        <div style="background: white; border-radius: var(--radius-lg); padding: clamp(20px, 4vw, 28px); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: all var(--transition-base);" onmouseover="this.style.boxShadow='var(--shadow-md)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='var(--shadow-sm)'; this.style.transform='translateY(0)';">
-            <div style="display: flex; gap: 20px; align-items: start; flex-wrap: wrap;">
-                <!-- 순서 섹션 -->
-                <div style="text-align: center; min-width: 80px;">
-                    <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--apple-blue), var(--apple-blue-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        {{ member.order }}
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <div style="width: 6px; height: 6px; background: var(--ku-crimson); border-radius: 50%;"></div>
+                        <span style="color: var(--ku-crimson); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem;">Organization Management</span>
                     </div>
-                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">
-                        순서
-                    </div>
+                    <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 800; color: #1a1a1a; margin: 0;">조직도 관리</h1>
                 </div>
-
-                <!-- 내용 섹션 -->
-                <div style="flex: 1; min-width: 200px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-                        <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: var(--text-primary); margin: 0;">
-                            {{ member.name }}
-                        </h3>
-                        <span style="padding: 4px 12px; background: var(--apple-blue-lighter); color: var(--apple-blue); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
-                            {{ member.position }}
-                        </span>
-                        {% if member.department %}
-                        <span style="padding: 4px 12px; background: var(--bg-secondary); color: var(--text-secondary); border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
-                            {{ member.department }}
-                        </span>
-                        {% endif %}
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        {% if member.major %}
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <path d="M1 5l6-3 6 3v5a1 1 0 01-1 1H2a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M5 13V8h4v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>{{ member.major }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if member.student_id %}
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <rect x="2" y="3" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M5 6h4M5 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                            <span>{{ member.student_id }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if member.email %}
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <path d="M2 3h10a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M13 4l-6 4-6-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>{{ member.email }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if member.phone %}
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--text-secondary);">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <path d="M3.5 1h7a.5.5 0 01.5.5v11a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M7 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                            <span>{{ member.phone }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- 관리 버튼 -->
-                <div style="display: flex; gap: 8px; margin-left: auto;">
-                    <a href="{{ url_for('admin_organization_edit', member_id=member.id) }}" style="padding: 10px 20px; background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; transition: var(--transition-base); border: 1px solid var(--border-color);" onmouseover="this.style.background='var(--border-color)';" onmouseout="this.style.background='var(--bg-secondary)';">
-                        수정
-                    </a>
-                    <form method="POST" action="{{ url_for('admin_organization_delete', member_id=member.id) }}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?')">
-                        <button type="submit" style="padding: 10px 20px; background: #fee; color: #dc3545; border: 1px solid #fcc; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: var(--transition-base);" onmouseover="this.style.background='#fdd'; this.style.borderColor='#fbb';" onmouseout="this.style.background='#fee'; this.style.borderColor='#fcc';">
-                            삭제
-                        </button>
-                    </form>
-                </div>
+                <a href="{{ url_for('admin_organization_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--ku-crimson); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; border: none;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    멤버 추가
+                </a>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div style="text-align: center; padding: 80px 20px; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);">
-        <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--bg-secondary); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                <path d="M16 3.13a4 4 0 010 7.75"/>
-            </svg>
+
+        {% if members %}
+        <div style="display: grid; gap: 16px;">
+            {% for member in members %}
+            <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="display: flex; gap: 24px; align-items: start; flex-wrap: wrap;">
+                    <!-- 순서 섹션 -->
+                    <div style="text-align: center; min-width: 80px;">
+                        <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; color: var(--ku-crimson);">
+                            {{ member.order }}
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-top: 4px;">
+                            순서
+                        </div>
+                    </div>
+
+                    <!-- 내용 섹션 -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: #1a1a1a; margin: 0;">
+                                {{ member.name }}
+                            </h3>
+                            <span style="padding: 6px 12px; background: rgba(150, 26, 50, 0.08); color: var(--ku-crimson); border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                                {{ member.position }}
+                            </span>
+                            {% if member.department %}
+                            <span style="padding: 6px 12px; background: #F5F5F7; color: #666; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                                {{ member.department }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            {% if member.major %}
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #666;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M1 5l6-3 6 3v5a1 1 0 01-1 1H2a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 13V8h4v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>{{ member.major }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if member.student_id %}
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #666;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <rect x="2" y="3" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M5 6h4M5 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>{{ member.student_id }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if member.email %}
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #666;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 3h10a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M13 4l-6 4-6-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>{{ member.email }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if member.phone %}
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #666;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M3.5 1h7a.5.5 0 01.5.5v11a.5.5 0 01-.5.5h-7a.5.5 0 01-.5-.5v-11a.5.5 0 01.5-.5z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M7 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>{{ member.phone }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 관리 버튼 -->
+                    <div style="display: flex; gap: 8px; margin-left: auto;">
+                        <a href="{{ url_for('admin_organization_edit', member_id=member.id) }}" style="padding: 10px 20px; background: white; color: #1a1a1a; text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; border: 1px solid #E5E5E5;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.color='var(--ku-crimson)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.color='#1a1a1a';">
+                            수정
+                        </a>
+                        <form method="POST" action="{{ url_for('admin_organization_delete', member_id=member.id) }}" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                            <button type="submit" style="padding: 10px 20px; background: #fee; color: #dc3545; border: 1px solid #fcc; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fdd'; this.style.borderColor='#fbb';" onmouseout="this.style.background='#fee'; this.style.borderColor='#fcc';">
+                                삭제
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 24px;">등록된 조직도 멤버가 없습니다.</p>
-        <a href="{{ url_for('admin_organization_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%); color: white; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; box-shadow: 0 4px 12px rgba(150, 26, 50, 0.2);">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            첫 멤버 추가하기
-        </a>
+        {% else %}
+        <div style="text-align: center; padding: 80px 20px; background: white; border-radius: 12px; border: 1px solid #E5E5E5;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: #F5F5F7; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 24px;">등록된 조직도 멤버가 없습니다.</p>
+            <a href="{{ url_for('admin_organization_add') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--ku-crimson); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                첫 멤버 추가하기
+            </a>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 {% endblock %}
