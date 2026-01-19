@@ -1203,7 +1203,14 @@ footer a:hover {
    반응형 헬퍼
    ============================================ */
 
+.show-mobile {
+    display: none !important;
+}
+
 @media (max-width: 767px) {
+    .show-mobile {
+        display: inline !important;
+    }
     .hide-mobile {
         display: none !important;
     }
