@@ -61,22 +61,52 @@
         <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 60px);">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(40px, 8vw, 60px); margin-bottom: clamp(48px, 10vw, 64px);">
                 <div style="text-align: left;">
-                    <h3 style="color: var(--ku-crimson); margin-bottom: 16px; font-size: 1.35rem; font-weight: 900;">비범 BIBEOM</h3>
-                    <p style="color: var(--text-primary); font-size: 1rem; font-weight: 600;">고려대학교 세종캠퍼스 제38대 총학생회</p>
-                    <p style="color: var(--text-secondary); margin-top: 16px;">여러분의 평범한 하루를, 비범한 순간으로!</p>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <img src="{{ url_for('static', filename='defaults/logo.png') }}" alt="고려대학교 로고" style="width: 36px; height: 36px; object-fit: contain;">
+                        <h3 style="color: var(--ku-crimson); margin: 0; font-size: 1.35rem; font-weight: 900;">비범 BIBEOM</h3>
+                    </div>
+                    <p style="color: var(--text-primary); font-size: 1rem; font-weight: 600; margin: 12px 0;">고려대학교 세종캠퍼스 제38대 총학생회</p>
+                    <p style="color: var(--text-secondary); margin: 16px 0 0 0; line-height: 1.5;">여러분의 평범한 하루를, 비범한 순간으로!</p>
                 </div>
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Contact</h4>
-                    <p>세종특별자치시 조치원읍 세종로 2511, 학술정보원 B105-C</p>
-                    <p>dsng3419@korea.ac.kr</p>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Contact</h4>
+                    <p style="color: var(--text-secondary); line-height: 1.8; margin: 8px 0;">세종특별자치시 조치원읍 세종로 2511<br>학술정보원 B105-C</p>
+                    <p style="color: var(--text-secondary); margin: 12px 0 0 0;">
+                        <a href="mailto:dsng3419@korea.ac.kr" style="color: var(--ku-crimson); text-decoration: none; transition: opacity 0.2s;">dsng3419@korea.ac.kr</a>
+                    </p>
                 </div>
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Connect With Us</h4>
-                    <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="text-decoration: none; color: #bc1888; font-weight: 600;">Instagram</a>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Connect With Us</h4>
+                    <div style="display: flex; gap: 24px; align-items: center;">
+                        <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); transition: all 0.2s; padding: 8px 12px; border-radius: 8px; background: rgba(188, 24, 136, 0.05);" onmouseover="this.style.background='rgba(188, 24, 136, 0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(188, 24, 136, 0.05)'; this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="#bc1888"/>
+                            </svg>
+                            <span style="font-weight: 600; color: #bc1888; font-size: 0.95rem;">Instagram</span>
+                        </a>
+                        <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); transition: all 0.2s; padding: 8px 12px; border-radius: 8px; background: rgba(254, 229, 0, 0.15);" onmouseover="this.style.background='rgba(254, 229, 0, 0.25)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(254, 229, 0, 0.15)'; this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3C6.477 3 2 6.58 2 11c0 2.638 1.654 4.977 4.154 6.43-.178.658-.658 2.435-.758 2.826-.12.467.17.461.358.335.141-.095 2.298-1.563 3.183-2.165C9.58 18.622 10.768 18.8 12 18.8c5.523 0 10-3.58 10-7.8S17.523 3 12 3z" fill="#FEE500"/>
+                                <path d="M8.5 13.5V9.75c0-.207-.168-.375-.375-.375s-.375.168-.375.375v4.125c0 .207.168.375.375.375h2.25c.207 0 .375-.168.375-.375s-.168-.375-.375-.375H8.5z" fill="#371D1E"/>
+                                <path d="M11.625 9.375c-.207 0-.375.168-.375.375v4.125c0 .207.168.375.375.375s.375-.168.375-.375V9.75c0-.207-.168-.375-.375-.375z" fill="#371D1E"/>
+                                <path d="M15.875 9.375c-.207 0-.375.168-.375.375v1.95l-1.845-2.145a.375.375 0 00-.655.247v4.123c0 .207.168.375.375.375s.375-.168.375-.375v-1.95l1.845 2.145a.375.375 0 00.655-.247V9.75c0-.207-.168-.375-.375-.375z" fill="#371D1E"/>
+                                <path d="M6.375 10.875h-.75V9.75c0-.207-.168-.375-.375-.375s-.375.168-.375.375v4.125c0 .207.168.375.375.375s.375-.168.375-.375v-2.25h.75v2.25c0 .207.168.375.375.375s.375-.168.375-.375V9.75c0-.207-.168-.375-.375-.375s-.375.168-.375.375v1.125z" fill="#371D1E"/>
+                            </svg>
+                            <span style="font-weight: 600; color: #3c1e1e; font-size: 0.95rem;">KakaoTalk</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div style="padding-top: 32px; border-top: 1px solid var(--border-light); text-align: center;">
-                <p>© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
+            <div style="padding-top: 32px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('admin_login') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(150, 26, 50, 0.05); color: var(--ku-crimson); text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(150, 26, 50, 0.1)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(150, 26, 50, 0.05)'; this.style.transform='translateY(0)';">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm4 10.723V20h-2v-2.277a1.993 1.993 0 01-1-1.723c0-1.103.897-2 2-2s2 .897 2 2c0 .738-.404 1.376-1 1.723z" fill="currentColor"/>
+                    </svg>
+                    관리자 로그인
+                </a>
+                {% endif %}
             </div>
         </div>
     </footer>
