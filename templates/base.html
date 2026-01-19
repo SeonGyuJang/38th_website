@@ -61,22 +61,44 @@
         <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 60px);">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(40px, 8vw, 60px); margin-bottom: clamp(48px, 10vw, 64px);">
                 <div style="text-align: left;">
-                    <h3 style="color: var(--ku-crimson); margin-bottom: 16px; font-size: 1.35rem; font-weight: 900;">비범 BIBEOM</h3>
-                    <p style="color: var(--text-primary); font-size: 1rem; font-weight: 600;">고려대학교 세종캠퍼스 제38대 총학생회</p>
-                    <p style="color: var(--text-secondary); margin-top: 16px;">여러분의 평범한 하루를, 비범한 순간으로!</p>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <img src="{{ url_for('static', filename='defaults/logo.png') }}" alt="고려대학교 로고" style="width: 36px; height: 36px; object-fit: contain;">
+                        <h3 style="color: var(--ku-crimson); margin: 0; font-size: 1.35rem; font-weight: 900;">비범 BIBEOM</h3>
+                    </div>
+                    <p style="color: var(--text-primary); font-size: 1rem; font-weight: 600; margin: 12px 0;">고려대학교 세종캠퍼스 제38대 총학생회</p>
+                    <p style="color: var(--text-secondary); margin: 16px 0 0 0; line-height: 1.5;">여러분의 평범한 하루를, 비범한 순간으로!</p>
                 </div>
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Contact</h4>
-                    <p>세종특별자치시 조치원읍 세종로 2511, 학술정보원 B105-C</p>
-                    <p>dsng3419@korea.ac.kr</p>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Contact</h4>
+                    <p style="color: var(--text-secondary); line-height: 1.8; margin: 8px 0;">세종특별자치시 조치원읍 세종로 2511<br>학술정보원 B105-C</p>
+                    <p style="color: var(--text-secondary); margin: 12px 0 0 0;">
+                        <a href="mailto:dsng3419@korea.ac.kr" style="color: var(--ku-crimson); text-decoration: none; transition: opacity 0.2s;">dsng3419@korea.ac.kr</a>
+                    </p>
                 </div>
                 <div style="text-align: left;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700;">Connect With Us</h4>
-                    <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="text-decoration: none; color: #bc1888; font-weight: 600;">Instagram</a>
+                    <h4 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700; font-size: 1.1rem;">Connect With Us</h4>
+                    <div style="display: flex; gap: 24px; align-items: center;">
+                        <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); transition: all 0.2s; padding: 8px 12px; border-radius: 8px; background: rgba(188, 24, 136, 0.05);" onmouseover="this.style.background='rgba(188, 24, 136, 0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(188, 24, 136, 0.05)'; this.style.transform='translateY(0)';">
+                            <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 24px; height: 24px; object-fit: contain;">
+                            <span style="font-weight: 600; color: #bc1888; font-size: 0.95rem;">Instagram</span>
+                        </a>
+                        <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); transition: all 0.2s; padding: 8px 12px; border-radius: 8px; background: rgba(254, 229, 0, 0.15);" onmouseover="this.style.background='rgba(254, 229, 0, 0.25)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(254, 229, 0, 0.15)'; this.style.transform='translateY(0)';">
+                            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 24px; height: 24px; object-fit: contain;">
+                            <span style="font-weight: 600; color: #3c1e1e; font-size: 0.95rem;">KakaoTalk</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div style="padding-top: 32px; border-top: 1px solid var(--border-light); text-align: center;">
-                <p>© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
+            <div style="padding-top: 32px; border-top: 1px solid var(--border-light); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">© 2025 KOREA UNIVERSITY STUDENT COUNCIL. All rights reserved.</p>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('admin_login') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(150, 26, 50, 0.05); color: var(--ku-crimson); text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(150, 26, 50, 0.1)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='rgba(150, 26, 50, 0.05)'; this.style.transform='translateY(0)';">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zM9 7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7zm4 10.723V20h-2v-2.277a1.993 1.993 0 01-1-1.723c0-1.103.897-2 2-2s2 .897 2 2c0 .738-.404 1.376-1 1.723z" fill="currentColor"/>
+                    </svg>
+                    관리자 로그인
+                </a>
+                {% endif %}
             </div>
         </div>
     </footer>
