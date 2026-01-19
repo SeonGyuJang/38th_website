@@ -33,11 +33,29 @@
                     <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 18px; height: 18px;">
                     카카오톡
                 </a>
+                <button type="button" id="contact-modal-open" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #7A1E2F; border: 1px solid #7A1E2F; border-radius: 999px; color: white; font-weight: 600; font-size: 0.9rem; cursor: pointer;">
+                    홈페이지 문의
+                </button>
             </div>
             <div style="border-top: 1px solid rgba(0, 0, 0, 0.08); padding-top: 16px;">
                 <a href="{{ url_for('admin_login') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #7A1E2F; color: white; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 8px 20px rgba(122, 30, 47, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
                     관리자 로그인
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 10;">
+        <div style="background: white; border-radius: 20px; max-width: 420px; width: 100%; padding: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: #1a1a1a; margin: 0;">홈페이지 개발자 정보</h2>
+                <button type="button" id="contact-modal-close" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: #666;">×</button>
+            </div>
+            <div style="display: grid; gap: 10px; font-size: 0.95rem; color: #444; font-weight: 600;">
+                <div>소속: 부총학생회장</div>
+                <div>이메일: <a href="mailto:dsng3419@korea.ac.kr" style="color: #444; text-decoration: none;">dsng3419@korea.ac.kr</a></div>
+                <div>전화번호: 010-6598-6414</div>
+                <div>문의 가능 시간: 평일 09:00 - 18:00</div>
             </div>
         </div>
     </div>
@@ -59,5 +77,24 @@
             }
         }
     </style>
+    <script>
+        const contactModal = document.getElementById('contact-modal');
+        const contactModalOpen = document.getElementById('contact-modal-open');
+        const contactModalClose = document.getElementById('contact-modal-close');
+
+        contactModalOpen.addEventListener('click', () => {
+            contactModal.style.display = 'flex';
+        });
+
+        contactModalClose.addEventListener('click', () => {
+            contactModal.style.display = 'none';
+        });
+
+        contactModal.addEventListener('click', (event) => {
+            if (event.target === contactModal) {
+                contactModal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
