@@ -71,7 +71,7 @@
                     </div>
                 </div>
                 <form method="POST" action="{{ url_for('admin_maintenance_toggle') }}" style="margin: 0;">
-                    <button type="submit" style="padding: 12px 24px; background: {% if maintenance_mode %}#4CD964{% else %}#FF9500{% endif %}; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px {% if maintenance_mode %}rgba(76, 217, 100, 0.3){% else %}rgba(255, 149, 0, 0.3){% endif %}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';" onclick="return confirm('유지보수 모드를 {% if maintenance_mode %}비활성화{% else %}활성화{% endif %}하시겠습니까?')">
+                    <button type="submit" style="padding: 12px 24px; background: {% if maintenance_mode %}#4CD964{% else %}#F5EBDD{% endif %}; color: {% if maintenance_mode %}white{% else %}#7A1E2F{% endif %}; border: {% if maintenance_mode %}none{% else %}1px solid rgba(122, 30, 47, 0.15){% endif %}; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px {% if maintenance_mode %}rgba(76, 217, 100, 0.3){% else %}rgba(122, 30, 47, 0.18){% endif %}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';" onclick="return confirm('유지보수 모드를 {% if maintenance_mode %}비활성화{% else %}활성화{% endif %}하시겠습니까?')">
                         {% if maintenance_mode %}비활성화{% else %}활성화{% endif %}
                     </button>
                 </form>
