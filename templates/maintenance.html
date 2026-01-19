@@ -22,7 +22,17 @@
             </h1>
             <div style="display: grid; gap: 8px; font-size: 0.95rem; color: #555; font-weight: 600; margin-bottom: 20px;">
                 <div>이메일: <a href="mailto:dsng3419@korea.ac.kr" style="color: #555; text-decoration: none;">dsng3419@korea.ac.kr</a></div>
-                <div>연락처: 부총학생회장 장선규 (010-6598-6414)</div>
+                <div>홈페이지 개발자: 부총학생회장 장선규 (010-6598-6414)</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 20px;">
+                <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 999px; color: #333; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                    <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 18px; height: 18px;">
+                    인스타그램
+                </a>
+                <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 999px; color: #333; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                    <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 18px; height: 18px;">
+                    카카오톡
+                </a>
             </div>
             <div style="border-top: 1px solid rgba(0, 0, 0, 0.08); padding-top: 16px;">
                 <a href="{{ url_for('admin_login') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #7A1E2F; color: white; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 8px 20px rgba(122, 30, 47, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
