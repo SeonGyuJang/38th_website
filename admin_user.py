@@ -4,6 +4,7 @@ Flask-Login을 위한 Admin User 클래스
 Supabase를 사용하면서 Flask-Login과 호환되도록 User 객체를 정의합니다.
 """
 from flask_login import UserMixin
+from config import Config
 
 
 class AdminUser(UserMixin):
@@ -19,7 +20,22 @@ class AdminUser(UserMixin):
         self.name = admin_data.get('name')
         self.password_hash = admin_data.get('password_hash')
         self.created_at = admin_data.get('created_at')
-        self.is_super_admin = admin_data.get('is_super_admin', False)
+        is_super_admin = admin_data.get('is_super_admin', False)
+        if isinstance(is_super_admin, str):
+            is_super_admin = is_super_admin.strip().lower() in {'true', 't', '1', 'yes', 'y'}
+
+        super_admin_usernames = {
+            name.strip()
+            for name in (Config.SUPER_ADMIN_USERNAMES or "").split(',')
+            if name.strip()
+        }
+        super_admin_names = {name for name in super_admin_usernames}
+        super_admin_names.add('Super Admin')
+        self.is_super_admin = (
+            bool(is_super_admin)
+            or (self.username in super_admin_usernames)
+            or (self.name in super_admin_names)
+        )
 
     def get_id(self):
         """Flask-Login이 사용하는 ID 반환"""

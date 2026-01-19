@@ -9,8 +9,8 @@
    - Supabase 대시보드 → Table Editor → admins 테이블
    - 아래 SQL 쿼리 실행:
 
-   INSERT INTO admins (username, password_hash, name, created_at)
-   VALUES ('username', '<생성된_해시>', '이름', NOW());
+   INSERT INTO admins (username, password_hash, name, is_super_admin, created_at)
+   VALUES ('username', '<생성된_해시>', '이름', false, NOW());
 """
 
 import sys
@@ -29,11 +29,12 @@ def generate_hash(password: str):
     print("Supabase에 추가하는 SQL 쿼리 예시:")
     print("="*80)
     print(f"""
-INSERT INTO admins (username, password_hash, name, created_at)
+INSERT INTO admins (username, password_hash, name, is_super_admin, created_at)
 VALUES (
     'your_username',  -- 원하는 사용자명으로 변경
     '{password_hash}',
     '관리자',  -- 원하는 이름으로 변경
+    false,
     NOW()
 );
 """)
