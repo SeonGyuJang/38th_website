@@ -8,6 +8,7 @@ from supabase_helpers import SupabaseHelper
 from storage_helper import storage
 from admin_user import AdminUser
 from datetime import datetime
+import tempfile
 import os
 import shutil
 
@@ -101,7 +102,10 @@ def init_default_files():
 # 유지보수 모드
 # ============================================
 
-MAINTENANCE_MODE_FILE = os.path.join(os.path.dirname(__file__), 'maintenance_mode.txt')
+MAINTENANCE_MODE_FILE = os.environ.get(
+    'MAINTENANCE_MODE_FILE',
+    os.path.join(tempfile.gettempdir(), 'maintenance_mode.txt')
+)
 
 def is_maintenance_mode():
     """유지보수 모드 활성화 여부 확인"""
