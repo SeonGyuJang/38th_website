@@ -257,7 +257,7 @@ button {
 }
 
 .logo-img {
-    height: 2.5rem;
+    height: 3rem;
     width: auto;
     display: block;
     flex-shrink: 0;
@@ -382,7 +382,7 @@ button {
     }
 
     .logo-img {
-        height: 2.8rem;
+        height: 3.5rem;
     }
 
     .logo-title {
