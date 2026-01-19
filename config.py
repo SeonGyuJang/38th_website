@@ -13,6 +13,7 @@ class Config:
     SUPABASE_URL = os.environ.get('SUPABASE_URL')
     SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
     SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
+    SUPER_ADMIN_USERNAMES = os.environ.get('SUPER_ADMIN_USERNAMES')
 
     # Session configuration
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)

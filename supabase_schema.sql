@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS admins (
     username VARCHAR(80) UNIQUE NOT NULL,
     password_hash VARCHAR(200) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    is_super_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
