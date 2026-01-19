@@ -19,6 +19,7 @@ class AdminUser(UserMixin):
         self.name = admin_data.get('name')
         self.password_hash = admin_data.get('password_hash')
         self.created_at = admin_data.get('created_at')
+        self.is_super_admin = admin_data.get('is_super_admin', False)
 
     def get_id(self):
         """Flask-Login이 사용하는 ID 반환"""

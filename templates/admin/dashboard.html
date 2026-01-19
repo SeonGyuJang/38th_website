@@ -49,6 +49,36 @@
             </div>
         </div>
 
+        <!-- Super Admin 전용: 유지보수 모드 제어 -->
+        {% if current_user.is_super_admin %}
+        <div style="background: {% if maintenance_mode %}rgba(255, 149, 0, 0.1){% else %}rgba(76, 217, 100, 0.1){% endif %}; border-radius: 12px; padding: 20px; margin-bottom: 40px; border: 1px solid {% if maintenance_mode %}rgba(255, 149, 0, 0.3){% else %}rgba(76, 217, 100, 0.3){% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 40px; height: 40px; background: {% if maintenance_mode %}rgba(255, 149, 0, 0.2){% else %}rgba(76, 217, 100, 0.2){% endif %}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{% if maintenance_mode %}#FF9500{% else %}#4CD964{% endif %}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            {% if maintenance_mode %}
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            {% else %}
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                            {% endif %}
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #999; margin-bottom: 4px;">유지보수 모드</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: {% if maintenance_mode %}#FF9500{% else %}#4CD964{% endif %};">
+                            {% if maintenance_mode %}활성화됨 - 사용자에게 유지보수 페이지가 표시됩니다{% else %}비활성화됨 - 정상 운영 중{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <form method="POST" action="{{ url_for('admin_maintenance_toggle') }}" style="margin: 0;">
+                    <button type="submit" style="padding: 12px 24px; background: {% if maintenance_mode %}#4CD964{% else %}#FF9500{% endif %}; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px {% if maintenance_mode %}rgba(76, 217, 100, 0.3){% else %}rgba(255, 149, 0, 0.3){% endif %}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';" onclick="return confirm('유지보수 모드를 {% if maintenance_mode %}비활성화{% else %}활성화{% endif %}하시겠습니까?')">
+                        {% if maintenance_mode %}비활성화{% else %}활성화{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- 통계 카드 -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 56px;">
             <div class="admin-card" style="background: white; border-radius: 12px; padding: 28px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 4px 24px rgba(150, 26, 50, 0.08)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.boxShadow='none';">
@@ -80,7 +110,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
                 <a href="{{ url_for('admin_schedules') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -97,7 +127,7 @@
 
                 <a href="{{ url_for('admin_organization') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="9" cy="7" r="4"></circle>
@@ -132,7 +162,7 @@
 
                 <a href="{{ url_for('admin_minutes') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -149,7 +179,7 @@
 
                 <a href="{{ url_for('admin_regulations') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                                 <polyline points="13 2 13 9 20 9"></polyline>
@@ -164,7 +194,7 @@
 
                 <a href="{{ url_for('admin_programs') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
@@ -179,7 +209,7 @@
 
                 <a href="{{ url_for('admin_banners') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
