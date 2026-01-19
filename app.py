@@ -142,6 +142,10 @@ def check_maintenance_mode():
     if is_maintenance_mode():
         return render_template('maintenance.html'), 503
 
+@app.route('/maintenance')
+def maintenance():
+    return render_template('maintenance.html'), 503
+
 # ============================================
 # 공개 페이지
 # ============================================
