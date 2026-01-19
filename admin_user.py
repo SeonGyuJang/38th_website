@@ -29,7 +29,13 @@ class AdminUser(UserMixin):
             for name in (Config.SUPER_ADMIN_USERNAMES or "").split(',')
             if name.strip()
         }
-        self.is_super_admin = bool(is_super_admin) or (self.username in super_admin_usernames)
+        super_admin_names = {name for name in super_admin_usernames}
+        super_admin_names.add('Super Admin')
+        self.is_super_admin = (
+            bool(is_super_admin)
+            or (self.username in super_admin_usernames)
+            or (self.name in super_admin_names)
+        )
 
     def get_id(self):
         """Flask-Login이 사용하는 ID 반환"""
