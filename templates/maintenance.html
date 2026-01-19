@@ -12,17 +12,46 @@
     <!-- 배경 패턴 -->
     <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 15% 20%, rgba(150, 26, 50, 0.08), transparent 55%), radial-gradient(circle at 85% 75%, rgba(255, 193, 7, 0.12), transparent 60%); pointer-events: none;"></div>
 
-    <div style="max-width: 860px; width: 100%; position: relative; z-index: 1;">
-        <div style="display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: stretch;">
+    <div style="max-width: 1100px; width: 100%; position: relative; z-index: 1;">
+        <div style="display: grid; gap: 28px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); align-items: stretch;">
+            <!-- 이미지 및 안내 -->
+            <div style="background: #fff9f3; border-radius: 32px; padding: clamp(24px, 4vw, 36px); box-shadow: 0 28px 70px rgba(29, 22, 13, 0.12); border: 1px solid rgba(122, 30, 47, 0.08); animation: fadeInUp 0.6s ease-out;">
+                <div style="display: flex; align-items: center; justify-content: center; background: white; border-radius: 24px; padding: clamp(20px, 3vw, 28px); border: 1px solid rgba(122, 30, 47, 0.1); margin-bottom: 20px;">
+                    <img src="{{ url_for('static', filename='defaults/fix.gif') }}" alt="점검 이미지" style="max-width: 100%; width: min(520px, 90%); height: auto;">
+                </div>
+                <div style="display: grid; gap: 16px;">
+                    <div style="background: white; border-radius: 18px; padding: 18px 20px; border: 1px solid rgba(122, 30, 47, 0.08);">
+                        <div style="font-size: 0.9rem; font-weight: 700; color: #7A1E2F; margin-bottom: 8px;">작업 내용</div>
+                        <p style="font-size: 0.98rem; color: #5e5e5e; margin: 0; line-height: 1.7;">
+                            서비스 안정성 개선 및 관리자 기능 업데이트를 진행 중입니다.
+                        </p>
+                    </div>
+                    <div style="background: white; border-radius: 18px; padding: 18px 20px; border: 1px solid rgba(122, 30, 47, 0.08);">
+                        <div style="font-size: 0.9rem; font-weight: 700; color: #7A1E2F; margin-bottom: 8px;">빠른 연락</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 20px; height: 20px;">
+                            <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="color: #7A1E2F; font-weight: 600; text-decoration: none;">@kus_bibeom_38th</a>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 20px; height: 20px;">
+                            <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" style="color: #7A1E2F; font-weight: 600; text-decoration: none;">카카오톡 채널</a>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 12px 18px; background: rgba(122, 30, 47, 0.08); border-radius: 999px; font-size: 0.9rem; font-weight: 700; color: #7A1E2F;">
+                        고려대학교 38대 총학생회 비범
+                    </div>
+                </div>
+            </div>
+
             <!-- 비주얼 카드 -->
-            <div style="background: white; border-radius: 28px; padding: clamp(28px, 5vw, 36px); box-shadow: 0 24px 60px rgba(29, 22, 13, 0.12); border: 1px solid rgba(122, 30, 47, 0.08); animation: fadeInUp 0.6s ease-out;">
+            <div style="background: white; border-radius: 32px; padding: clamp(28px, 4vw, 36px); box-shadow: 0 24px 60px rgba(29, 22, 13, 0.1); border: 1px solid rgba(122, 30, 47, 0.08); animation: fadeInUp 0.6s ease-out 0.1s backwards;">
                 <div style="display: inline-flex; align-items: center; justify-content: center; width: 86px; height: 86px; background: linear-gradient(145deg, var(--ku-crimson) 0%, #7A1E2F 100%); border-radius: 22px; box-shadow: 0 16px 36px rgba(150, 26, 50, 0.3); margin-bottom: 20px;">
                     <img src="{{ url_for('static', filename='defaults/logo.png') }}" alt="고려대학교 로고" style="width: 52px; height: 52px;">
                 </div>
                 <div style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 18px; background: #F5EBDD; border-radius: 999px; margin-bottom: 16px; border: 1px solid rgba(122, 30, 47, 0.15);">
                     <span style="color: #7A1E2F; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.7rem;">Maintenance</span>
                 </div>
-                <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; color: #1a1a1a; margin: 0 0 12px 0; letter-spacing: -0.02em; line-height: 1.2;">
+                <h1 style="font-size: clamp(1.9rem, 3.6vw, 2.45rem); font-weight: 800; color: #1a1a1a; margin: 0 0 12px 0; letter-spacing: -0.02em; line-height: 1.2;">
                     현재 홈페이지 점검 중입니다
                 </h1>
                 <p style="color: #5e5e5e; font-size: 1rem; line-height: 1.7; margin: 0;">
@@ -37,37 +66,16 @@
                         </svg>
                         관리자 대시보드 로그인
                     </a>
-                    <a href="mailto:dsng3419@korea.ac.kr" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; background: white; color: #7A1E2F; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; border: 1px solid rgba(122, 30, 47, 0.2);">
-                        문의하기
-                    </a>
                 </div>
-            </div>
 
-            <!-- 이미지 및 안내 -->
-            <div style="background: #fff9f3; border-radius: 28px; padding: clamp(24px, 5vw, 32px); box-shadow: 0 24px 60px rgba(29, 22, 13, 0.1); border: 1px solid rgba(122, 30, 47, 0.08); animation: fadeInUp 0.6s ease-out 0.1s backwards;">
-                <div style="display: flex; align-items: center; justify-content: center; background: white; border-radius: 20px; padding: 20px; border: 1px solid rgba(122, 30, 47, 0.1); margin-bottom: 20px;">
-                    <img src="{{ url_for('static', filename='defaults/fix.gif') }}" alt="점검 이미지" style="max-width: 100%; width: 240px; height: auto;">
-                </div>
-                <div style="display: grid; gap: 16px;">
-                    <div style="background: white; border-radius: 16px; padding: 18px; border: 1px solid rgba(122, 30, 47, 0.08);">
-                        <div style="font-size: 0.85rem; font-weight: 700; color: #7A1E2F; margin-bottom: 8px;">작업 내용</div>
-                        <p style="font-size: 0.95rem; color: #5e5e5e; margin: 0; line-height: 1.6;">
-                            서비스 안정성 개선 및 관리자 기능 업데이트를 진행 중입니다.
-                        </p>
+                <div style="margin-top: 24px; display: grid; gap: 12px;">
+                    <div style="display: grid; gap: 6px; padding: 14px 16px; background: #F5EBDD; border-radius: 12px; border: 1px solid rgba(122, 30, 47, 0.12);">
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #7A1E2F;">이메일</div>
+                        <a href="mailto:dsng3419@korea.ac.kr" style="color: #7A1E2F; font-weight: 700; text-decoration: none; font-size: 0.95rem;">dsng3419@korea.ac.kr</a>
                     </div>
-                    <div style="background: white; border-radius: 16px; padding: 18px; border: 1px solid rgba(122, 30, 47, 0.08);">
-                        <div style="font-size: 0.85rem; font-weight: 700; color: #7A1E2F; margin-bottom: 8px;">빠른 연락</div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 20px; height: 20px;">
-                            <a href="https://www.instagram.com/kus_bibeom_38th/" target="_blank" style="color: #7A1E2F; font-weight: 600; text-decoration: none;">@kus_bibeom_38th</a>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
-                            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 20px; height: 20px;">
-                            <a href="https://open.kakao.com/o/sT7D1ALg" target="_blank" style="color: #7A1E2F; font-weight: 600; text-decoration: none;">카카오톡 채널</a>
-                        </div>
-                    </div>
-                    <div style="text-align: center; padding: 12px 16px; background: rgba(122, 30, 47, 0.08); border-radius: 999px; font-size: 0.85rem; font-weight: 700; color: #7A1E2F;">
-                        고려대학교 38대 총학생회 비범
+                    <div style="display: grid; gap: 6px; padding: 14px 16px; background: #F5EBDD; border-radius: 12px; border: 1px solid rgba(122, 30, 47, 0.12);">
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #7A1E2F;">연락처</div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #7A1E2F;">부총학생회장 장선규 (010-6598-6414)</div>
                     </div>
                 </div>
             </div>
@@ -75,6 +83,14 @@
     </div>
 
     <style>
+        @media (max-width: 900px) {
+            body {
+                padding: 24px;
+            }
+            div[style*="grid-template-columns: minmax(0, 1.1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
         @keyframes fadeInUp {
             from {
                 opacity: 0;
