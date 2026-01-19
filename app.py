@@ -474,9 +474,10 @@ def admin_schedule_delete(schedule_id):
 @login_required
 def admin_promises():
     promises_list = db_helper.get_all_promises()
+    all_progress = db_helper.get_all_promise_progress()
     # 각 공약의 진행 상황 추가
     for promise in promises_list:
-        promise['progress_updates'] = db_helper.get_promise_progress(promise['id'])
+        promise['progress_updates'] = all_progress.get(promise['id'], [])
     return render_template('admin/promises.html', promises=promises_list)
 
 @app.route('/admin/promises/add', methods=['GET', 'POST'])

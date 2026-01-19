@@ -59,7 +59,7 @@
                         </svg>
                         <span style="font-size: 0.9rem; font-weight: 700; color: var(--ku-crimson); text-transform: uppercase; letter-spacing: 0.05em;">안건</span>
                     </div>
-                    <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; margin: 0; white-space: pre-wrap;">{{ minute.agenda }}</p>
+                    <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; margin: 0; white-space: pre-wrap;">{{ minute.agenda | trim }}</p>
                 </div>
                 {% endif %}
             </div>
