@@ -3,7 +3,10 @@ Supabase 데이터베이스 클라이언트
 
 Supabase를 사용한 데이터베이스 연결 및 관리를 담당합니다.
 """
+import inspect
 import os
+
+import httpx
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -17,6 +20,30 @@ _supabase_client: Client = None
 _supabase_admin_client: Client = None
 
 
+def _ensure_httpx_proxy_compat() -> None:
+    """
+    gotrue가 httpx.Client에 proxy 인자를 전달하는 경우를 대비한 호환성 패치.
+
+    일부 환경에서는 gotrue가 proxy 키워드를 사용하지만,
+    httpx 버전에 따라 proxy 인자가 없어 TypeError가 발생할 수 있습니다.
+    """
+    if "proxy" in inspect.signature(httpx.Client).parameters:
+        return
+
+    if getattr(httpx.Client, "_proxy_kwarg_patched", False):
+        return
+
+    original_init = httpx.Client.__init__
+
+    def patched_init(self, *args, proxy=None, proxies=None, **kwargs):
+        if proxy is not None and proxies is None:
+            proxies = proxy
+        return original_init(self, *args, proxies=proxies, **kwargs)
+
+    httpx.Client.__init__ = patched_init
+    httpx.Client._proxy_kwarg_patched = True
+
+
 def get_supabase_client() -> Client:
     """
     Supabase 클라이언트 인스턴스를 반환합니다. (anon key 사용)
@@ -24,6 +51,7 @@ def get_supabase_client() -> Client:
     global _supabase_client
 
     if _supabase_client is None:
+        _ensure_httpx_proxy_compat()
         # os.getenv는 .env 파일이나 Heroku Config Vars에서 값을 가져옵니다.
         supabase_url = os.getenv('SUPABASE_URL')
         supabase_key = os.getenv('SUPABASE_KEY')
@@ -54,6 +82,7 @@ def get_supabase_admin_client() -> Client:
     global _supabase_admin_client
 
     if _supabase_admin_client is None:
+        _ensure_httpx_proxy_compat()
         supabase_url = os.getenv('SUPABASE_URL')
         supabase_service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 
