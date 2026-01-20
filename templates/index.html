@@ -240,22 +240,24 @@
     }
 }
 
-/* SVG 텍스트 그리기 애니메이션 */
+/* SVG 텍스트 (애니메이션 제거) */
 .korea-text {
-    stroke-dasharray: 1200;
-    stroke-dashoffset: 1200;
+    font-family: var(--font-system);
+    paint-order: stroke fill;
+    vector-effect: non-scaling-stroke;
+    text-rendering: geometricPrecision;
     stroke-linecap: round;
     stroke-linejoin: round;
-    animation: drawKorea 2.2s ease-in-out forwards;
 }
 
 .univ-text {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
+    font-family: var(--font-system);
+    paint-order: stroke fill;
+    vector-effect: non-scaling-stroke;
+    text-rendering: geometricPrecision;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0;
-    animation: drawUniv 1.8s ease-in-out 0.8s forwards;
+    opacity: 1;
 }
 
 /* 모바일 전용 최적화 */
@@ -265,20 +267,9 @@
     }
 }
 
-/* 전체 SVG 페이드아웃 */
+/* 전체 SVG (애니메이션 제거) */
 .korea-watermark-svg {
     opacity: 0.4;
-    animation: svgFadeOut 0.8s ease-out 2.8s forwards;
-}
-
-@keyframes svgFadeOut {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        visibility: hidden;
-    }
 }
 
 /* PC에서 SVG 더 크게 */
@@ -302,54 +293,6 @@
         stroke-width: 1.8 !important;
         stroke-linecap: round;
         stroke-linejoin: round;
-    }
-}
-
-@keyframes drawKorea {
-    0% {
-        stroke-dashoffset: 1200;
-        fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 1);
-        stroke-width: 3;
-    }
-    70% {
-        stroke-dashoffset: 0;
-        fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 1);
-        stroke-width: 3;
-    }
-    100% {
-        stroke-dashoffset: 0;
-        fill: rgba(150, 26, 50, 0.45);
-        stroke: rgba(150, 26, 50, 0.85);
-        stroke-width: 2.8;
-    }
-}
-
-@keyframes drawUniv {
-    0% {
-        stroke-dashoffset: 1000;
-        fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 1);
-        stroke-width: 3;
-        opacity: 0;
-    }
-    1% {
-        opacity: 1;
-    }
-    70% {
-        stroke-dashoffset: 0;
-        fill: rgba(150, 26, 50, 0);
-        stroke: rgba(150, 26, 50, 1);
-        stroke-width: 3;
-        opacity: 1;
-    }
-    100% {
-        stroke-dashoffset: 0;
-        fill: rgba(150, 26, 50, 0.45);
-        stroke: rgba(150, 26, 50, 0.85);
-        stroke-width: 2.8;
-        opacity: 1;
     }
 }
 
@@ -815,8 +758,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // KOREA UNIV. 텍스트 애니메이션을 스크롤 시 시작
 document.addEventListener('DOMContentLoaded', function() {
-    const koreaText = document.querySelector('.korea-text');
-    const univText = document.querySelector('.univ-text');
     const koreaWatermarkSvg = document.querySelector('.korea-watermark-svg');
 
     // Connect With Us 요소들
@@ -878,60 +819,30 @@ document.addEventListener('DOMContentLoaded', function() {
             mobileObserver.observe(contactSection);
         }
     } else {
-        // PC/태블릿: 기존 애니메이션 실행
-        // 초기 상태 설정 (애니메이션 중지)
-        if (koreaText && univText && koreaWatermarkSvg) {
-            koreaText.style.animationPlayState = 'paused';
-            univText.style.animationPlayState = 'paused';
-            koreaWatermarkSvg.style.animationPlayState = 'paused';
-        }
-
-        // Intersection Observer로 섹션이 보일 때 애니메이션 시작
+        // PC/태블릿: 애니메이션 없이 요소 표시
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting && koreaText && univText && koreaWatermarkSvg) {
-                    // 사용자가 섹션을 충분히 볼 수 있도록 0.4초 딜레이 후 애니메이션 시작
-                    setTimeout(() => {
-                        koreaText.style.animationPlayState = 'running';
-                        univText.style.animationPlayState = 'running';
-                        koreaWatermarkSvg.style.animationPlayState = 'running';
-
-                        // SVG fadeout 완료 후 Connect With Us 요소들을 순차적으로 표시
-                        setTimeout(() => {
-                            if (connectBadge) {
-                                connectBadge.style.opacity = '1';
-                                connectBadge.style.transform = 'translateY(0)';
-                            }
-                        }, 2900);
-
-                        setTimeout(() => {
-                            if (connectTitle) {
-                                connectTitle.style.opacity = '1';
-                                connectTitle.style.transform = 'translateY(0)';
-                            }
-                        }, 3050);
-
-                        setTimeout(() => {
-                            if (connectDescription) {
-                                connectDescription.style.opacity = '1';
-                                connectDescription.style.transform = 'translateY(0)';
-                            }
-                        }, 3200);
-
-                        setTimeout(() => {
-                            if (connectCards) {
-                                connectCards.style.opacity = '1';
-                                connectCards.style.transform = 'translateY(0)';
-                            }
-                        }, 3350);
-
-                        setTimeout(() => {
-                            if (connectCta) {
-                                connectCta.style.opacity = '1';
-                                connectCta.style.transform = 'translateY(0)';
-                            }
-                        }, 3500);
-                    }, 400);
+                if (entry.isIntersecting) {
+                    if (connectBadge) {
+                        connectBadge.style.opacity = '1';
+                        connectBadge.style.transform = 'translateY(0)';
+                    }
+                    if (connectTitle) {
+                        connectTitle.style.opacity = '1';
+                        connectTitle.style.transform = 'translateY(0)';
+                    }
+                    if (connectDescription) {
+                        connectDescription.style.opacity = '1';
+                        connectDescription.style.transform = 'translateY(0)';
+                    }
+                    if (connectCards) {
+                        connectCards.style.opacity = '1';
+                        connectCards.style.transform = 'translateY(0)';
+                    }
+                    if (connectCta) {
+                        connectCta.style.opacity = '1';
+                        connectCta.style.transform = 'translateY(0)';
+                    }
                     observer.unobserve(entry.target);
                 }
             });
