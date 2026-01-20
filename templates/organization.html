@@ -47,7 +47,7 @@
                                 <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                                     {% for member in departments[dept_name] %}
                                         {% if member.position in ['국장', '차장', '국원'] %}
-                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.position }} {{ member.name }}</div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -62,7 +62,7 @@
                                 <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                                     {% for member in departments[dept_name] %}
                                         {% if member.position in ['국장', '차장', '국원'] %}
-                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.position }} {{ member.name }}</div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -105,7 +105,7 @@
                             <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                                 {% for member in departments[dept_name] %}
                                     {% if member.position in ['국장', '차장', '국원'] %}
-                                    <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.position }} {{ member.name }}</div>
                                     {% endif %}
                                 {% endfor %}
                             </div>
@@ -128,7 +128,7 @@
                             <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                                 {% for member in departments[dept_name] %}
                                     {% if member.position in ['국장', '차장', '국원'] %}
-                                    <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.name }} {{ member.position }}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-primary); font-weight: {% if member.position == '국장' %}700{% else %}500{% endif %};">{{ member.position }} {{ member.name }}</div>
                                     {% endif %}
                                 {% endfor %}
                             </div>
