@@ -242,16 +242,24 @@
 
 /* SVG 텍스트 그리기 애니메이션 */
 .korea-text {
-    stroke-dasharray: 1200;
-    stroke-dashoffset: 1200;
+    font-family: var(--font-system);
+    paint-order: stroke fill;
+    vector-effect: non-scaling-stroke;
+    text-rendering: geometricPrecision;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
     stroke-linecap: round;
     stroke-linejoin: round;
     animation: drawKorea 2.2s ease-in-out forwards;
 }
 
 .univ-text {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
+    font-family: var(--font-system);
+    paint-order: stroke fill;
+    vector-effect: non-scaling-stroke;
+    text-rendering: geometricPrecision;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
     stroke-linecap: round;
     stroke-linejoin: round;
     opacity: 0;
@@ -307,7 +315,7 @@
 
 @keyframes drawKorea {
     0% {
-        stroke-dashoffset: 1200;
+        stroke-dashoffset: 2000;
         fill: rgba(150, 26, 50, 0);
         stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
@@ -328,7 +336,7 @@
 
 @keyframes drawUniv {
     0% {
-        stroke-dashoffset: 1000;
+        stroke-dashoffset: 2000;
         fill: rgba(150, 26, 50, 0);
         stroke: rgba(150, 26, 50, 1);
         stroke-width: 3;
