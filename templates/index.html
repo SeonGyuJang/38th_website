@@ -240,62 +240,6 @@
     }
 }
 
-/* SVG 텍스트 (애니메이션 제거) */
-.korea-text {
-    font-family: var(--font-system);
-    paint-order: stroke fill;
-    vector-effect: non-scaling-stroke;
-    text-rendering: geometricPrecision;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.univ-text {
-    font-family: var(--font-system);
-    paint-order: stroke fill;
-    vector-effect: non-scaling-stroke;
-    text-rendering: geometricPrecision;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 1;
-}
-
-/* 모바일 전용 최적화 */
-@media (max-width: 768px) {
-    .korea-text, .univ-text {
-        stroke-width: 1.8 !important;
-    }
-}
-
-/* 전체 SVG (애니메이션 제거) */
-.korea-watermark-svg {
-    opacity: 0.4;
-}
-
-/* PC에서 SVG 더 크게 */
-@media (min-width: 769px) {
-    .korea-watermark-svg {
-        opacity: 0.3 !important;
-        max-width: clamp(1200px, 150vw, 1800px) !important;
-        width: 110% !important;
-    }
-}
-
-/* 모바일에서 SVG 위치 조정 */
-@media (max-width: 768px) {
-    .korea-watermark-svg {
-        top: 20% !important;
-        max-width: 95% !important;
-        width: 95% !important;
-    }
-
-    .korea-text, .univ-text {
-        stroke-width: 1.8 !important;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-}
-
 </style>
 
 <!-- 공약 현황 섹션 -->
@@ -614,33 +558,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="position: absolute; top: -10%; right: -5%; width: clamp(400px, 70vw, 800px); height: clamp(400px, 70vw, 800px); background: radial-gradient(circle, rgba(150, 26, 50, 0.08) 0%, transparent 70%); border-radius: 50%; filter: blur(100px); will-change: transform; animation: float 30s ease-in-out infinite;"></div>
     <div style="position: absolute; bottom: -15%; left: -8%; width: clamp(500px, 80vw, 900px); height: clamp(500px, 80vw, 900px); background: radial-gradient(circle, rgba(150, 26, 50, 0.06) 0%, transparent 70%); border-radius: 50%; filter: blur(120px); will-change: transform; animation: float 35s ease-in-out infinite reverse;"></div>
 
-    <!-- 고려대 로고 워터마크 - SVG 텍스트 그리기 애니메이션 (PC에서 더 크게) -->
-    <svg class="korea-watermark-svg" style="shape-rendering: geometricPrecision; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: clamp(90%, 95%, 100%); max-width: clamp(900px, 120vw, 1400px); height: auto; user-select: none; pointer-events: none; z-index: 10; filter: drop-shadow(0 0 60px rgba(150, 26, 50, 0.3));" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
-        <!-- KOREA 텍스트 -->
-        <text x="50%" y="38%"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              font-size="140"
-              font-weight="900"
-              letter-spacing="-3"
-              fill="rgba(150, 26, 50, 0.45)"
-              stroke="rgba(150, 26, 50, 0.85)"
-              stroke-width="2.8"
-              class="korea-text">KOREA</text>
-
-        <!-- UNIV. 텍스트 -->
-        <text x="50%" y="62%"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              font-size="140"
-              font-weight="900"
-              letter-spacing="-3"
-              fill="rgba(150, 26, 50, 0.45)"
-              stroke="rgba(150, 26, 50, 0.85)"
-              stroke-width="2.8"
-              class="univ-text">UNIV.</text>
-    </svg>
-
     <div class="container" style="position: relative; z-index: 20;">
         <!-- 헤더 -->
         <div style="text-align: center; margin-bottom: clamp(64px, 12vw, 96px);">
@@ -758,8 +675,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // KOREA UNIV. 텍스트 애니메이션을 스크롤 시 시작
 document.addEventListener('DOMContentLoaded', function() {
-    const koreaWatermarkSvg = document.querySelector('.korea-watermark-svg');
-
     // Connect With Us 요소들
     const connectBadge = document.querySelector('.connect-badge');
     const connectTitle = document.querySelector('.connect-title');
@@ -771,12 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const isMobile = window.innerWidth <= 768;
 
     if (isMobile) {
-        // 모바일: 애니메이션 없이 즉시 표시
-        if (koreaWatermarkSvg) {
-            koreaWatermarkSvg.style.display = 'none';
-        }
-
-        // Intersection Observer로 섹션이 보일 때 즉시 표시
+        // 모바일: Intersection Observer로 섹션이 보일 때 즉시 표시
         const mobileObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
