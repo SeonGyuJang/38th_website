@@ -72,9 +72,19 @@
     }
 
     .lightbox-content {
-        max-width: 90%;
-        max-height: 90vh;
+        max-width: calc(100% - 40px);
+        max-height: calc(100vh - 180px);
+        margin: 90px 20px;
+        object-fit: contain;
         animation: scaleUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (max-width: 768px) {
+        .lightbox-content {
+            max-width: calc(100% - 32px);
+            max-height: calc(100vh - 160px);
+            margin: 80px 16px;
+        }
     }
 
     @keyframes scaleUp {
@@ -103,6 +113,7 @@
         cursor: pointer;
         transition: all 0.3s;
         border: 2px solid rgba(255, 255, 255, 0.3);
+        z-index: 10001;
     }
 
     .lightbox-nav:hover {
@@ -116,6 +127,21 @@
 
     .lightbox-nav.next {
         right: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .lightbox-nav {
+            width: 44px;
+            height: 44px;
+        }
+
+        .lightbox-nav.prev {
+            left: 16px;
+        }
+
+        .lightbox-nav.next {
+            right: 16px;
+        }
     }
 
     .lightbox-close {
@@ -133,12 +159,22 @@
         cursor: pointer;
         transition: all 0.3s;
         border: 2px solid rgba(255, 255, 255, 0.3);
+        z-index: 10001;
     }
 
     .lightbox-close:hover {
         background: rgba(255, 255, 255, 0.3);
         border-color: rgba(255, 255, 255, 0.5);
         transform: rotate(90deg);
+    }
+
+    @media (max-width: 768px) {
+        .lightbox-close {
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+        }
     }
 
     .lightbox-counter {
@@ -154,6 +190,15 @@
         backdrop-filter: blur(10px);
         border-radius: 20px;
         border: 2px solid rgba(255, 255, 255, 0.3);
+        z-index: 10001;
+    }
+
+    @media (max-width: 768px) {
+        .lightbox-counter {
+            bottom: 20px;
+            font-size: 0.85rem;
+            padding: 10px 20px;
+        }
     }
 </style>
 
