@@ -157,7 +157,7 @@ def index():
 
     # 전반적인 공약 이행률 계산
     promises_list = db_helper.get_all_promises()
-    promise_rate = int(sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list)) if promises_list else 0
+    promise_rate = round(sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list)) if promises_list else 0
 
     # 메인 페이지용 다가오는 일정 (2개)
     upcoming_schedules = db_helper.get_upcoming_schedules(limit=2)
