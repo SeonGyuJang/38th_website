@@ -1175,6 +1175,28 @@ def admin_history_check(log_id):
     flash('확인 표시가 변경되었습니다.', 'success')
     return redirect(url_for('admin_history'))
 
+@app.route('/admin/history/comment/<int:log_id>', methods=['POST'])
+@login_required
+def admin_history_comment(log_id):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 코멘트를 남길 수 있습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    history_log = db_helper.get_history_log_by_id(log_id)
+    if not history_log:
+        flash('히스토리 로그를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    admin_comment = request.form.get('admin_comment', '').strip()
+    data = {
+        'admin_comment': admin_comment or None,
+        'commented_by': current_user.name if admin_comment else None,
+        'commented_at': datetime.now().isoformat() if admin_comment else None
+    }
+    db_helper.update_history_log(log_id, data)
+    flash('코멘트가 저장되었습니다.', 'success')
+    return redirect(url_for('admin_history'))
+
 # ============================================
 # 성능 최적화: 캐싱 헤더 추가
 # ============================================

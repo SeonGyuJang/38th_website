@@ -89,6 +89,8 @@ class SupabaseHelper:
                 history['created_at'] = self.parse_datetime(history['created_at'])
             if 'checked_at' in history:
                 history['checked_at'] = self.parse_datetime(history['checked_at'])
+            if 'commented_at' in history:
+                history['commented_at'] = self.parse_datetime(history['commented_at'])
         return history
 
     # ============ Admin 관련 ============
