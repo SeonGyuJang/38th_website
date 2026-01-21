@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}히스토리 관리 - 관리자{% endblock %}
+
+{% block content %}
+<style>
+    .history-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .history-check svg {
+        width: 18px;
+        height: 18px;
+    }
+    .history-check .secondary {
+        opacity: 0.45;
+    }
+</style>
+
+<div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
+    <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 32px;">
+            <a href="{{ url_for('admin_dashboard') }}" style="display: inline-flex; align-items: center; gap: 6px; color: #666; font-size: 0.9rem; text-decoration: none; margin-bottom: 16px; transition: color 0.2s;" onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='#666';">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                대시보드로 돌아가기
+            </a>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <div style="width: 6px; height: 6px; background: var(--ku-crimson); border-radius: 50%;"></div>
+                        <span style="color: var(--ku-crimson); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem;">History Logs</span>
+                    </div>
+                    <h1 style="font-size: clamp(1.75rem, 4vw, 2.25rem); font-weight: 800; color: #1a1a1a; margin: 0;">히스토리 관리</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- 작성 폼 -->
+        <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; margin-bottom: 24px;">
+            <form method="POST" action="{{ url_for('admin_history_add') }}" style="display: grid; gap: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #333; margin-bottom: 8px;">작업자</label>
+                        <input type="text" name="worker_name" placeholder="예: 홍길동" required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5E5E5; font-size: 0.95rem;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end; justify-content: flex-end;">
+                        <div style="font-size: 0.85rem; color: #999; text-align: right;">
+                            작성 시간은 자동 기록됩니다.
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #333; margin-bottom: 8px;">작업 내용</label>
+                    <textarea name="work_content" rows="4" placeholder="작업한 내용을 입력해주세요." required style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #E5E5E5; font-size: 0.95rem; resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" style="padding: 12px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(150, 26, 50, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        로그 등록
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if history_logs %}
+        <div style="display: grid; gap: 16px;">
+            {% for log in history_logs %}
+            <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <div style="display: flex; gap: 24px; align-items: start; flex-wrap: wrap;">
+                    <div style="text-align: center; min-width: 90px;">
+                        <div style="font-size: 2rem; font-weight: 800; line-height: 1; color: var(--ku-crimson);">
+                            {{ log.created_at.strftime('%d') if log.created_at }}
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #666; margin-top: 6px;">
+                            {{ log.created_at.strftime('%Y.%m') if log.created_at }}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">
+                            {{ log.created_at.strftime('%H:%M') if log.created_at }}
+                        </div>
+                    </div>
+
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <h3 style="font-size: clamp(1.1rem, 2.5vw, 1.3rem); font-weight: 700; color: #1a1a1a; margin: 0;">
+                                {{ log.worker_name }}
+                            </h3>
+                            {% if log.is_checked %}
+                            <span class="history-check" style="background: rgba(76, 217, 100, 0.12); color: #2E8B57;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#2E8B57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5"></path>
+                                </svg>
+                                <svg class="secondary" viewBox="0 0 24 24" fill="none" stroke="#2E8B57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6L9 17l-5-5"></path>
+                                </svg>
+                                확인됨
+                            </span>
+                            {% else %}
+                            <span class="history-check" style="background: rgba(0, 0, 0, 0.05); color: #666;">
+                                미확인
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <p style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0; white-space: pre-line;">
+                            {{ log.work_content }}
+                        </p>
+
+                        {% if log.is_checked and log.checked_by %}
+                        <div style="margin-top: 12px; font-size: 0.85rem; color: #888;">
+                            {{ log.checked_by }} 님이 {{ log.checked_at.strftime('%Y.%m.%d %H:%M') if log.checked_at }}에 확인했습니다.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-left: auto;">
+                        {% if current_user.is_super_admin %}
+                        <form method="POST" action="{{ url_for('admin_history_check', log_id=log.id) }}" style="display: inline;">
+                            <button type="submit" style="padding: 10px 18px; background: {% if log.is_checked %}#F5F5F7{% else %}#EAF8EF{% endif %}; color: {% if log.is_checked %}#555{% else %}#2E8B57{% endif %}; border: 1px solid {% if log.is_checked %}#E1E1E8{% else %}rgba(46, 139, 87, 0.35){% endif %}; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';">
+                                {% if log.is_checked %}체크 해제{% else %}체크 표시{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 80px 20px; background: white; border-radius: 12px; border: 1px solid #E5E5E5;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: #F5F5F7; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+            </div>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 0;">등록된 히스토리 로그가 없습니다.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
