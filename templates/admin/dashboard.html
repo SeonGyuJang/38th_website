@@ -27,6 +27,7 @@
     .admin-card:nth-child(6) { animation-delay: 0.3s; }
     .admin-card:nth-child(7) { animation-delay: 0.35s; }
     .admin-card:nth-child(8) { animation-delay: 0.4s; }
+    .admin-card:nth-child(9) { animation-delay: 0.45s; }
 </style>
 
 <div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
@@ -235,6 +236,21 @@
                         <div style="flex: 1;">
                             <div style="font-size: 1rem; font-weight: 700; color: #1a1a1a;">아카이브 관리</div>
                             <div style="font-size: 0.85rem; color: #999; margin-top: 2px;">활동 사진 관리</div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('admin_history') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 1rem; font-weight: 700; color: #1a1a1a;">히스토리 관리</div>
+                            <div style="font-size: 0.85rem; color: #999; margin-top: 2px;">작업 로그 기록 및 확인</div>
                         </div>
                     </div>
                 </a>

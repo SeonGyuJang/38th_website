@@ -153,6 +153,17 @@ CREATE TABLE IF NOT EXISTS archive_images (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 12. HistoryLog 테이블 (관리자 작업 히스토리)
+CREATE TABLE IF NOT EXISTS history_logs (
+    id BIGSERIAL PRIMARY KEY,
+    worker_name VARCHAR(100) NOT NULL,
+    work_content TEXT NOT NULL,
+    is_checked BOOLEAN DEFAULT FALSE,
+    checked_by VARCHAR(100),
+    checked_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- 인덱스 생성
 -- ============================================
@@ -190,6 +201,10 @@ CREATE INDEX IF NOT EXISTS idx_archives_active ON archives(is_active);
 CREATE INDEX IF NOT EXISTS idx_archives_event_date ON archives(event_date DESC);
 CREATE INDEX IF NOT EXISTS idx_archive_images_archive_id ON archive_images(archive_id);
 
+-- 히스토리 검색 최적화
+CREATE INDEX IF NOT EXISTS idx_history_logs_created_at ON history_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_history_logs_checked ON history_logs(is_checked);
+
 -- ============================================
 -- Row Level Security (RLS) 정책
 -- ============================================
@@ -206,6 +221,7 @@ ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archives ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archive_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE history_logs ENABLE ROW LEVEL SECURITY;
 
 -- 모든 테이블에 대한 공개 읽기 정책 (SELECT)
 CREATE POLICY "Public read access" ON schedules FOR SELECT USING (true);
@@ -218,6 +234,7 @@ CREATE POLICY "Public read access" ON organizations FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON banners FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON archives FOR SELECT USING (true);
 CREATE POLICY "Public read access" ON archive_images FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON history_logs FOR SELECT USING (true);
 
 -- Admins 테이블은 service_role 키로만 접근 가능
 CREATE POLICY "Admin full access" ON admins FOR ALL USING (auth.role() = 'service_role');

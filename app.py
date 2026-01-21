@@ -1125,6 +1125,57 @@ def admin_archive_image_delete(archive_id, image_id):
     return redirect(url_for('admin_archive_edit', archive_id=archive_id))
 
 # ============================================
+# 히스토리 로그
+# ============================================
+
+@app.route('/admin/history')
+@login_required
+def admin_history():
+    history_logs = db_helper.get_all_history_logs()
+    return render_template('admin/history.html', history_logs=history_logs)
+
+@app.route('/admin/history/add', methods=['POST'])
+@login_required
+def admin_history_add():
+    worker_name = request.form.get('worker_name', '').strip()
+    work_content = request.form.get('work_content', '').strip()
+
+    if not worker_name or not work_content:
+        flash('작업자와 작업 내용을 모두 입력해주세요.', 'error')
+        return redirect(url_for('admin_history'))
+
+    data = {
+        'worker_name': worker_name,
+        'work_content': work_content,
+        'created_at': datetime.now().isoformat()
+    }
+    db_helper.create_history_log(data)
+    flash('히스토리 로그가 등록되었습니다.', 'success')
+    return redirect(url_for('admin_history'))
+
+@app.route('/admin/history/check/<int:log_id>', methods=['POST'])
+@login_required
+def admin_history_check(log_id):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 확인 표시를 할 수 있습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    history_log = db_helper.get_history_log_by_id(log_id)
+    if not history_log:
+        flash('히스토리 로그를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    is_checked = not bool(history_log.get('is_checked'))
+    data = {
+        'is_checked': is_checked,
+        'checked_by': current_user.name if is_checked else None,
+        'checked_at': datetime.now().isoformat() if is_checked else None
+    }
+    db_helper.update_history_log(log_id, data)
+    flash('확인 표시가 변경되었습니다.', 'success')
+    return redirect(url_for('admin_history'))
+
+# ============================================
 # 성능 최적화: 캐싱 헤더 추가
 # ============================================
 

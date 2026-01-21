@@ -82,6 +82,15 @@ class SupabaseHelper:
                 archive['updated_at'] = self.parse_datetime(archive['updated_at'])
         return archive
 
+    def convert_history_dates(self, history: Dict[str, Any]) -> Dict[str, Any]:
+        """히스토리 로그 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if history:
+            if 'created_at' in history:
+                history['created_at'] = self.parse_datetime(history['created_at'])
+            if 'checked_at' in history:
+                history['checked_at'] = self.parse_datetime(history['checked_at'])
+        return history
+
     # ============ Admin 관련 ============
     def get_admin_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """사용자명으로 관리자 조회"""
@@ -497,4 +506,27 @@ class SupabaseHelper:
     def get_archive_image_by_id(self, image_id: int) -> Optional[Dict[str, Any]]:
         """ID로 아카이브 이미지 조회"""
         response = self.client.table('archive_images').select('*').eq('id', image_id).execute()
+        return response.data[0] if response.data else None
+
+    # ============ HistoryLog 관련 ============
+    def get_all_history_logs(self, order_by: str = 'created_at', ascending: bool = False) -> List[Dict[str, Any]]:
+        """모든 히스토리 로그 조회"""
+        response = self.client.table('history_logs').select('*').order(order_by, desc=not ascending).execute()
+        return [self.convert_history_dates(history) for history in response.data]
+
+    def get_history_log_by_id(self, log_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 히스토리 로그 조회"""
+        response = self.client.table('history_logs').select('*').eq('id', log_id).execute()
+        if response.data:
+            return self.convert_history_dates(response.data[0])
+        return None
+
+    def create_history_log(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """히스토리 로그 생성"""
+        response = self.client.table('history_logs').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_history_log(self, log_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """히스토리 로그 수정"""
+        response = self.client.table('history_logs').update(data).eq('id', log_id).execute()
         return response.data[0] if response.data else None
