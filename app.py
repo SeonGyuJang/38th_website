@@ -1066,20 +1066,24 @@ def admin_archive_edit(archive_id):
 
     if request.method == 'POST':
         thumbnail_url = archive.get('thumbnail_url')
+        # 새 파일이 업로드되면 우선적으로 사용
         if 'thumbnail' in request.files:
             file = request.files['thumbnail']
-            saved_path = save_file(file, 'archives')
-            if saved_path:
-                thumbnail_url = saved_path
-        if request.form.get('thumbnail_url_text'):
-            thumbnail_url = request.form.get('thumbnail_url_text')
+            if file and file.filename:  # 파일이 실제로 선택되었는지 확인
+                saved_path = save_file(file, 'archives')
+                if saved_path:
+                    thumbnail_url = saved_path
+        # URL 텍스트가 입력되면 사용 (빈 문자열이 아닐 때만)
+        thumbnail_url_input = request.form.get('thumbnail_url_text', '').strip()
+        if thumbnail_url_input:
+            thumbnail_url = thumbnail_url_input
 
         data = {
             'title': request.form['title'],
-            'description': request.form.get('description'),
+            'description': request.form.get('description', '').strip(),
             'event_date': request.form['event_date'],
-            'category': request.form.get('category'),
-            'location': request.form.get('location'),
+            'category': request.form.get('category', '').strip(),
+            'location': request.form.get('location', '').strip(),
             'thumbnail_url': thumbnail_url,
             'is_active': request.form.get('is_active') == 'on',
             'order': int(request.form.get('order', 0))
