@@ -34,12 +34,30 @@
     .program-card {
         animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
 
-    .program-card:nth-child(4n+1) { animation-delay: 0.05s; }
-    .program-card:nth-child(4n+2) { animation-delay: 0.1s; }
-    .program-card:nth-child(4n+3) { animation-delay: 0.15s; }
-    .program-card:nth-child(4n) { animation-delay: 0.2s; }
+    .program-card:nth-child(5n+1) { animation-delay: 0.05s; }
+    .program-card:nth-child(5n+2) { animation-delay: 0.1s; }
+    .program-card:nth-child(5n+3) { animation-delay: 0.15s; }
+    .program-card:nth-child(5n+4) { animation-delay: 0.2s; }
+    .program-card:nth-child(5n) { animation-delay: 0.25s; }
+
+    .program-card-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+        padding: 20px 16px 16px 16px;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+
+    .program-card:hover .program-card-overlay {
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 50%, rgba(0, 0, 0, 0.3) 100%);
+    }
 
     .modal-overlay {
         position: fixed;
@@ -47,14 +65,15 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(6px);
         display: none;
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        padding: 20px;
+        padding: 40px;
         animation: fadeIn 0.3s ease-out;
+        overflow-y: auto;
     }
 
     .modal-overlay.active {
@@ -64,30 +83,69 @@
     .modal-content {
         background: white;
         border-radius: 24px;
-        max-width: 800px;
+        max-width: 1200px;
         width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
+        max-height: calc(100vh - 80px);
+        overflow: hidden;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: row;
+        position: relative;
     }
 
-    .modal-content::-webkit-scrollbar {
+    .modal-image-section {
+        flex: 0 0 45%;
+        background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    .modal-info-section {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+    }
+
+    .modal-info-section::-webkit-scrollbar {
         width: 8px;
     }
 
-    .modal-content::-webkit-scrollbar-track {
+    .modal-info-section::-webkit-scrollbar-track {
         background: #f1f1f1;
-        border-radius: 10px;
     }
 
-    .modal-content::-webkit-scrollbar-thumb {
+    .modal-info-section::-webkit-scrollbar-thumb {
         background: #888;
         border-radius: 10px;
     }
 
-    .modal-content::-webkit-scrollbar-thumb:hover {
+    .modal-info-section::-webkit-scrollbar-thumb:hover {
         background: #555;
+    }
+
+    @media (max-width: 768px) {
+        .modal-overlay {
+            padding: 20px;
+        }
+
+        .modal-content {
+            flex-direction: column;
+            max-height: calc(100vh - 40px);
+        }
+
+        .modal-image-section {
+            flex: 0 0 auto;
+            max-height: 50vh;
+            padding: 20px;
+        }
+
+        .modal-info-section {
+            padding: 20px;
+        }
     }
 </style>
 
@@ -98,7 +156,14 @@
             <span style="color: var(--ku-crimson); font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; font-size: clamp(0.7rem, 1.5vw, 0.8rem);">Programs & Events</span>
         </div>
         <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">교내 프로그램</h1>
-        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">다양한 교내 프로그램 정보를 확인하세요</p>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto 16px auto; line-height: 1.7;">다양한 교내 프로그램 정보를 확인하세요</p>
+        <p style="font-size: clamp(0.9rem, 2vw, 1rem); color: var(--ku-crimson); font-weight: 700; margin: 0 auto;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            포스터를 클릭하여 상세한 정보를 확인해보세요!
+        </p>
     </div>
 
     {% if programs %}
@@ -124,7 +189,7 @@
     </div>
     {% endif %}
 
-    <!-- 프로그램 그리드 (간결한 카드) -->
+    <!-- 프로그램 그리드 (포스터만 표시) -->
     {% set category_colors = {
         0: '#961A32',
         1: '#0969DA',
@@ -135,7 +200,7 @@
         6: '#A0216C',
         7: '#6E7781'
     } %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 24px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px;">
         {% for program in programs %}
         {% set category_index = (categories.index(program.category) if program.category in categories else 0) % 8 %}
         {% set category_color = category_colors[category_index] %}
@@ -153,63 +218,42 @@
              data-category="{{ program.category if program.category else 'uncategorized' }}"
              data-program-id="{{ program.id }}"
              onclick="openModal({{ program.id }})"
-             style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
-             onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba({{ category_color_rgb }}, 0.2)'; this.style.borderColor='{{ category_color }}';"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
+             style="background: #F5F5F7; border-radius: 16px; aspect-ratio: 3/4; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 2px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+             onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.boxShadow='0 16px 40px rgba({{ category_color_rgb }}, 0.25)'; this.style.borderColor='{{ category_color }}';"
+             onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.08)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
 
-            <!-- 이미지 -->
+            <!-- 포스터 이미지 -->
             {% if program.image_url %}
-            <div style="position: relative; width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
-                <img src="{{ program.image_url }}" alt="{{ program.title }}"
-                     style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="{{ program.image_url }}" alt="{{ program.title }}"
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">
+            {% else %}
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, {{ category_color }} 0%, {{ category_color }}dd 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                <div style="text-align: center; color: white;">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 16px;">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <p style="font-size: 0.9rem; font-weight: 700; margin: 0; word-break: keep-all; line-height: 1.4;">{{ program.title }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 호버 오버레이 -->
+            <div class="program-card-overlay">
                 {% if program.category %}
-                <div style="position: absolute; top: 12px; right: 12px; padding: 6px 12px; background: {{ category_color }}; backdrop-filter: blur(10px); color: white; border-radius: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                <div style="display: inline-block; padding: 6px 12px; background: {{ category_color }}; color: white; border-radius: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 8px;">
                     {{ program.category }}
                 </div>
                 {% endif %}
-            </div>
-            {% else %}
-            {% if program.category %}
-            <div style="padding: 16px; background: {{ category_color }}; height: 60px; display: flex; align-items: center;">
-                <span style="padding: 6px 14px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; border-radius: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">
-                    {{ program.category }}
-                </span>
-            </div>
-            {% endif %}
-            {% endif %}
-
-            <!-- 콘텐츠 (간결한 정보만) -->
-            <div style="padding: 20px;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 8px 0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                <h3 style="font-size: 1rem; font-weight: 700; color: white; margin: 0 0 4px 0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                     {{ program.title }}
                 </h3>
                 {% if program.organizer %}
-                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 12px 0; font-weight: 600;">
+                <p style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.85); margin: 0; font-weight: 600;">
                     {{ program.organizer }}
                 </p>
                 {% endif %}
-
-                <!-- 간단한 기간 정보 -->
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
-                    {% if program.start_date and program.end_date %}
-                    <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary);">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <rect x="2" y="3" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                            <path d="M9 1v2M5 1v2M2 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        <span>{{ program.start_date.strftime('%m.%d') }} - {{ program.end_date.strftime('%m.%d') }}</span>
-                    </div>
-                    {% endif %}
-                    {% if program.application_end %}
-                    <div style="display: flex; align-items: center; gap: 6px; color: var(--ku-crimson); font-weight: 700;">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M7 1v6l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                        <span>신청마감 {{ program.application_end.strftime('%m.%d') }}</span>
-                    </div>
-                    {% endif %}
-                </div>
             </div>
         </div>
         {% endfor %}
@@ -292,51 +336,68 @@
         const modalOverlay = document.getElementById('modalOverlay');
         const modalContent = modalOverlay.querySelector('.modal-content');
 
-        // 모달 내용 생성
+        // 모달 내용 생성 (2열 레이아웃)
         modalContent.innerHTML = `
-            ${program.imageUrl ? `
-            <div style="position: relative; width: 100%; max-height: 400px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
-                <img src="${program.imageUrl}" alt="${program.title}"
-                     style="width: 100%; height: 100%; object-fit: contain;">
+            <!-- 닫기 버튼 (왼쪽 상단) -->
+            <button onclick="closeModal()" style="position: absolute; top: 20px; left: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10;"
+                    onmouseover="this.style.background='white'; this.style.transform='scale(1.1)';"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.95)'; this.style.transform='scale(1)';">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none">
+                    <path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <!-- 왼쪽: 포스터 이미지 -->
+            <div class="modal-image-section">
+                ${program.imageUrl ? `
+                    <img src="${program.imageUrl}" alt="${program.title}"
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);">
+                ` : `
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, ${program.categoryColor} 0%, ${program.categoryColor}dd 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px;">
+                        <div style="text-align: center; color: white;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 20px;">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <p style="font-size: 1.2rem; font-weight: 700; margin: 0; word-break: keep-all; line-height: 1.4;">${program.title}</p>
+                        </div>
+                    </div>
+                `}
+            </div>
+
+            <!-- 오른쪽: 정보 섹션 -->
+            <div class="modal-info-section">
+                <!-- 카테고리 배지 -->
                 ${program.category ? `
-                <div style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: ${program.categoryColor}; color: white; border-radius: 12px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+                <div style="display: inline-block; padding: 8px 16px; background: ${program.categoryColor}; color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 20px;">
                     ${program.category}
                 </div>
                 ` : ''}
-            </div>
-            ` : ''}
-
-            <div style="padding: 40px;">
-                <!-- 닫기 버튼 -->
-                <button onclick="closeModal()" style="position: absolute; top: 20px; ${program.imageUrl ? 'left' : 'right'}: 20px; width: 40px; height: 40px; border-radius: 50%; background: ${program.imageUrl ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)'}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);"
-                        onmouseover="this.style.background='${program.imageUrl ? 'white' : 'rgba(0, 0, 0, 0.1)'}'; this.style.transform='scale(1.1)';"
-                        onmouseout="this.style.background='${program.imageUrl ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)'}'; this.style.transform='scale(1)';">
-                    <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                        <path d="M12 4L4 12M4 4l8 8" stroke="${program.imageUrl ? '#1a1a1a' : '#666'}" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
 
                 <!-- 제목 및 주최자 -->
-                <div style="margin-bottom: 24px;">
-                    <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.3;">
+                <div style="margin-bottom: 28px;">
+                    <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.3; word-break: keep-all;">
                         ${program.title}
                     </h2>
                     ${program.organizer ? `
-                    <p style="font-size: 1rem; color: var(--text-secondary); margin: 0; font-weight: 600;">
+                    <p style="font-size: 1.05rem; color: var(--text-secondary); margin: 0; font-weight: 600;">
                         ${program.organizer}
                     </p>
                     ` : ''}
                 </div>
 
                 <!-- 설명 -->
-                <div style="margin-bottom: 28px;">
-                    <p style="font-size: 1rem; line-height: 1.8; color: var(--text-secondary); margin: 0; white-space: pre-line;">
+                ${program.description ? `
+                <div style="margin-bottom: 32px;">
+                    <p style="font-size: 1rem; line-height: 1.8; color: var(--text-secondary); margin: 0; white-space: pre-line; word-break: keep-all;">
                         ${program.description}
                     </p>
                 </div>
+                ` : ''}
 
                 <!-- 정보 섹션 -->
-                <div style="padding: 24px; background: #F5F5F7; border-radius: 16px; margin-bottom: 24px; font-size: 0.95rem;">
+                <div style="padding: 24px; background: #F5F5F7; border-radius: 16px; margin-bottom: 28px; font-size: 0.95rem;">
                     ${program.target ? `
                     <div style="margin: 0 0 14px 0; display: flex; align-items: start; gap: 10px;">
                         <span style="color: var(--text-primary); font-weight: 700; min-width: 70px;">대상:</span>
