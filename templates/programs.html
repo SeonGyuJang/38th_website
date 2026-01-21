@@ -15,28 +15,145 @@
         }
     }
 
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .program-card {
         animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .program-card:nth-child(5n+1) { animation-delay: 0.05s; }
+    .program-card:nth-child(5n+2) { animation-delay: 0.1s; }
+    .program-card:nth-child(5n+3) { animation-delay: 0.15s; }
+    .program-card:nth-child(5n+4) { animation-delay: 0.2s; }
+    .program-card:nth-child(5n) { animation-delay: 0.25s; }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(6px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 40px;
+        animation: fadeIn 0.3s ease-out;
+        overflow-y: auto;
+    }
+
+    .modal-overlay.active {
         display: flex;
-        flex-direction: column;
     }
 
-    .program-card:nth-child(3n+1) { animation-delay: 0.05s; }
-    .program-card:nth-child(3n+2) { animation-delay: 0.1s; }
-    .program-card:nth-child(3n) { animation-delay: 0.15s; }
-
-    .category-filter {
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    .modal-content {
+        background: white;
+        border-radius: 24px;
+        max-width: 1200px;
+        width: 100%;
+        max-height: calc(100vh - 80px);
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: row;
+        position: relative;
     }
 
-    .category-filter:hover {
-        transform: translateY(-2px);
+    .modal-image-section {
+        flex: 0 0 45%;
+        background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
     }
 
-    .category-filter.active {
-        background: var(--ku-crimson) !important;
-        color: white !important;
-        box-shadow: 0 4px 16px rgba(150, 26, 50, 0.3) !important;
+    .modal-info-section {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+    }
+
+    .modal-info-section::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-info-section::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .modal-info-section::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .modal-info-section::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    @media (max-width: 768px) {
+        .modal-overlay {
+            padding: 20px;
+            padding-top: 80px;
+            align-items: flex-start;
+        }
+
+        .modal-content {
+            flex-direction: column;
+            max-height: none;
+            height: auto;
+            border-radius: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .modal-image-section {
+            flex: 0 0 auto;
+            width: 100%;
+            height: 40vh;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .modal-info-section {
+            flex: 0 0 auto;
+            padding: 24px;
+            overflow-y: visible;
+        }
     }
 </style>
 
@@ -47,7 +164,14 @@
             <span style="color: var(--ku-crimson); font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; font-size: clamp(0.7rem, 1.5vw, 0.8rem);">Programs & Events</span>
         </div>
         <h1 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 800; margin-bottom: 20px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">교내 프로그램</h1>
-        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto; line-height: 1.7;">다양한 교내 프로그램 정보를 확인하세요</p>
+        <p style="font-size: clamp(1rem, 2vw, 1.15rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto 16px auto; line-height: 1.7;">다양한 교내 프로그램 정보를 확인하세요</p>
+        <p style="font-size: clamp(0.9rem, 2vw, 1rem); color: var(--ku-crimson); font-weight: 700; margin: 0 auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 6px;">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                <path d="M9 12h6m-6 4h6"/>
+            </svg>
+            포스터를 클릭하여 상세한 정보를 확인해보세요!
+        </p>
     </div>
 
     {% if programs %}
@@ -73,7 +197,7 @@
     </div>
     {% endif %}
 
-    <!-- 프로그램 그리드 -->
+    <!-- 프로그램 그리드 (포스터만 표시) -->
     {% set category_colors = {
         0: '#961A32',
         1: '#0969DA',
@@ -84,7 +208,7 @@
         6: '#A0216C',
         7: '#6E7781'
     } %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 28px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px;">
         {% for program in programs %}
         {% set category_index = (categories.index(program.category) if program.category in categories else 0) % 8 %}
         {% set category_color = category_colors[category_index] %}
@@ -98,93 +222,37 @@
             '#A0216C': '160, 33, 108',
             '#6E7781': '110, 119, 129'
         }[category_color] %}
-        <div class="program-card" data-category="{{ program.category if program.category else 'uncategorized' }}" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 16px 48px rgba({{ category_color_rgb }}, 0.2)'; this.style.borderColor='{{ category_color }}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.04)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
+        <div class="program-card"
+             data-category="{{ program.category if program.category else 'uncategorized' }}"
+             data-program-id="{{ program.id }}"
+             onclick="openModal({{ program.id }})"
+             style="background: #F5F5F7; border-radius: 16px; aspect-ratio: 3/4; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 2px solid rgba(0, 0, 0, 0.06); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;"
+             onmouseover="this.style.transform='translateY(-6px) scale(1.02)'; this.style.boxShadow='0 16px 40px rgba({{ category_color_rgb }}, 0.25)'; this.style.borderColor='{{ category_color }}';"
+             onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.08)'; this.style.borderColor='rgba(0, 0, 0, 0.06)';">
 
-            <!-- 이미지 -->
+            <!-- 포스터 이미지 -->
             {% if program.image_url %}
-            <div style="position: relative; width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
-                <img src="{{ program.image_url }}" alt="{{ program.title }}"
-                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);"
-                     onmouseover="this.style.transform='scale(1.05)';"
-                     onmouseout="this.style.transform='scale(1)';">
-                {% if program.category %}
-                <div style="position: absolute; top: 16px; right: 16px; padding: 8px 16px; background: {{ category_color }}; backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
-                    {{ program.category }}
-                </div>
-                {% endif %}
-            </div>
+            <img src="{{ program.image_url }}" alt="{{ program.title }}"
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">
             {% else %}
-            {% if program.category %}
-            <div style="padding: 20px; background: {{ category_color }};">
-                <span style="padding: 8px 18px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; display: inline-block;">
-                    {{ program.category }}
-                </span>
-            </div>
-            {% endif %}
-            {% endif %}
-
-            <!-- 콘텐츠 -->
-            <div style="padding: 28px; display: flex; flex-direction: column; flex: 1;">
-                <!-- 제목 및 주최자 -->
-                <div style="margin-bottom: 16px;">
-                    <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; line-height: 1.4; letter-spacing: -0.01em;">
-                        {{ program.title }}
-                    </h3>
-                    {% if program.organizer %}
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 600;">
-                        {{ program.organizer }}
-                    </p>
-                    {% endif %}
-                </div>
-
-                <!-- 설명 -->
-                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; flex: 1;">
-                    {{ program.description }}
-                </p>
-
-                <!-- 정보 섹션 -->
-                <div style="padding: 20px; background: #F5F5F7; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem;">
-                    {% if program.target %}
-                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
-                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">대상:</span>
-                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.target }}</span>
-                    </div>
-                    {% endif %}
-                    {% if program.location %}
-                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
-                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">장소:</span>
-                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.location }}</span>
-                    </div>
-                    {% endif %}
-                    {% if program.start_date and program.end_date %}
-                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
-                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">기간:</span>
-                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.start_date.strftime('%Y.%m.%d') }} - {{ program.end_date.strftime('%Y.%m.%d') }}</span>
-                    </div>
-                    {% elif program.start_date %}
-                    <div style="margin: 0 0 10px 0; display: flex; align-items: start; gap: 8px;">
-                        <span style="color: var(--text-primary); font-weight: 700; min-width: 60px;">일시:</span>
-                        <span style="color: var(--text-secondary); font-weight: 600;">{{ program.start_date.strftime('%Y.%m.%d') }}</span>
-                    </div>
-                    {% endif %}
-                    {% if program.application_start and program.application_end %}
-                    <div style="margin: 0; display: flex; align-items: start; gap: 8px;">
-                        <span style="color: var(--ku-crimson); font-weight: 700; min-width: 60px;">신청:</span>
-                        <span style="color: var(--ku-crimson); font-weight: 700;">{{ program.application_start.strftime('%m.%d') }} - {{ program.application_end.strftime('%m.%d') }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- 더 알아보기 버튼 -->
-                {% if program.link %}
-                <a href="{{ program.link }}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; background: {{ category_color }}; color: white; text-decoration: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 16px rgba({{ category_color_rgb }}, 0.25); margin-top: auto;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba({{ category_color_rgb }}, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba({{ category_color_rgb }}, 0.25)';">
-                    더 알아보기
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, {{ category_color }} 0%, {{ category_color }}dd 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                <div style="text-align: center; color: white;">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 16px;">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
                     </svg>
-                </a>
-                {% endif %}
+                    <p style="font-size: 0.9rem; font-weight: 700; margin: 0; word-break: keep-all; line-height: 1.4;">{{ program.title }}</p>
+                </div>
             </div>
+            {% endif %}
+
+            <!-- 카테고리 배지 (왼쪽 하단) -->
+            {% if program.category %}
+            <div style="position: absolute; bottom: 12px; left: 12px; padding: 6px 12px; background: {{ category_color }}; color: white; border-radius: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                {{ program.category }}
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -202,14 +270,53 @@
     {% endif %}
 </div>
 
+<!-- 모달 오버레이 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <!-- 모달 내용은 JavaScript로 동적 생성 -->
+    </div>
+</div>
+
 <script>
+    // 프로그램 데이터를 JavaScript 객체로 변환
+    const programsData = {
+        {% for program in programs %}
+        {% set category_index = (categories.index(program.category) if program.category in categories else 0) % 8 %}
+        {% set category_color = category_colors[category_index] %}
+        {% set category_color_rgb = {
+            '#961A32': '150, 26, 50',
+            '#0969DA': '9, 105, 218',
+            '#1A7F37': '26, 127, 55',
+            '#8250DF': '130, 80, 223',
+            '#BC4C00': '188, 76, 0',
+            '#0A3069': '10, 48, 105',
+            '#A0216C': '160, 33, 108',
+            '#6E7781': '110, 119, 129'
+        }[category_color] %}
+        {{ program.id }}: {
+            title: {{ program.title|tojson }},
+            category: {{ program.category|tojson }},
+            categoryColor: '{{ category_color }}',
+            categoryColorRgb: '{{ category_color_rgb }}',
+            description: {{ program.description|tojson }},
+            organizer: {{ program.organizer|tojson }},
+            target: {{ program.target|tojson }},
+            location: {{ program.location|tojson }},
+            startDate: {{ (program.start_date.strftime('%Y.%m.%d') if program.start_date else '')|tojson }},
+            endDate: {{ (program.end_date.strftime('%Y.%m.%d') if program.end_date else '')|tojson }},
+            applicationStart: {{ (program.application_start.strftime('%m.%d') if program.application_start else '')|tojson }},
+            applicationEnd: {{ (program.application_end.strftime('%m.%d') if program.application_end else '')|tojson }},
+            link: {{ program.link|tojson }},
+            imageUrl: {{ program.image_url|tojson }}
+        }{{ ',' if not loop.last else '' }}
+        {% endfor %}
+    };
+
     function filterPrograms(category) {
-        // 카드 필터링
         const cards = document.querySelectorAll('.program-card');
         cards.forEach(card => {
             if (category === 'all' || card.dataset.category === category) {
-                card.style.display = 'flex';
-                // 페이드인 애니메이션 재실행
+                card.style.display = 'block';
                 card.style.animation = 'none';
                 setTimeout(() => {
                     card.style.animation = 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -219,5 +326,166 @@
             }
         });
     }
+
+    function openModal(programId) {
+        const program = programsData[programId];
+        if (!program) return;
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = modalOverlay.querySelector('.modal-content');
+
+        // 모바일 여부 확인
+        const isMobile = window.innerWidth <= 768;
+
+        // 모달 내용 생성
+        modalContent.innerHTML = `
+            <!-- 닫기 버튼 -->
+            <button onclick="closeModal()" style="position: absolute; top: ${isMobile ? '16px' : '20px'}; ${isMobile ? 'right: 16px' : 'left: 20px'}; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10;"
+                    onmouseover="this.style.background='white'; this.style.transform='scale(1.1)';"
+                    onmouseout="this.style.background='rgba(255, 255, 255, 0.95)'; this.style.transform='scale(1)';">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none">
+                    <path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            ${!isMobile ? `
+            <!-- 데스크탑: 왼쪽 포스터, 오른쪽 정보 -->
+            <div class="modal-image-section">
+                ${program.imageUrl ? `
+                    <img src="${program.imageUrl}" alt="${program.title}"
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);">
+                ` : `
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, ${program.categoryColor} 0%, ${program.categoryColor}dd 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px;">
+                        <div style="text-align: center; color: white;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 20px;">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <p style="font-size: 1.2rem; font-weight: 700; margin: 0; word-break: keep-all; line-height: 1.4;">${program.title}</p>
+                        </div>
+                    </div>
+                `}
+            </div>
+
+            <!-- 오른쪽: 정보 섹션 -->
+            <div class="modal-info-section">
+            ` : `
+            <!-- 모바일: 세로 레이아웃 (전체 스크롤) -->
+            <div class="modal-image-section">
+                ${program.imageUrl ? `
+                    <img src="${program.imageUrl}" alt="${program.title}"
+                         style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);">
+                ` : `
+                    <div style="width: 100%; aspect-ratio: 3/4; max-height: 100%; background: linear-gradient(135deg, ${program.categoryColor} 0%, ${program.categoryColor}dd 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 30px;">
+                        <div style="text-align: center; color: white;">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 16px;">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <p style="font-size: 1rem; font-weight: 700; margin: 0; word-break: keep-all; line-height: 1.4;">${program.title}</p>
+                        </div>
+                    </div>
+                `}
+            </div>
+
+            <div class="modal-info-section">
+            `}
+                <!-- 카테고리 배지 -->
+                ${program.category ? `
+                <div style="display: inline-block; padding: 8px 16px; background: ${program.categoryColor}; color: white; border-radius: 10px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 20px;">
+                    ${program.category}
+                </div>
+                ` : ''}
+
+                <!-- 제목 및 주최자 -->
+                <div style="margin-bottom: 28px;">
+                    <h2 style="font-size: ${isMobile ? '1.5rem' : '1.85rem'}; font-weight: 800; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.3; word-break: keep-all;">
+                        ${program.title}
+                    </h2>
+                    ${program.organizer ? `
+                    <p style="font-size: ${isMobile ? '0.95rem' : '1.05rem'}; color: var(--text-secondary); margin: 0; font-weight: 600;">
+                        ${program.organizer}
+                    </p>
+                    ` : ''}
+                </div>
+
+                <!-- 설명 -->
+                ${program.description ? `
+                <div style="margin-bottom: 32px;">
+                    <p style="font-size: ${isMobile ? '0.95rem' : '1rem'}; line-height: 1.8; color: var(--text-secondary); margin: 0; white-space: pre-line; word-break: keep-all;">
+                        ${program.description}
+                    </p>
+                </div>
+                ` : ''}
+
+                <!-- 정보 섹션 -->
+                <div style="padding: ${isMobile ? '20px' : '24px'}; background: #F5F5F7; border-radius: 16px; margin-bottom: 28px; font-size: ${isMobile ? '0.9rem' : '0.95rem'};">
+                    ${program.target ? `
+                    <div style="margin: 0 0 14px 0; display: flex; align-items: start; gap: 10px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 70px;">대상:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">${program.target}</span>
+                    </div>
+                    ` : ''}
+                    ${program.location ? `
+                    <div style="margin: 0 0 14px 0; display: flex; align-items: start; gap: 10px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 70px;">장소:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">${program.location}</span>
+                    </div>
+                    ` : ''}
+                    ${program.startDate && program.endDate ? `
+                    <div style="margin: 0 0 14px 0; display: flex; align-items: start; gap: 10px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 70px;">기간:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">${program.startDate} - ${program.endDate}</span>
+                    </div>
+                    ` : program.startDate ? `
+                    <div style="margin: 0 0 14px 0; display: flex; align-items: start; gap: 10px;">
+                        <span style="color: var(--text-primary); font-weight: 700; min-width: 70px;">일시:</span>
+                        <span style="color: var(--text-secondary); font-weight: 600;">${program.startDate}</span>
+                    </div>
+                    ` : ''}
+                    ${program.applicationStart && program.applicationEnd ? `
+                    <div style="margin: 0; display: flex; align-items: start; gap: 10px;">
+                        <span style="color: var(--ku-crimson); font-weight: 700; min-width: 70px;">신청:</span>
+                        <span style="color: var(--ku-crimson); font-weight: 700;">${program.applicationStart} - ${program.applicationEnd}</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <!-- 더 알아보기 버튼 -->
+                ${program.link ? `
+                <a href="${program.link}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 32px; background: ${program.categoryColor}; color: white; text-decoration: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 16px rgba(${program.categoryColorRgb}, 0.3);"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(${program.categoryColorRgb}, 0.4)';"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(${program.categoryColorRgb}, 0.3)';">
+                    더 알아보기
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                ` : ''}
+            </div>
+        `;
+
+        modalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(event) {
+        if (event && event.target !== event.currentTarget && event.type === 'click') {
+            return;
+        }
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        modalOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
 </script>
 {% endblock %}

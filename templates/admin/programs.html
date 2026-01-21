@@ -36,9 +36,9 @@
             <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="display: flex; gap: 24px; align-items: start; flex-wrap: wrap;">
                     <!-- 포스터 섹션 -->
-                    {% if program.poster_url %}
+                    {% if program.image_url %}
                     <div style="min-width: 120px; max-width: 120px;">
-                        <img src="{{ program.poster_url }}" alt="{{ program.title }}" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <img src="{{ program.image_url }}" alt="{{ program.title }}" style="width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     </div>
                     {% else %}
                     <div style="min-width: 120px; max-width: 120px;">
