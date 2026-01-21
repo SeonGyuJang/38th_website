@@ -71,6 +71,17 @@ class SupabaseHelper:
                 progress['created_at'] = self.parse_datetime(progress['created_at'])
         return progress
 
+    def convert_archive_dates(self, archive: Dict[str, Any]) -> Dict[str, Any]:
+        """아카이브 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if archive:
+            if 'event_date' in archive:
+                archive['event_date'] = self.parse_datetime(archive['event_date'])
+            if 'created_at' in archive:
+                archive['created_at'] = self.parse_datetime(archive['created_at'])
+            if 'updated_at' in archive:
+                archive['updated_at'] = self.parse_datetime(archive['updated_at'])
+        return archive
+
     # ============ Admin 관련 ============
     def get_admin_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """사용자명으로 관리자 조회"""
@@ -415,7 +426,7 @@ class SupabaseHelper:
         if is_active is not None:
             query = query.eq('is_active', is_active)
         response = query.order(order_by, desc=not ascending).execute()
-        return response.data
+        return [self.convert_archive_dates(archive) for archive in response.data]
 
     def get_archive_by_id(self, archive_id: int) -> Optional[Dict[str, Any]]:
         """ID로 아카이브 조회 (이미지 포함)"""
@@ -430,7 +441,8 @@ class SupabaseHelper:
         images_response = self.client.table('archive_images').select('*').eq('archive_id', archive_id).order('order').execute()
         archive['images'] = images_response.data
 
-        return archive
+        # 날짜 변환
+        return self.convert_archive_dates(archive)
 
     def create_archive(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """아카이브 생성"""
