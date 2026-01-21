@@ -74,16 +74,18 @@
     .lightbox-content {
         max-width: calc(100% - 40px);
         max-height: calc(100vh - 180px);
-        margin: 90px 20px;
+        margin: 0;
         object-fit: contain;
         animation: scaleUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10001;
+        position: relative;
     }
 
     @media (max-width: 768px) {
         .lightbox-content {
-            max-width: calc(100% - 32px);
-            max-height: calc(100vh - 160px);
-            margin: 80px 16px;
+            max-width: 90%;
+            max-height: 70vh;
+            margin: 0;
         }
     }
 
@@ -172,6 +174,8 @@
         .lightbox-close {
             width: 44px;
             height: 44px;
+            top: max(16px, env(safe-area-inset-top));
+            right: max(16px, env(safe-area-inset-right));
         }
     }
 
@@ -317,12 +321,22 @@
             updateLightboxImage();
             document.getElementById('lightbox').classList.add('active');
             document.body.style.overflow = 'hidden';
+            // 헤더 숨기기
+            const header = document.querySelector('.header');
+            if (header) {
+                header.style.display = 'none';
+            }
         }
 
         function closeLightbox(event) {
             if (event.target.id === 'lightbox' || event.target.closest('.lightbox-close')) {
                 document.getElementById('lightbox').classList.remove('active');
                 document.body.style.overflow = '';
+                // 헤더 다시 보이기
+                const header = document.querySelector('.header');
+                if (header) {
+                    header.style.display = '';
+                }
                 event.stopPropagation();
             }
         }
@@ -345,6 +359,11 @@
                 if (e.key === 'Escape') {
                     lightbox.classList.remove('active');
                     document.body.style.overflow = '';
+                    // 헤더 다시 보이기
+                    const header = document.querySelector('.header');
+                    if (header) {
+                        header.style.display = '';
+                    }
                 } else if (e.key === 'ArrowLeft') {
                     changeImage(-1, e);
                 } else if (e.key === 'ArrowRight') {
