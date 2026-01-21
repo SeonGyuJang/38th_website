@@ -102,9 +102,9 @@
 
             <!-- 이미지 -->
             {% if program.image_url %}
-            <div style="position: relative; width: 100%; height: 200px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
+            <div style="position: relative; width: 100%; min-height: 200px; overflow: hidden; background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%);">
                 <img src="{{ program.image_url }}" alt="{{ program.title }}"
-                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);"
+                     style="width: 100%; height: auto; object-fit: contain; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);"
                      onmouseover="this.style.transform='scale(1.05)';"
                      onmouseout="this.style.transform='scale(1)';">
                 {% if program.category %}
@@ -138,7 +138,7 @@
                 </div>
 
                 <!-- 설명 -->
-                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; flex: 1;">
+                <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; flex: 1; white-space: pre-line;">
                     {{ program.description }}
                 </p>
 
