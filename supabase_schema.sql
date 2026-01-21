@@ -161,6 +161,9 @@ CREATE TABLE IF NOT EXISTS history_logs (
     is_checked BOOLEAN DEFAULT FALSE,
     checked_by VARCHAR(100),
     checked_at TIMESTAMPTZ,
+    admin_comment TEXT,
+    commented_by VARCHAR(100),
+    commented_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
