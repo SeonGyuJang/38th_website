@@ -1175,6 +1175,22 @@ def admin_history_check(log_id):
     flash('확인 표시가 변경되었습니다.', 'success')
     return redirect(url_for('admin_history'))
 
+@app.route('/admin/history/delete/<int:log_id>', methods=['POST'])
+@login_required
+def admin_history_delete(log_id):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 히스토리를 삭제할 수 있습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    history_log = db_helper.get_history_log_by_id(log_id)
+    if not history_log:
+        flash('히스토리 로그를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_history'))
+
+    db_helper.delete_history_log(log_id)
+    flash('히스토리 로그가 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_history'))
+
 # ============================================
 # 성능 최적화: 캐싱 헤더 추가
 # ============================================
