@@ -530,3 +530,8 @@ class SupabaseHelper:
         """히스토리 로그 수정"""
         response = self.client.table('history_logs').update(data).eq('id', log_id).execute()
         return response.data[0] if response.data else None
+
+    def delete_history_log(self, log_id: int) -> bool:
+        """히스토리 로그 삭제"""
+        response = self.client.table('history_logs').delete().eq('id', log_id).execute()
+        return len(response.data) > 0
