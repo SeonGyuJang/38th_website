@@ -125,15 +125,21 @@ def send_email(to_email, subject, html_body):
         msg['To'] = to_email
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
-        with smtplib.SMTP(mail_server, mail_port) as server:
+        with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
             if mail_use_tls:
                 server.starttls()
             server.login(mail_username, mail_password)
             server.sendmail(mail_sender, to_email, msg.as_string())
         print(f'[이메일 발송 성공] 수신자: {to_email}, 제목: {subject}')
         return True
+    except smtplib.SMTPAuthenticationError as e:
+        print(f'[이메일 발송 실패] 인증 오류 — Gmail 앱 비밀번호를 확인하세요. 오류: {e}')
+        return False
+    except smtplib.SMTPException as e:
+        print(f'[이메일 발송 실패] SMTP 오류: {e}')
+        return False
     except Exception as e:
-        print(f'[이메일 발송 실패] 수신자: {to_email}, 오류: {e}')
+        print(f'[이메일 발송 실패] 수신자: {to_email}, 오류: {type(e).__name__}: {e}')
         return False
 
 
@@ -621,9 +627,12 @@ def meeting_room_book():
 
     if booking:
         # 이메일 발송
-        send_booking_submitted_user_email(booking)
+        user_email_sent = send_booking_submitted_user_email(booking)
         send_booking_admin_notification_email(booking)
-        flash('대관 신청이 완료되었습니다. 확인 이메일을 발송했습니다. 승인 후 이메일로 안내해 드립니다.', 'success')
+        if user_email_sent:
+            flash('대관 신청이 완료되었습니다. 확인 이메일을 발송했습니다. 승인 후 이메일로 안내해 드립니다.', 'success')
+        else:
+            flash('대관 신청이 완료되었습니다. 승인 후 이메일로 안내해 드립니다. (확인 이메일 발송에 실패했습니다)', 'success')
     else:
         flash('대관 신청 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
 
@@ -1523,9 +1532,12 @@ def admin_meeting_room_approve(booking_id):
     }
     updated = db_helper.update_meeting_room_booking(booking_id, data)
     if updated:
-        updated['admin_note'] = admin_note
-        send_booking_approved_email(updated)
-        flash(f'회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+        email_data = {**booking, 'status': 'approved', 'admin_note': admin_note}
+        email_sent = send_booking_approved_email(email_data)
+        if email_sent:
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+        else:
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
     else:
         flash('승인 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
@@ -1547,9 +1559,12 @@ def admin_meeting_room_reject(booking_id):
     }
     updated = db_helper.update_meeting_room_booking(booking_id, data)
     if updated:
-        updated['admin_note'] = admin_note
-        send_booking_rejected_email(updated)
-        flash(f'회의실 {booking["room_number"]}호 대관 신청이 거절되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+        email_data = {**booking, 'status': 'rejected', 'admin_note': admin_note}
+        email_sent = send_booking_rejected_email(email_data)
+        if email_sent:
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 거절되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+        else:
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 거절되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
     else:
         flash('거절 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
