@@ -153,7 +153,26 @@ CREATE TABLE IF NOT EXISTS archive_images (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 12. HistoryLog 테이블 (관리자 작업 히스토리)
+-- 12. MeetingRoomBooking 테이블 (회의실 대관)
+CREATE TABLE IF NOT EXISTS meeting_room_bookings (
+    id BIGSERIAL PRIMARY KEY,
+    room_number INTEGER NOT NULL CHECK (room_number BETWEEN 1 AND 4),
+    applicant_name VARCHAR(100) NOT NULL,
+    applicant_email VARCHAR(200) NOT NULL,
+    applicant_phone VARCHAR(50),
+    organization VARCHAR(200),
+    purpose TEXT NOT NULL,
+    booking_date DATE NOT NULL,
+    start_time VARCHAR(10) NOT NULL,
+    end_time VARCHAR(10) NOT NULL,
+    attendees INTEGER DEFAULT 1,
+    status VARCHAR(20) DEFAULT 'pending',
+    admin_note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 13. HistoryLog 테이블 (관리자 작업 히스토리)
 CREATE TABLE IF NOT EXISTS history_logs (
     id BIGSERIAL PRIMARY KEY,
     worker_name VARCHAR(100) NOT NULL,
@@ -205,6 +224,11 @@ CREATE INDEX IF NOT EXISTS idx_archive_images_archive_id ON archive_images(archi
 CREATE INDEX IF NOT EXISTS idx_history_logs_created_at ON history_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_history_logs_checked ON history_logs(is_checked);
 
+-- 회의실 대관 검색 최적화
+CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_date ON meeting_room_bookings(booking_date DESC);
+CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_room ON meeting_room_bookings(room_number);
+CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_status ON meeting_room_bookings(status);
+
 -- ============================================
 -- Row Level Security (RLS) 정책
 -- ============================================
@@ -222,6 +246,7 @@ ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archives ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archive_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE history_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE meeting_room_bookings ENABLE ROW LEVEL SECURITY;
 
 -- 모든 테이블에 대한 공개 읽기 정책 (SELECT)
 CREATE POLICY "Public read access" ON schedules FOR SELECT USING (true);
@@ -250,6 +275,9 @@ CREATE POLICY "Authenticated write access" ON organizations FOR ALL USING (auth.
 CREATE POLICY "Authenticated write access" ON banners FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Authenticated write access" ON archives FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Authenticated write access" ON archive_images FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Public read access" ON meeting_room_bookings FOR SELECT USING (true);
+CREATE POLICY "Authenticated write access" ON meeting_room_bookings FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Public insert access" ON meeting_room_bookings FOR INSERT WITH CHECK (true);
 
 -- ============================================
 -- 트리거: updated_at 자동 업데이트
@@ -271,3 +299,4 @@ CREATE TRIGGER update_programs_updated_at BEFORE UPDATE ON programs FOR EACH ROW
 CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_banners_updated_at BEFORE UPDATE ON banners FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_archives_updated_at BEFORE UPDATE ON archives FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_meeting_room_bookings_updated_at BEFORE UPDATE ON meeting_room_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
