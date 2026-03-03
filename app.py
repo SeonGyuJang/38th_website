@@ -1563,6 +1563,34 @@ def admin_meeting_room_delete(booking_id):
     return redirect(url_for('admin_meeting_rooms'))
 
 
+@app.route('/admin/email-test', methods=['GET', 'POST'])
+@login_required
+def admin_email_test():
+    """이메일 설정 진단 및 테스트 발송"""
+    config_status = {
+        'MAIL_SERVER': app.config.get('MAIL_SERVER'),
+        'MAIL_PORT': app.config.get('MAIL_PORT'),
+        'MAIL_USE_TLS': app.config.get('MAIL_USE_TLS'),
+        'MAIL_USERNAME': app.config.get('MAIL_USERNAME'),
+        'MAIL_PASSWORD': '설정됨 ✓' if app.config.get('MAIL_PASSWORD') else '미설정 ✗',
+        'MAIL_DEFAULT_SENDER': app.config.get('MAIL_DEFAULT_SENDER'),
+        'ADMIN_EMAIL': app.config.get('ADMIN_EMAIL'),
+    }
+
+    test_result = None
+    if request.method == 'POST':
+        to_email = request.form.get('to_email', '').strip()
+        if to_email:
+            ok = send_email(
+                to_email,
+                '[총학생회] 이메일 발송 테스트',
+                '<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f9f9f9;border-radius:12px;"><h2 style="color:#961A32;">이메일 발송 테스트 성공!</h2><p>회의실 대관 시스템의 이메일이 정상적으로 작동하고 있습니다.</p></div>'
+            )
+            test_result = ('success', f'{to_email} 으로 테스트 이메일 발송 성공!') if ok else ('error', '발송 실패 — 서버 로그(터미널)를 확인하세요.')
+
+    return render_template('admin/email_test.html', config_status=config_status, test_result=test_result)
+
+
 # ============================================
 # 성능 최적화: 캐싱 헤더 추가
 # ============================================
