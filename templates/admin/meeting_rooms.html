@@ -385,10 +385,11 @@
     }
 
     function confirmDelete(bookingId, roomNum) {
-        if (!confirm(`회의실 ${roomNum}호 대관 신청을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+        if (!confirm(`회의실 ${roomNum}호 대관 신청을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/admin/meeting-rooms/delete/${bookingId}`;
+        form.style.display = 'none';
         document.body.appendChild(form);
         form.submit();
     }
