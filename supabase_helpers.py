@@ -3,8 +3,10 @@ Supabase 헬퍼 함수
 
 데이터베이스 작업을 간소화하는 유틸리티 함수들을 제공합니다.
 """
+import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import httpx
 from database import get_supabase_client, get_supabase_admin_client
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -583,15 +585,28 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
-        """회의실 대관 신청 삭제"""
+        """회의실 대관 신청 삭제 — Supabase REST API 직접 호출"""
+        supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
+        service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
+        if not supabase_url or not service_key:
+            print('[DELETE ERROR] SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY 환경 변수 누락')
+            return False
+        url = f'{supabase_url}/rest/v1/meeting_room_bookings?id=eq.{booking_id}'
+        headers = {
+            'apikey': service_key,
+            'Authorization': f'Bearer {service_key}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+        }
         try:
-            response = self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
-            # supabase-py 버전에 따라 response.data가 비어 있을 수 있으므로
-            # 예외가 발생하지 않으면 성공으로 간주
-            print(f'[삭제 완료] booking_id={booking_id}, returned rows={len(response.data)}')
-            return True
+            resp = httpx.delete(url, headers=headers, timeout=10)
+            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
+            if resp.status_code in (200, 204):
+                return True
+            print(f'[DELETE FAILED] {resp.status_code}: {resp.text}')
+            return False
         except Exception as e:
-            print(f'[삭제 실패] booking_id={booking_id}, 오류: {e}')
+            print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
             return False
 
     def count_pending_bookings(self) -> int:
