@@ -56,13 +56,6 @@ def get_supabase_client() -> Client:
         supabase_url = os.getenv('SUPABASE_URL')
         supabase_key = os.getenv('SUPABASE_KEY')
 
-        # 디버깅용 로그 (Heroku logs --tail에서 확인 가능)
-        # 보안을 위해 키의 앞부분 10자리만 출력합니다.
-        if supabase_key:
-            print(f"DEBUG: Supabase Key detected (Starts with: {supabase_key[:10]}...)")
-        else:
-            print("DEBUG: Supabase Key is missing!")
-
         if not supabase_url or not supabase_key:
             raise ValueError(
                 "SUPABASE_URL과 SUPABASE_KEY 환경 변수가 설정되지 않았습니다. "
