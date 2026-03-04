@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}이메일 설정 진단 - 관리자{% endblock %}
+{% block content %}
+<div style="background:#FAFAFA;min-height:100vh;padding-top:80px;">
+  <div class="container" style="padding-top:40px;padding-bottom:80px;max-width:680px;">
+
+    <div style="margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:6px;height:6px;background:var(--ku-crimson);border-radius:50%;"></div>
+        <span style="color:var(--ku-crimson);font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;">Admin</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h1 style="font-size:2rem;font-weight:800;margin:0;color:#1a1a1a;">이메일 설정 진단</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="padding:10px 20px;background:white;border:1px solid #e5e5e5;border-radius:10px;color:#555;text-decoration:none;font-weight:600;font-size:0.9rem;">← 대시보드</a>
+      </div>
+    </div>
+
+    <!-- 테스트 결과 -->
+    {% if test_result %}
+    <div style="padding:16px 20px;border-radius:12px;margin-bottom:24px;
+                background:{{ '#d1fae5' if test_result[0] == 'success' else '#fee2e2' }};
+                border:1px solid {{ '#6ee7b7' if test_result[0] == 'success' else '#fca5a5' }};">
+      <p style="margin:0;font-weight:700;color:{{ '#065f46' if test_result[0] == 'success' else '#991b1b' }};font-size:0.95rem;">
+        {{ '✓ ' if test_result[0] == 'success' else '✗ ' }}{{ test_result[1] }}
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- 현재 환경변수 상태 -->
+    <div style="background:white;border-radius:16px;border:1px solid #e8e8ed;padding:28px;margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#1a1a1a;margin:0 0 20px 0;">현재 환경변수 상태</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        {% for key, val in config_status.items() %}
+        <tr style="border-bottom:1px solid #f0f0f0;">
+          <td style="padding:12px 0;font-size:0.85rem;font-weight:700;color:#555;width:200px;">{{ key }}</td>
+          <td style="padding:12px 0;font-size:0.85rem;font-family:monospace;">
+            {% if val %}
+              {% if '미설정' in val|string %}
+                <span style="color:#991b1b;font-weight:700;">{{ val }}</span>
+              {% elif '설정됨' in val|string %}
+                <span style="color:#065f46;font-weight:700;">{{ val }}</span>
+              {% else %}
+                <span style="color:#1a1a1a;">{{ val }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:#991b1b;font-weight:700;">미설정 ✗</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+
+      <!-- 진단 결과 요약 -->
+      {% set mail_user = config_status['MAIL_USERNAME'] %}
+      {% set mail_pass = config_status['MAIL_PASSWORD'] %}
+      <div style="margin-top:20px;padding:14px 16px;border-radius:10px;
+                  background:{{ '#d1fae5' if mail_user and '설정됨' in mail_pass else '#fef3c7' }};
+                  border:1px solid {{ '#6ee7b7' if mail_user and '설정됨' in mail_pass else '#fcd34d' }};">
+        {% if mail_user and '설정됨' in mail_pass %}
+        <p style="margin:0;font-weight:700;color:#065f46;font-size:0.9rem;">✓ 이메일 설정이 완료되어 있습니다. 아래에서 테스트 발송해보세요.</p>
+        {% else %}
+        <p style="margin:0;font-weight:700;color:#92400e;font-size:0.9rem;">⚠ MAIL_USERNAME 또는 MAIL_PASSWORD가 설정되지 않았습니다.</p>
+        <p style="margin:8px 0 0 0;font-size:0.85rem;color:#92400e;">
+          로컬: 프로젝트 루트의 <code>.env</code> 파일에 값을 입력하세요.<br>
+          Heroku: <code>heroku config:set MAIL_USERNAME=...</code> 명령어로 설정하세요.
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 테스트 이메일 발송 -->
+    <div style="background:white;border-radius:16px;border:1px solid #e8e8ed;padding:28px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#1a1a1a;margin:0 0 8px 0;">테스트 이메일 발송</h2>
+      <p style="color:#888;font-size:0.9rem;margin:0 0 20px 0;">아래 주소로 테스트 이메일을 발송해 실제 동작을 확인하세요.</p>
+      <form method="POST">
+        <div style="display:flex;gap:10px;">
+          <input type="email" name="to_email" required
+                 placeholder="수신자 이메일 주소"
+                 value="{{ config_status['ADMIN_EMAIL'] or '' }}"
+                 style="flex:1;padding:12px 16px;border:1.5px solid #e5e5e5;border-radius:10px;font-size:0.95rem;outline:none;font-family:inherit;"
+                 onfocus="this.style.borderColor='var(--ku-crimson)';"
+                 onblur="this.style.borderColor='#e5e5e5';">
+          <button type="submit"
+                  style="padding:12px 24px;background:var(--ku-crimson);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;white-space:nowrap;"
+                  onmouseover="this.style.background='#7a1528';"
+                  onmouseout="this.style.background='var(--ku-crimson)';">
+            테스트 발송
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- .env 파일 작성 안내 -->
+    <div style="background:white;border-radius:16px;border:1px solid #e8e8ed;padding:28px;margin-top:24px;">
+      <h2 style="font-size:1.1rem;font-weight:800;color:#1a1a1a;margin:0 0 16px 0;">로컬 .env 파일 예시</h2>
+      <pre style="background:#1a1a1a;color:#f8f8f2;padding:20px;border-radius:10px;font-size:0.85rem;overflow-x:auto;line-height:1.7;margin:0;"><code>MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=총학생회계정@gmail.com
+MAIL_PASSWORD=앱비밀번호16자리
+MAIL_DEFAULT_SENDER=총학생회계정@gmail.com
+ADMIN_EMAIL=dsng3419@korea.ac.kr</code></pre>
+      <p style="color:#888;font-size:0.82rem;margin:12px 0 0 0;">⚠ <code>.env</code> 파일은 <code>.gitignore</code>에 등록되어 있어 Git에 커밋되지 않습니다.</p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -3,8 +3,10 @@ Supabase 헬퍼 함수
 
 데이터베이스 작업을 간소화하는 유틸리티 함수들을 제공합니다.
 """
+import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import httpx
 from database import get_supabase_client, get_supabase_admin_client
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -535,3 +537,79 @@ class SupabaseHelper:
         """히스토리 로그 삭제"""
         response = self.client.table('history_logs').delete().eq('id', log_id).execute()
         return len(response.data) > 0
+
+    # ============ MeetingRoomBooking 관련 ============
+
+    def convert_booking_dates(self, booking: Dict[str, Any]) -> Dict[str, Any]:
+        """회의실 대관 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if booking:
+            if 'created_at' in booking:
+                booking['created_at'] = self.parse_datetime(booking['created_at'])
+            if 'updated_at' in booking:
+                booking['updated_at'] = self.parse_datetime(booking['updated_at'])
+        return booking
+
+    def get_all_meeting_room_bookings(self, status: Optional[str] = None, order_by: str = 'created_at', ascending: bool = False) -> List[Dict[str, Any]]:
+        """모든 회의실 대관 신청 조회"""
+        query = self.admin_client.table('meeting_room_bookings').select('*')
+        if status:
+            query = query.eq('status', status)
+        response = query.order(order_by, desc=not ascending).execute()
+        return [self.convert_booking_dates(b) for b in response.data]
+
+    def get_meeting_room_booking_by_id(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 회의실 대관 신청 조회"""
+        response = self.admin_client.table('meeting_room_bookings').select('*').eq('id', booking_id).execute()
+        if response.data:
+            return self.convert_booking_dates(response.data[0])
+        return None
+
+    def get_bookings_by_date(self, booking_date: str) -> List[Dict[str, Any]]:
+        """특정 날짜의 모든 승인된 대관 신청 조회 (가용성 확인용)"""
+        response = self.client.table('meeting_room_bookings').select('*').eq('booking_date', booking_date).in_('status', ['pending', 'approved']).execute()
+        return [self.convert_booking_dates(b) for b in response.data]
+
+    def get_bookings_by_date_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
+        """날짜 범위의 모든 대관 신청 조회"""
+        response = self.client.table('meeting_room_bookings').select('*').gte('booking_date', start_date).lte('booking_date', end_date).in_('status', ['pending', 'approved']).execute()
+        return [self.convert_booking_dates(b) for b in response.data]
+
+    def create_meeting_room_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """회의실 대관 신청 생성"""
+        response = self.client.table('meeting_room_bookings').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_meeting_room_booking(self, booking_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """회의실 대관 신청 수정"""
+        response = self.admin_client.table('meeting_room_bookings').update(data).eq('id', booking_id).execute()
+        return response.data[0] if response.data else None
+
+    def delete_meeting_room_booking(self, booking_id: int) -> bool:
+        """회의실 대관 신청 삭제 — Supabase REST API 직접 호출"""
+        supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
+        service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
+        if not supabase_url or not service_key:
+            print('[DELETE ERROR] SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY 환경 변수 누락')
+            return False
+        url = f'{supabase_url}/rest/v1/meeting_room_bookings?id=eq.{booking_id}'
+        headers = {
+            'apikey': service_key,
+            'Authorization': f'Bearer {service_key}',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+        }
+        try:
+            resp = httpx.delete(url, headers=headers, timeout=10)
+            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
+            if resp.status_code in (200, 204):
+                return True
+            print(f'[DELETE FAILED] {resp.status_code}: {resp.text}')
+            return False
+        except Exception as e:
+            print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
+            return False
+
+    def count_pending_bookings(self) -> int:
+        """대기 중인 대관 신청 수 조회"""
+        response = self.admin_client.table('meeting_room_bookings').select('id', count='exact').eq('status', 'pending').execute()
+        return response.count or 0

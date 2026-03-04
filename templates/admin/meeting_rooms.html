@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block title %}회의실 대관 관리 - 관리자{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .booking-row {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        transition: background 0.15s ease;
+    }
+    .booking-row:hover {
+        background: #fafafa !important;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+
+    .action-btn {
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-approve { background: #d1fae5; color: #065f46; }
+    .btn-approve:hover { background: #a7f3d0; transform: translateY(-1px); }
+    .btn-reject { background: #fee2e2; color: #991b1b; }
+    .btn-reject:hover { background: #fecaca; transform: translateY(-1px); }
+    .btn-delete { background: #f3f4f6; color: #6b7280; }
+    .btn-delete:hover { background: #e5e7eb; transform: translateY(-1px); }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #e5e5e5;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--ku-crimson); }
+
+    @media (max-width: 768px) {
+        .desktop-only { display: none !important; }
+        .table-scroll { overflow-x: auto; }
+    }
+</style>
+
+<div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
+    <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+        <!-- 헤더 -->
+        <div style="margin-bottom: 36px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <div style="width: 6px; height: 6px; background: var(--ku-crimson); border-radius: 50%;"></div>
+                <span style="color: var(--ku-crimson); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem;">Admin</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin: 0 0 6px 0; color: #1a1a1a; letter-spacing: -0.02em;">회의실 대관 관리</h1>
+                    <p style="color: #888; font-size: 0.95rem; margin: 0;">대관 신청 목록을 확인하고 승인/거절 처리를 할 수 있습니다.</p>
+                </div>
+                <a href="{{ url_for('admin_dashboard') }}" style="padding: 10px 20px; background: white; border: 1px solid #e5e5e5; border-radius: 10px; color: #555; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;"
+                   onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.color='var(--ku-crimson)';"
+                   onmouseout="this.style.borderColor='#e5e5e5'; this.style.color='#555';">
+                    ← 대시보드
+                </a>
+            </div>
+        </div>
+
+        <!-- 통계 카드 -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px;">
+            {% set total = bookings | length %}
+            {% set pending_count = bookings | selectattr('status', 'eq', 'pending') | list | length %}
+            {% set approved_count = bookings | selectattr('status', 'eq', 'approved') | list | length %}
+            {% set rejected_count = bookings | selectattr('status', 'eq', 'rejected') | list | length %}
+
+            <a href="{{ url_for('admin_meeting_rooms') }}" style="background: white; border-radius: 12px; padding: 20px; border: {{ '2px solid var(--ku-crimson)' if not status_filter else '1px solid #e5e5e5' }}; text-decoration: none; transition: all 0.2s;"
+               onmouseover="this.style.borderColor='var(--ku-crimson)';" onmouseout="this.style.borderColor='{{ 'var(--ku-crimson)' if not status_filter else '#e5e5e5' }}';">
+                <div style="font-size: 0.8rem; color: #999; font-weight: 600; margin-bottom: 8px;">전체</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #1a1a1a;">{{ total }}</div>
+            </a>
+            <a href="{{ url_for('admin_meeting_rooms', status='pending') }}" style="background: white; border-radius: 12px; padding: 20px; border: {{ '2px solid #92400e' if status_filter == 'pending' else '1px solid #e5e5e5' }}; text-decoration: none; transition: all 0.2s;"
+               onmouseover="this.style.borderColor='#92400e';" onmouseout="this.style.borderColor='{{ '#92400e' if status_filter == 'pending' else '#e5e5e5' }}';">
+                <div style="font-size: 0.8rem; color: #92400e; font-weight: 600; margin-bottom: 8px;">검토 중</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #92400e;">{{ pending_count }}</div>
+            </a>
+            <a href="{{ url_for('admin_meeting_rooms', status='approved') }}" style="background: white; border-radius: 12px; padding: 20px; border: {{ '2px solid #065f46' if status_filter == 'approved' else '1px solid #e5e5e5' }}; text-decoration: none; transition: all 0.2s;"
+               onmouseover="this.style.borderColor='#065f46';" onmouseout="this.style.borderColor='{{ '#065f46' if status_filter == 'approved' else '#e5e5e5' }}';">
+                <div style="font-size: 0.8rem; color: #065f46; font-weight: 600; margin-bottom: 8px;">승인됨</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #065f46;">{{ approved_count }}</div>
+            </a>
+            <a href="{{ url_for('admin_meeting_rooms', status='rejected') }}" style="background: white; border-radius: 12px; padding: 20px; border: {{ '2px solid #991b1b' if status_filter == 'rejected' else '1px solid #e5e5e5' }}; text-decoration: none; transition: all 0.2s;"
+               onmouseover="this.style.borderColor='#991b1b';" onmouseout="this.style.borderColor='{{ '#991b1b' if status_filter == 'rejected' else '#e5e5e5' }}';">
+                <div style="font-size: 0.8rem; color: #991b1b; font-weight: 600; margin-bottom: 8px;">거절됨</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #991b1b;">{{ rejected_count }}</div>
+            </a>
+        </div>
+
+        <!-- 대관 신청 목록 -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e8e8ed; overflow: hidden;">
+            {% if bookings %}
+            <div class="table-scroll">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #fafafa; border-bottom: 1px solid #e8e8ed;">
+                            <th style="padding: 14px 20px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">회의실</th>
+                            <th style="padding: 14px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">날짜 / 시간</th>
+                            <th style="padding: 14px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">신청자</th>
+                            <th class="desktop-only" style="padding: 14px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">연락처</th>
+                            <th class="desktop-only" style="padding: 14px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">목적</th>
+                            <th style="padding: 14px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">상태</th>
+                            <th style="padding: 14px 16px; text-align: right; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr class="booking-row" style="border-bottom: 1px solid #f0f0f0; animation-delay: {{ loop.index0 * 0.04 }}s;">
+                            <!-- 회의실 번호 -->
+                            <td style="padding: 16px 20px;">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--ku-crimson) 0%, #c0392b 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1rem;">
+                                    {{ booking.room_number }}
+                                </div>
+                            </td>
+                            <!-- 날짜/시간 -->
+                            <td style="padding: 16px; white-space: nowrap;">
+                                <div style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">{{ booking.booking_date }}</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">{{ booking.start_time }} ~ {{ booking.end_time }}</div>
+                                <div style="font-size: 0.75rem; color: #bbb; margin-top: 2px;">{{ booking.attendees }}명</div>
+                            </td>
+                            <!-- 신청자 -->
+                            <td style="padding: 16px;">
+                                <div style="font-size: 0.9rem; font-weight: 700; color: #1a1a1a;">{{ booking.applicant_name }}</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">{{ booking.applicant_email }}</div>
+                                {% if booking.organization %}
+                                <div style="font-size: 0.75rem; color: #bbb; margin-top: 2px;">{{ booking.organization }}</div>
+                                {% endif %}
+                            </td>
+                            <!-- 연락처 -->
+                            <td class="desktop-only" style="padding: 16px; font-size: 0.85rem; color: #555;">
+                                {{ booking.applicant_phone or '-' }}
+                            </td>
+                            <!-- 목적 -->
+                            <td class="desktop-only" style="padding: 16px; max-width: 200px;">
+                                <div style="font-size: 0.85rem; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;" title="{{ booking.purpose }}">
+                                    {{ booking.purpose }}
+                                </div>
+                                {% if booking.admin_note %}
+                                <div style="font-size: 0.75rem; color: var(--ku-crimson); margin-top: 4px;">메모: {{ booking.admin_note }}</div>
+                                {% endif %}
+                            </td>
+                            <!-- 상태 -->
+                            <td style="padding: 16px; white-space: nowrap;">
+                                <span class="status-badge status-{{ booking.status }}">
+                                    {% if booking.status == 'pending' %}검토 중
+                                    {% elif booking.status == 'approved' %}승인됨
+                                    {% else %}거절됨{% endif %}
+                                </span>
+                                {% if booking.created_at %}
+                                <div style="font-size: 0.7rem; color: #bbb; margin-top: 4px; white-space: nowrap;">
+                                    {{ booking.created_at.strftime('%m/%d %H:%M') if booking.created_at else '' }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <!-- 액션 -->
+                            <td style="padding: 16px; text-align: right; white-space: nowrap;">
+                                <div style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                                    <!-- 상세 정보 보기 버튼 -->
+                                    <button onclick="showDetail({{ loop.index0 }})" class="action-btn" style="background: #f0f0f0; color: #555;"
+                                            onmouseover="this.style.background='#e0e0e0'; this.style.transform='translateY(-1px)';"
+                                            onmouseout="this.style.background='#f0f0f0'; this.style.transform='translateY(0)';">
+                                        상세
+                                    </button>
+                                    {% if booking.status == 'pending' %}
+                                    <button onclick="openApproveModal({{ booking.id }}, {{ booking.room_number }}, '{{ booking.booking_date }}', '{{ booking.start_time }}', '{{ booking.end_time }}')" class="action-btn btn-approve">
+                                        승인
+                                    </button>
+                                    <button onclick="openRejectModal({{ booking.id }}, {{ booking.room_number }}, '{{ booking.booking_date }}')" class="action-btn btn-reject">
+                                        거절
+                                    </button>
+                                    {% endif %}
+                                    <button onclick="confirmDelete({{ booking.id }}, {{ booking.room_number }})" class="action-btn btn-delete">
+                                        삭제
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 80px 20px;">
+                <div style="width: 80px; height: 80px; background: #f5f5f7; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <p style="color: #999; font-size: 1rem; font-weight: 600; margin: 0;">대관 신청 내역이 없습니다.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 상세 정보 모달 -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal('detailModal', event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #1a1a1a;">대관 신청 상세 정보</h3>
+            <button onclick="closeModal('detailModal')" style="width: 32px; height: 32px; border-radius: 50%; background: #f5f5f7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<!-- 승인 모달 -->
+<div class="modal-overlay" id="approveModal" onclick="closeModal('approveModal', event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #065f46;">대관 신청 승인</h3>
+        <p style="color: #555; font-size: 0.9rem; margin: 0 0 20px 0;" id="approveDesc"></p>
+        <form method="POST" id="approveForm">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">관리자 메모 (선택)</label>
+                <textarea name="admin_note" class="form-input" rows="3" placeholder="신청자에게 전달할 메모가 있으면 작성해주세요."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeModal('approveModal')" style="flex: 1; padding: 12px; background: #f5f5f7; color: #555; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">취소</button>
+                <button type="submit" style="flex: 2; padding: 12px; background: #1A7F37; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;"
+                        onmouseover="this.style.background='#155d2a';" onmouseout="this.style.background='#1A7F37';">
+                    승인하기 (이메일 발송)
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 거절 모달 -->
+<div class="modal-overlay" id="rejectModal" onclick="closeModal('rejectModal', event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #991b1b;">대관 신청 거절</h3>
+        <p style="color: #555; font-size: 0.9rem; margin: 0 0 20px 0;" id="rejectDesc"></p>
+        <form method="POST" id="rejectForm">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">거절 사유 (선택)</label>
+                <textarea name="admin_note" class="form-input" rows="3" placeholder="거절 사유를 입력하면 신청자에게 이메일로 안내됩니다."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeModal('rejectModal')" style="flex: 1; padding: 12px; background: #f5f5f7; color: #555; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">취소</button>
+                <button type="submit" style="flex: 2; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;"
+                        onmouseover="this.style.background='#b91c1c';" onmouseout="this.style.background='#dc2626';">
+                    거절하기 (이메일 발송)
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 삭제 폼은 JS에서 동적으로 생성 -->
+
+<!-- 상세 정보 데이터 -->
+<script>
+    const bookingsData = [
+        {% for booking in bookings %}
+        {
+            id: {{ booking.id }},
+            room: {{ booking.room_number }},
+            date: {{ booking.booking_date | tojson }},
+            startTime: {{ booking.start_time | tojson }},
+            endTime: {{ booking.end_time | tojson }},
+            name: {{ booking.applicant_name | tojson }},
+            email: {{ booking.applicant_email | tojson }},
+            phone: {{ (booking.applicant_phone or '') | tojson }},
+            org: {{ (booking.organization or '') | tojson }},
+            purpose: {{ booking.purpose | tojson }},
+            attendees: {{ booking.attendees or 1 }},
+            status: {{ booking.status | tojson }},
+            adminNote: {{ (booking.admin_note or '') | tojson }},
+            createdAt: {{ (booking.created_at.strftime('%Y-%m-%d %H:%M') if booking.created_at else '') | tojson }}
+        }{{ ',' if not loop.last else '' }}
+        {% endfor %}
+    ];
+
+    function showDetail(index) {
+        const b = bookingsData[index];
+        const statusMap = { pending: '검토 중', approved: '승인됨', rejected: '거절됨' };
+        const statusColor = { pending: '#92400e', approved: '#065f46', rejected: '#991b1b' };
+        const statusBg = { pending: '#fef3c7', approved: '#d1fae5', rejected: '#fee2e2' };
+
+        document.getElementById('detailContent').innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">회의실</span>
+                    <span style="font-weight: 800; color: #1a1a1a;">회의실 ${b.room}호</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">날짜</span>
+                    <span style="font-weight: 700; color: #1a1a1a;">${b.date}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">시간</span>
+                    <span style="font-weight: 700; color: #1a1a1a;">${b.startTime} ~ ${b.endTime}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">신청자</span>
+                    <span style="font-weight: 700; color: #1a1a1a;">${b.name}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">이메일</span>
+                    <a href="mailto:${b.email}" style="color: var(--ku-crimson); font-weight: 700; text-decoration: none;">${b.email}</a>
+                </div>
+                ${b.phone ? `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;"><span style="font-weight: 700; color: #444;">연락처</span><span style="font-weight: 700; color: #1a1a1a;">${b.phone}</span></div>` : ''}
+                ${b.org ? `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;"><span style="font-weight: 700; color: #444;">소속</span><span style="font-weight: 700; color: #1a1a1a;">${b.org}</span></div>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">인원</span>
+                    <span style="font-weight: 700; color: #1a1a1a;">${b.attendees}명</span>
+                </div>
+                <div style="padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444; display: block; margin-bottom: 6px;">사용 목적</span>
+                    <span style="color: #1a1a1a; line-height: 1.6; font-size: 0.9rem;">${b.purpose}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f7; border-radius: 10px;">
+                    <span style="font-weight: 700; color: #444;">상태</span>
+                    <span style="padding: 4px 12px; background: ${statusBg[b.status]}; color: ${statusColor[b.status]}; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">${statusMap[b.status]}</span>
+                </div>
+                ${b.adminNote ? `<div style="padding: 12px 16px; background: #fff3cd; border-radius: 10px; border-left: 3px solid #92400e;"><span style="font-weight: 700; color: #92400e; display: block; margin-bottom: 4px;">관리자 메모</span><span style="color: #92400e; font-size: 0.9rem;">${b.adminNote}</span></div>` : ''}
+                <div style="font-size: 0.75rem; color: #bbb; text-align: right; padding-top: 4px;">신청일: ${b.createdAt}</div>
+            </div>
+        `;
+        document.getElementById('detailModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openApproveModal(bookingId, roomNum, date, startTime, endTime) {
+        const form = document.getElementById('approveForm');
+        form.action = `/admin/meeting-rooms/approve/${bookingId}`;
+        document.getElementById('approveDesc').textContent = `회의실 ${roomNum}호 (${date} ${startTime}~${endTime}) 대관 신청을 승인하시겠습니까? 신청자에게 승인 이메일이 발송됩니다.`;
+        document.getElementById('approveModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openRejectModal(bookingId, roomNum, date) {
+        const form = document.getElementById('rejectForm');
+        form.action = `/admin/meeting-rooms/reject/${bookingId}`;
+        document.getElementById('rejectDesc').textContent = `회의실 ${roomNum}호 (${date}) 대관 신청을 거절하시겠습니까? 신청자에게 거절 이메일이 발송됩니다.`;
+        document.getElementById('rejectModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function confirmDelete(bookingId, roomNum) {
+        if (!confirm(`회의실 ${roomNum}호 대관 신청을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/meeting-rooms/delete/${bookingId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function closeModal(modalId, event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById(modalId).classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            ['detailModal', 'approveModal', 'rejectModal'].forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            document.body.style.overflow = '';
+        }
+    });
+</script>
+{% endblock %}
