@@ -293,8 +293,7 @@
     </div>
 </div>
 
-<!-- 삭제 폼 (hidden) -->
-<form method="POST" id="deleteForm" style="display: none;"></form>
+<!-- 삭제 폼은 JS에서 동적으로 생성 -->
 
 <!-- 상세 정보 데이터 -->
 <script>
@@ -387,9 +386,10 @@
 
     function confirmDelete(bookingId, roomNum) {
         if (!confirm(`회의실 ${roomNum}호 대관 신청을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
-        const form = document.getElementById('deleteForm');
-        form.action = `/admin/meeting-rooms/delete/${bookingId}`;
+        const form = document.createElement('form');
         form.method = 'POST';
+        form.action = `/admin/meeting-rooms/delete/${bookingId}`;
+        document.body.appendChild(form);
         form.submit();
     }
 
