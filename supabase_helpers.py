@@ -598,7 +598,7 @@ class SupabaseHelper:
         except Exception as e:
             print(f'[DELETE SDK ERROR] booking_id={booking_id}: {e}')
 
-        # 2차: 직접 REST API 호출 (Prefer: return=representation 으로 결과 검증)
+        # 2차: 직접 REST API 호출
         supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
         service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
         if not supabase_url or not service_key:
@@ -614,12 +614,20 @@ class SupabaseHelper:
         try:
             resp = httpx.delete(url, headers=headers, timeout=10)
             print(f'[DELETE REST] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
-            if resp.status_code == 200:
-                deleted = resp.json()
-                if deleted:
-                    print(f'[DELETE REST SUCCESS] Deleted {len(deleted)} row(s)')
-                    return True
-                print(f'[DELETE REST FAILED] No rows deleted (RLS 차단 또는 ID 불일치)')
+            if resp.status_code in (200, 204):
+                # 최종 삭제 여부 검증
+                try:
+                    verify = self.admin_client.table('meeting_room_bookings').select('id').eq('id', booking_id).execute()
+                    if not verify.data:
+                        print(f'[DELETE REST SUCCESS] booking_id={booking_id}')
+                        return True
+                    print(f'[DELETE REST FAILED] booking_id={booking_id} still exists after REST delete')
+                    return False
+                except Exception as ve:
+                    print(f'[DELETE VERIFY ERROR] booking_id={booking_id}: {ve}')
+                    # verify 실패 시 HTTP 상태 코드로 판단
+                    return resp.status_code in (200, 204)
+            print(f'[DELETE REST FAILED] HTTP {resp.status_code}')
             return False
         except Exception as e:
             print(f'[DELETE REST ERROR] booking_id={booking_id}: {e}')
