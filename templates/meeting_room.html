@@ -125,9 +125,9 @@
         padding: 0 4px;
     }
     .tg-slot {
-        padding: 10px 8px;
+        padding: 10px 4px;
         min-height: 42px;
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         font-weight: 600;
         color: #666;
         cursor: pointer;
@@ -552,7 +552,7 @@ function renderTimeGrid() {
 function makeSlotHTML(idx) {
     const status = slotStatuses[idx];
     let cls  = 'tg-slot ';
-    let text = slotToTime(idx);
+    let text = `${slotToTime(idx)}~${slotToTime(idx + 1)}`;
     if      (status === 'approved') { cls += 'booked';       text = '예약됨'; }
     else if (status === 'pending')  { cls += 'pending-slot'; text = '검토중'; }
     else                            { cls += 'available'; }
