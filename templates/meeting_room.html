@@ -168,6 +168,12 @@
         cursor: not-allowed;
         font-size: 0.72rem;
     }
+    .tg-slot.unavailable {
+        background: #e0e7ff;
+        color: #4f46e5;
+        cursor: not-allowed;
+        font-size: 0.72rem;
+    }
     .tg-slot.out-of-range { opacity: 0.35; cursor: not-allowed; }
 
     /* 선택 정보 바 */
@@ -269,9 +275,6 @@
         <span style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:#555;font-weight:600;">
             <span style="width:14px;height:14px;background:#fee2e2;border-radius:3px;display:inline-block;"></span>예약됨
         </span>
-        <span style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:#555;font-weight:600;">
-            <span style="width:14px;height:14px;background:#fef3c7;border-radius:3px;display:inline-block;"></span>검토 중
-        </span>
     </div>
 
     <!-- 회의실 카드 그리드 -->
@@ -362,12 +365,10 @@
             대관 안내
         </h3>
         <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:0.9rem;line-height:2;">
-            <li>대관 신청 후 관리자 승인 시 이메일로 안내됩니다.</li>
             <li>회의실은 총 4개(1~4호)이며, 학생회관 315호 인근에 위치합니다.</li>
-            <li>대관 가능 시간: <strong>00:00 ~ 24:00</strong> / 1회 최대 <strong>3시간</strong></li>
-            <li>대관 신청 가능 기간: <strong>오늘부터 2주 이내</strong> ({{ today.strftime('%Y.%m.%d') }} ~ {{ max_date.strftime('%Y.%m.%d') }})</li>
+            <li>대관 가능 시간 : <strong>24시간 연중무휴</strong> / 1회 최대 <strong>3시간</strong></li>
+            <li>대관 신청 가능 기간 : <strong>오늘부터 2주까지 대관 예약 가능</strong> ({{ today.strftime('%Y.%m.%d') }} ~ {{ max_date.strftime('%Y.%m.%d') }})</li>
             <li>30분 단위로 시간 블록을 클릭해 시작·종료 시간을 선택하세요.</li>
-            <li>신청 후 승인 전까지 <span style="color:#856404;font-weight:700;">검토 중</span> 상태로 표시됩니다.</li>
             <li>문의 : <a href="mailto:dsng3419@korea.ac.kr" style="color:var(--dark);font-weight:700;">부총학생회장 장선규(010-6598-6414)</a></li>
         </ul>
     </div>
@@ -453,12 +454,12 @@
 
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                             <div>
-                                <label class="form-label">연락처</label>
-                                <input type="tel" name="applicant_phone" class="form-input" placeholder="010-0000-0000">
+                                <label class="form-label">연락처 <span class="required">*</span></label>
+                                <input type="tel" name="applicant_phone" class="form-input" placeholder="010-0000-0000" required>
                             </div>
                             <div>
-                                <label class="form-label">소속 단체</label>
-                                <input type="text" name="organization" class="form-input" placeholder="학생회, 동아리 등">
+                                <label class="form-label">소속 단체 <span class="required">*</span></label>
+                                <input type="text" name="organization" class="form-input" placeholder="학생회, 동아리 등" required>
                             </div>
                         </div>
 
@@ -516,14 +517,33 @@ let slotStatuses   = [];   // 'available' | 'approved' | 'pending'
 let selStart       = null; // slot index
 let selEnd         = null; // slot index (inclusive)
 
-function getSlotStatuses(roomNum) {
+function getSlotStatuses(roomNum, bookingDate) {
     const bookings = ROOMS_DATA[roomNum] || [];
     const st = Array(TOTAL_SLOTS).fill('available');
+    
+    // 회의실 1번: 격주 월요일 19:00~24:00 블로킹 (3월 9일부터 3주 격주)
+    if (roomNum === 1) {
+        const bd = new Date(bookingDate + 'T00:00:00');
+        const restrictedStart = new Date('2026-03-09T00:00:00');
+        if (bd.getDay() === 1) { // 월요일
+            const daysDiff = (bd - restrictedStart) / (1000 * 60 * 60 * 24);
+            const weeksDiff = Math.floor(daysDiff / 7);
+            if (daysDiff >= 0 && weeksDiff % 3 === 0) { // 3주 격주
+                // 19:00 ~ 24:00 = slot 38 ~ 47 (19*2=38, 24*2=48)
+                for (let i = 38; i < TOTAL_SLOTS; i++) {
+                    st[i] = 'unavailable';
+                }
+            }
+        }
+    }
+    
     bookings.forEach(b => {
         const s = timeToSlot(b.start_time);
         const e = timeToSlot(b.end_time);
         for (let i = s; i < e && i < TOTAL_SLOTS; i++) {
-            st[i] = b.status === 'approved' ? 'approved' : 'pending';
+            if (st[i] !== 'unavailable') { // unavailable 상태는 유지
+                st[i] = b.status === 'approved' ? 'approved' : 'pending';
+            }
         }
     });
     return st;
@@ -553,9 +573,10 @@ function makeSlotHTML(idx) {
     const status = slotStatuses[idx];
     let cls  = 'tg-slot ';
     let text = `${slotToTime(idx)}~${slotToTime(idx + 1)}`;
-    if      (status === 'approved') { cls += 'booked';       text = '예약됨'; }
-    else if (status === 'pending')  { cls += 'pending-slot'; text = '검토중'; }
-    else                            { cls += 'available'; }
+    if      (status === 'approved')   { cls += 'booked';       text = '예약됨'; }
+    else if (status === 'pending')    { cls += 'pending-slot'; text = '검토중'; }
+    else if (status === 'unavailable'){ cls += 'unavailable';  text = '이용불가'; }
+    else                              { cls += 'available'; }
     return `<div class="${cls}" data-idx="${idx}">${text}</div>`;
 }
 
@@ -581,7 +602,11 @@ function onGridClick(e) {
         }
         for (let i = a; i <= b; i++) {
             if (slotStatuses[i] !== 'available') {
-                flashInfo('선택 범위에 이미 예약된 시간이 포함되어 있습니다.', 'error');
+                const status = slotStatuses[i];
+                const msg = status === 'unavailable' 
+                    ? '선택 범위에 이용 불가 시간이 포함되어 있습니다.'
+                    : '선택 범위에 이미 예약된 시간이 포함되어 있습니다.';
+                flashInfo(msg, 'error');
                 return;
             }
         }
@@ -611,8 +636,9 @@ function redrawSlots(hoverIdx) {
         const st  = slotStatuses[i];
         // 기본 클래스 재설정
         el.className = 'tg-slot ' + (
-            st === 'approved' ? 'booked' :
-            st === 'pending'  ? 'pending-slot' : 'available'
+            st === 'approved'   ? 'booked' :
+            st === 'pending'    ? 'pending-slot' :
+            st === 'unavailable'? 'unavailable' : 'available'
         );
 
         if (st !== 'available') return;
@@ -734,7 +760,7 @@ function openBookingModal(roomNumber, bookingDate) {
     document.getElementById('modalSubtitle').textContent =
         `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
 
-    slotStatuses = getSlotStatuses(roomNumber);
+    slotStatuses = getSlotStatuses(roomNumber, bookingDate);
     renderTimeGrid();
     updateInfo();
 

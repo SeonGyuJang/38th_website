@@ -145,25 +145,27 @@ def send_email(to_email, subject, html_body):
 
 def send_booking_submitted_user_email(booking):
     """대관 신청 완료 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 신청이 접수되었습니다'
+    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
-      <div style="background: #961A32; padding: 32px 40px;">
+      <div style="background: #1A7F37; padding: 32px 40px;">
         <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회</h1>
-        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">회의실 대관 신청 접수 확인</p>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">회의실 대관 신청 승인 안내</p>
       </div>
       <div style="background: white; padding: 40px;">
-        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">대관 신청이 접수되었습니다</h2>
-        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">신청하신 내용을 검토 후 승인 여부를 안내해 드리겠습니다.</p>
+        <div style="display: inline-block; padding: 8px 20px; background: #d4edda; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #155724; font-weight: 700; font-size: 15px;">✓ 승인 완료</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">대관 신청이 승인되었습니다!</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 일정에 회의실을 이용하실 수 있습니다.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {booking['room_number']}호</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['booking_date']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">시간</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['start_time']} ~ {booking['end_time']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">사용 목적</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['purpose']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">현재 상태</td><td style="padding: 12px 16px;"><span style="background: #FFF3CD; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700;">검토 중</span></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">시간</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">사용 목적</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking['purpose']}</td></tr>
         </table>
-        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">승인 여부는 별도의 이메일로 안내됩니다. 문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
       </div>
       <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
         <p style="color: #999; font-size: 12px; margin: 0;">© 2025 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
@@ -175,9 +177,10 @@ def send_booking_submitted_user_email(booking):
 
 def send_booking_admin_notification_email(booking):
     """새 대관 신청 알림 이메일 (관리자에게)"""
-    admin_email = app.config.get('ADMIN_EMAIL')
-    if not admin_email:
+    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    if not admin_emails:
         return False
+    
     subject = f'[총학생회] 새로운 회의실 대관 신청 - {booking["applicant_name"]} (회의실 {booking["room_number"]}호)'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
@@ -207,7 +210,14 @@ def send_booking_admin_notification_email(booking):
       </div>
     </div>
     """
-    return send_email(admin_email, subject, html)
+    
+    # 모든 관리자 이메일에 발송
+    result = True
+    for email in admin_emails:
+        if not send_email(email, subject, html):
+            result = False
+    
+    return result
 
 
 def send_booking_approved_email(booking):
@@ -611,6 +621,21 @@ def meeting_room_book():
     except ValueError:
         flash('올바른 날짜를 입력해주세요.', 'error')
         return redirect(url_for('meeting_room'))
+    
+    # 회의실 1번: 격주 월요일 19:00~24:00 불가 검증 (3월 9일부터 3주 격주)
+    if room_number == 1:
+        restricted_monday_start = datetime.strptime('2026-03-09', '%Y-%m-%d').date()
+        if bd.weekday() == 0:  # 월요일 (0=월요일)
+            weeks_since_start = (bd - restricted_monday_start).days // 7
+            if weeks_since_start >= 0 and weeks_since_start % 3 == 0:  # 3주 격주
+                # 19:00 ~ 24:00 (23:59) 확인
+                st_hour = int(start_time.split(':')[0])
+                et_hour = int(end_time.split(':')[0])
+                et_min = int(end_time.split(':')[1])
+                # 19:00 이상의 시간과 겹치는지 확인
+                if st_hour >= 19 or (et_hour > 19 or (et_hour == 19)):
+                    flash('회의실 1호는 3월 9일부터 3주마다 월요일 19:00 ~ 24:00에는 이용할 수 없습니다.', 'error')
+                    return redirect(url_for('meeting_room', date=booking_date))
 
     # 시간 중복 확인 (같은 날짜 같은 회의실)
     existing_bookings = db_helper.get_bookings_by_date(booking_date)
@@ -633,7 +658,7 @@ def meeting_room_book():
         'start_time': start_time,
         'end_time': end_time,
         'attendees': attendees,
-        'status': 'pending'
+        'status': 'approved'
     }
     booking = db_helper.create_meeting_room_booking(data)
 

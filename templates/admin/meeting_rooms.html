@@ -205,14 +205,6 @@
                                             onmouseout="this.style.background='#f0f0f0'; this.style.transform='translateY(0)';">
                                         상세
                                     </button>
-                                    {% if booking.status == 'pending' %}
-                                    <button onclick="openApproveModal({{ booking.id }}, {{ booking.room_number }}, '{{ booking.booking_date }}', '{{ booking.start_time }}', '{{ booking.end_time }}')" class="action-btn btn-approve">
-                                        승인
-                                    </button>
-                                    <button onclick="openRejectModal({{ booking.id }}, {{ booking.room_number }}, '{{ booking.booking_date }}')" class="action-btn btn-reject">
-                                        거절
-                                    </button>
-                                    {% endif %}
                                     <button onclick="confirmDelete({{ booking.id }}, {{ booking.room_number }})" class="action-btn btn-delete">
                                         삭제
                                     </button>
@@ -251,47 +243,9 @@
     </div>
 </div>
 
-<!-- 승인 모달 -->
-<div class="modal-overlay" id="approveModal" onclick="closeModal('approveModal', event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #065f46;">대관 신청 승인</h3>
-        <p style="color: #555; font-size: 0.9rem; margin: 0 0 20px 0;" id="approveDesc"></p>
-        <form method="POST" id="approveForm">
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">관리자 메모 (선택)</label>
-                <textarea name="admin_note" class="form-input" rows="3" placeholder="신청자에게 전달할 메모가 있으면 작성해주세요."></textarea>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="closeModal('approveModal')" style="flex: 1; padding: 12px; background: #f5f5f7; color: #555; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">취소</button>
-                <button type="submit" style="flex: 2; padding: 12px; background: #1A7F37; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;"
-                        onmouseover="this.style.background='#155d2a';" onmouseout="this.style.background='#1A7F37';">
-                    승인하기 (이메일 발송)
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- 승인 모달 제거됨 (자동 승인 시스템으로 변경) -->
 
-<!-- 거절 모달 -->
-<div class="modal-overlay" id="rejectModal" onclick="closeModal('rejectModal', event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 800; color: #991b1b;">대관 신청 거절</h3>
-        <p style="color: #555; font-size: 0.9rem; margin: 0 0 20px 0;" id="rejectDesc"></p>
-        <form method="POST" id="rejectForm">
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">거절 사유 (선택)</label>
-                <textarea name="admin_note" class="form-input" rows="3" placeholder="거절 사유를 입력하면 신청자에게 이메일로 안내됩니다."></textarea>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="closeModal('rejectModal')" style="flex: 1; padding: 12px; background: #f5f5f7; color: #555; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">취소</button>
-                <button type="submit" style="flex: 2; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;"
-                        onmouseover="this.style.background='#b91c1c';" onmouseout="this.style.background='#dc2626';">
-                    거절하기 (이메일 발송)
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- 거절 모달 제거됨 (자동 승인 시스템으로 변경) -->
 
 <!-- 삭제 폼은 JS에서 동적으로 생성 -->
 

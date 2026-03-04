@@ -33,6 +33,11 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
+    ADMIN_EMAILS = [
+        'hongwook5179@korea.ac.kr',
+        'ekdus0510@korea.ac.kr',
+        'rhajaejoon02@naver.com'
+    ]
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'dsng3419@korea.ac.kr')
 
     # Ensure upload directories exist
