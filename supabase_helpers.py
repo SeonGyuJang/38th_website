@@ -585,7 +585,20 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
-        """회의실 대관 신청 삭제 — Supabase REST API 직접 호출"""
+        """회의실 대관 신청 삭제"""
+        # 1차: Supabase Python SDK (service_role → RLS 우회)
+        try:
+            self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
+            # 실제 삭제 여부 검증
+            verify = self.admin_client.table('meeting_room_bookings').select('id').eq('id', booking_id).execute()
+            if not verify.data:
+                print(f'[DELETE SUCCESS] booking_id={booking_id}')
+                return True
+            print(f'[DELETE SDK FAILED] booking_id={booking_id} still exists, trying REST API fallback')
+        except Exception as e:
+            print(f'[DELETE SDK ERROR] booking_id={booking_id}: {e}')
+
+        # 2차: 직접 REST API 호출 (Prefer: return=representation 으로 결과 검증)
         supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
         service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
         if not supabase_url or not service_key:
@@ -596,17 +609,20 @@ class SupabaseHelper:
             'apikey': service_key,
             'Authorization': f'Bearer {service_key}',
             'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
+            'Prefer': 'return=representation',
         }
         try:
             resp = httpx.delete(url, headers=headers, timeout=10)
-            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
-            if resp.status_code in (200, 204):
-                return True
-            print(f'[DELETE FAILED] {resp.status_code}: {resp.text}')
+            print(f'[DELETE REST] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
+            if resp.status_code == 200:
+                deleted = resp.json()
+                if deleted:
+                    print(f'[DELETE REST SUCCESS] Deleted {len(deleted)} row(s)')
+                    return True
+                print(f'[DELETE REST FAILED] No rows deleted (RLS 차단 또는 ID 불일치)')
             return False
         except Exception as e:
-            print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
+            print(f'[DELETE REST ERROR] booking_id={booking_id}: {e}')
             return False
 
     def count_pending_bookings(self) -> int:
