@@ -585,26 +585,11 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
-        """회의실 대관 신청 삭제 — Supabase REST API 직접 호출"""
-        supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
-        service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
-        if not supabase_url or not service_key:
-            print('[DELETE ERROR] SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY 환경 변수 누락')
-            return False
-        url = f'{supabase_url}/rest/v1/meeting_room_bookings?id=eq.{booking_id}'
-        headers = {
-            'apikey': service_key,
-            'Authorization': f'Bearer {service_key}',
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
-        }
+        """회의실 대관 신청 삭제"""
         try:
-            resp = httpx.delete(url, headers=headers, timeout=10)
-            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
-            if resp.status_code in (200, 204):
-                return True
-            print(f'[DELETE FAILED] {resp.status_code}: {resp.text}')
-            return False
+            response = self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
+            print(f'[DELETE] booking_id={booking_id}, result={response.data}')
+            return True
         except Exception as e:
             print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
             return False
