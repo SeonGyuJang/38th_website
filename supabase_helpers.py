@@ -584,8 +584,15 @@ class SupabaseHelper:
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
         """회의실 대관 신청 삭제"""
-        response = self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
-        return len(response.data) > 0
+        try:
+            response = self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
+            # supabase-py 버전에 따라 response.data가 비어 있을 수 있으므로
+            # 예외가 발생하지 않으면 성공으로 간주
+            print(f'[삭제 완료] booking_id={booking_id}, returned rows={len(response.data)}')
+            return True
+        except Exception as e:
+            print(f'[삭제 실패] booking_id={booking_id}, 오류: {e}')
+            return False
 
     def count_pending_bookings(self) -> int:
         """대기 중인 대관 신청 수 조회"""

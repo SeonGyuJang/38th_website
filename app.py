@@ -531,6 +531,7 @@ def archive_detail(archive_id):
 @app.route('/meeting-room')
 def meeting_room():
     today = date.today()
+    max_date = today + timedelta(days=14)  # 최대 2주 앞까지 예약 가능
 
     # 선택한 날짜 (기본: 오늘)
     selected_date_str = request.args.get('date', today.strftime('%Y-%m-%d'))
@@ -538,6 +539,11 @@ def meeting_room():
         selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
     except ValueError:
         selected_date = today
+
+    # 2주 초과 날짜 접근 시 max_date로 클램핑
+    if selected_date > max_date:
+        selected_date = max_date
+        selected_date_str = selected_date.strftime('%Y-%m-%d')
 
     # 선택한 날짜가 속한 주의 월~일 계산
     week_start = selected_date - timedelta(days=selected_date.weekday())
@@ -559,6 +565,7 @@ def meeting_room():
                            rooms=rooms,
                            selected_date=selected_date,
                            today=today,
+                           max_date=max_date,
                            week_dates=week_dates,
                            prev_week=prev_week,
                            next_week=next_week)
@@ -590,11 +597,16 @@ def meeting_room_book():
         flash('종료 시간은 시작 시간보다 늦어야 합니다.', 'error')
         return redirect(url_for('meeting_room', date=booking_date))
 
-    # 날짜 유효성 (과거 날짜 불가)
+    # 날짜 유효성 (과거 날짜 불가, 2주 초과 불가)
     try:
         bd = datetime.strptime(booking_date, '%Y-%m-%d').date()
-        if bd < date.today():
+        today_d = date.today()
+        max_date = today_d + timedelta(days=14)
+        if bd < today_d:
             flash('오늘 이후 날짜만 신청 가능합니다.', 'error')
+            return redirect(url_for('meeting_room', date=booking_date))
+        if bd > max_date:
+            flash('대관은 오늘부터 최대 2주 앞까지만 신청 가능합니다.', 'error')
             return redirect(url_for('meeting_room', date=booking_date))
     except ValueError:
         flash('올바른 날짜를 입력해주세요.', 'error')
@@ -1573,8 +1585,15 @@ def admin_meeting_room_reject(booking_id):
 @app.route('/admin/meeting-rooms/delete/<int:booking_id>', methods=['POST'])
 @login_required
 def admin_meeting_room_delete(booking_id):
-    db_helper.delete_meeting_room_booking(booking_id)
-    flash('대관 신청이 삭제되었습니다.', 'success')
+    try:
+        ok = db_helper.delete_meeting_room_booking(booking_id)
+        if ok:
+            flash('대관 신청이 삭제되었습니다.', 'success')
+        else:
+            flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
+    except Exception as e:
+        print(f'[삭제 오류] booking_id={booking_id}: {e}')
+        flash('삭제 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
 
 
