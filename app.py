@@ -14,8 +14,75 @@ import os
 import shutil
 import threading
 import smtplib
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+# ============================================
+# 셔틀버스 & 식단표 모듈 (kus_bus_website 포팅)
+# ============================================
+_menu_data = None
+_is_crawling = False
+
+def _load_menu_from_file():
+    """저장된 메뉴 JSON 파일 로드"""
+    global _menu_data
+    menu_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu_data')
+    student_file = os.path.join(menu_dir, 'student_menu.json')
+    staff_file = os.path.join(menu_dir, 'staff_menu.json')
+    try:
+        if os.path.exists(student_file) and os.path.exists(staff_file):
+            with open(student_file, 'r', encoding='utf-8') as f:
+                student_data = json.load(f)
+            with open(staff_file, 'r', encoding='utf-8') as f:
+                staff_data = json.load(f)
+            _menu_data = {
+                'success': True,
+                'data': {
+                    '기간': student_data.get('기간', {}),
+                    '학생식당': student_data,
+                    '교직원식당': staff_data
+                }
+            }
+            return True
+    except Exception as e:
+        print(f'메뉴 파일 로드 오류: {e}')
+    return False
+
+def _perform_crawling():
+    """백그라운드 크롤링"""
+    global _menu_data, _is_crawling
+    if _is_crawling:
+        return
+    try:
+        _is_crawling = True
+        from crawling import crawl_and_save_menu
+        result = crawl_and_save_menu()
+        if result:
+            _menu_data = {'success': True, 'data': result}
+        else:
+            if _menu_data is None:
+                _menu_data = {'success': False, 'message': '식단표를 불러오는데 실패했습니다.'}
+    except Exception as e:
+        print(f'크롤링 오류: {e}')
+        if _menu_data is None:
+            _menu_data = {'success': False, 'message': str(e)}
+    finally:
+        _is_crawling = False
+
+def _init_menu_scheduler():
+    """메뉴 자동 갱신 스케줄러 설정 (매주 월요일)"""
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(_perform_crawling, trigger='cron', day_of_week='mon', hour='5-6', minute='0,30')
+        scheduler.start()
+    except Exception as e:
+        print(f'스케줄러 설정 오류: {e}')
+
+# 서버 시작 시 메뉴 초기화
+_load_menu_from_file()
+threading.Thread(target=_init_menu_scheduler, daemon=True).start()
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -1860,6 +1927,26 @@ def add_header(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
 
     return response
+
+# ============================================
+# 셔틀버스 & 식단표 API
+# ============================================
+
+@app.route('/schedules/<path:filename>')
+def serve_schedule(filename):
+    """셔틀버스 시간표 CSV 서빙"""
+    return send_from_directory('schedules', filename)
+
+@app.route('/api/menu')
+def api_menu():
+    """식단표 JSON API"""
+    global _menu_data
+    if _menu_data is None:
+        _load_menu_from_file()
+    if _menu_data is None or not _menu_data.get('success'):
+        threading.Thread(target=_perform_crawling, daemon=True).start()
+        return jsonify({'success': False, 'message': '식단표를 불러오는 중입니다. 잠시 후 다시 시도해주세요.'})
+    return jsonify(_menu_data)
 
 # ============================================
 # CLI 명령어
