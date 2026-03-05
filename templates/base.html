@@ -170,10 +170,19 @@
 
     <!-- ===================== 식단표 모달 ===================== -->
     <div class="widget-modal-overlay" id="menuModal">
-        <div class="widget-modal widget-modal--wide">
+        <div class="widget-modal widget-modal--menu" id="menuModalBox">
             <div class="widget-modal-header">
                 <h2>학식 / 교직원 식단표</h2>
-                <button class="widget-modal-close" id="menuModalClose" aria-label="닫기">&times;</button>
+                <div class="widget-modal-actions">
+                    <!-- 전체화면 토글 버튼 -->
+                    <button class="widget-modal-fullscreen" id="menuFullscreenBtn" aria-label="전체화면" title="전체화면">
+                        <svg id="menuFullscreenIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                            <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                        </svg>
+                    </button>
+                    <button class="widget-modal-close" id="menuModalClose" aria-label="닫기">&times;</button>
+                </div>
             </div>
             <div class="widget-modal-body">
                 <div id="menuLoadingIndicator" class="widget-loading">식단표를 불러오는 중...</div>

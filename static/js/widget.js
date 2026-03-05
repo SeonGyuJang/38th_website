@@ -343,6 +343,38 @@
         });
     }
 
+    // ── 전체화면 토글 ──────────────────────────────────────────────────────
+
+    // 전체화면 아이콘 SVG 두 가지
+    const ICON_EXPAND = `
+        <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+    `;
+    const ICON_COMPRESS = `
+        <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+        <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+    `;
+
+    function initFullscreenToggle() {
+        const btn     = document.getElementById('menuFullscreenBtn');
+        const box     = document.getElementById('menuModalBox');
+        const overlay = document.getElementById('menuModal');
+        const iconEl  = document.getElementById('menuFullscreenIcon');
+        if (!btn || !box) return;
+
+        let isFullscreen = false;
+
+        btn.addEventListener('click', () => {
+            isFullscreen = !isFullscreen;
+            box.classList.toggle('is-fullscreen', isFullscreen);
+            // overlay의 padding을 직접 제어 (CSS :has() 미지원 브라우저 대비)
+            overlay.style.padding = isFullscreen ? '0' : '';
+            // 아이콘 교체
+            iconEl.innerHTML = isFullscreen ? ICON_COMPRESS : ICON_EXPAND;
+            btn.title = isFullscreen ? '창 크기로 보기' : '전체화면';
+        });
+    }
+
     // ── 초기화 ────────────────────────────────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -373,6 +405,26 @@
             if (!_menuLoaded) loadAndRenderMenu();
         });
 
+        // 식단표 모달 닫을 때 전체화면 해제
+        const menuOverlay  = document.getElementById('menuModal');
+        const menuCloseBtn = document.getElementById('menuModalClose');
+        const menuBox      = document.getElementById('menuModalBox');
+        function resetFullscreen() {
+            if (!menuBox) return;
+            menuBox.classList.remove('is-fullscreen');
+            if (menuOverlay) menuOverlay.style.padding = '';
+            const iconEl = document.getElementById('menuFullscreenIcon');
+            if (iconEl) iconEl.innerHTML = ICON_EXPAND;
+            const btn = document.getElementById('menuFullscreenBtn');
+            if (btn) btn.title = '전체화면';
+        }
+        if (menuOverlay) menuOverlay.addEventListener('click', (e) => { if (e.target === menuOverlay) resetFullscreen(); });
+        if (menuCloseBtn) menuCloseBtn.addEventListener('click', resetFullscreen);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menuOverlay && menuOverlay.classList.contains('active')) resetFullscreen();
+        });
+
         initMenuTabs();
+        initFullscreenToggle();
     });
 })();
