@@ -322,8 +322,8 @@
     <div style="margin-bottom: 28px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;">
         <h2 style="font-size: 1.4rem; font-weight: 800; color: #1a1a1a; margin: 0;">
             <span style="color: var(--ku-crimson);">{{ selected_date.strftime('%Y년 %m월 %d일') }}</span>
-            {% set day_names_full = ['월요일','화요일','수요일','목요일','금요일','토요일','일요일'] %}
-            ({{ day_names_full[selected_date.weekday()] }}) 회의실 현황
+            {% set day_names_short = ['월','화','수','목','금','토','일'] %}
+            ({{ day_names_short[selected_date.weekday()] }}) 회의실 현황
         </h2>
     </div>
 
