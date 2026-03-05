@@ -1740,19 +1740,23 @@ def admin_meeting_room_reject(booking_id):
 @app.route('/admin/meeting-rooms/delete/<int:booking_id>', methods=['POST'])
 @login_required
 def admin_meeting_room_delete(booking_id):
+    print(f'[DELETE ROUTE] 진입 booking_id={booking_id} user={current_user}')
     try:
         booking = db_helper.get_meeting_room_booking_by_id(booking_id)
+        print(f'[DELETE ROUTE] booking 조회 결과: {booking}')
         if not booking:
+            print(f'[DELETE ROUTE] booking_id={booking_id} 찾을 수 없음')
             flash('대관 신청을 찾을 수 없습니다.', 'error')
             return redirect(url_for('admin_meeting_rooms'))
         ok = db_helper.delete_meeting_room_booking(booking_id)
+        print(f'[DELETE ROUTE] delete 결과: ok={ok}')
         if ok:
             threading.Thread(target=send_booking_cancelled_by_admin_email, args=(dict(booking),), daemon=True).start()
             flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송됩니다.', 'success')
         else:
             flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
     except Exception as e:
-        print(f'[삭제 오류] booking_id={booking_id}: {e}')
+        print(f'[DELETE ROUTE] 예외 발생 booking_id={booking_id}: {e}')
         flash('삭제 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
 

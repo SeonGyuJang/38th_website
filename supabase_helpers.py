@@ -593,12 +593,20 @@ class SupabaseHelper:
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
         """회의실 대관 신청 삭제 (status를 'cancelled'로 변경하여 목록에서 제외)"""
+        print(f'[DELETE] booking_id={booking_id} 시작')
         try:
             result = self.update_meeting_room_booking(booking_id, {'status': 'cancelled'})
-            if result:
-                print(f'[DELETE] booking_id={booking_id} status set to cancelled')
+            print(f'[DELETE] update 결과: {result}')
+            if not result:
+                print(f'[DELETE FAILED] booking_id={booking_id} update returned None/empty')
+                return False
+            # 업데이트 후 재조회해서 실제로 반영됐는지 검증
+            verify = self.get_meeting_room_booking_by_id(booking_id)
+            print(f'[DELETE] 검증 재조회 결과: status={verify.get("status") if verify else "NOT FOUND"}')
+            if verify and verify.get('status') == 'cancelled':
+                print(f'[DELETE SUCCESS] booking_id={booking_id} cancelled 확인됨')
                 return True
-            print(f'[DELETE FAILED] booking_id={booking_id} update returned None')
+            print(f'[DELETE VERIFY FAILED] booking_id={booking_id} status={verify.get("status") if verify else None}')
             return False
         except Exception as e:
             print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
