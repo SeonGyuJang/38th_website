@@ -288,7 +288,7 @@
     </div>
     {% if is_restricted_sunday %}
     <div style="margin-bottom:16px;padding:12px 18px;background:#ede9fe;border-radius:10px;border-left:3px solid #7c3aed;font-size:0.85rem;color:#5b21b6;font-weight:600;">
-        오늘(일요일)은 격주 제한일로 <strong>20:00 ~ 24:00</strong> 전 회의실 대관이 불가합니다.
+        오늘(일요일)은 격주 제한일로 <strong>회의실 1호</strong>의 <strong>20:00 ~ 24:00</strong> 대관이 불가합니다.
     </div>
     {% endif %}
 
@@ -560,14 +560,14 @@ function getSlotStatuses(roomNum, bookingDate) {
         }
     }
 
-    // 전 회의실: 격주 일요일 20:00~24:00 블로킹 (2026-03-08부터 2주 격주)
-    {
+    // 회의실 1번: 격주 일요일 20:00~24:00 블로킹 (2026-03-08부터 2주 격주)
+    if (roomNum === 1) {
         const sundayStart = new Date('2026-03-08T00:00:00');
         if (bd.getDay() === 0) { // 일요일
             const daysDiff = (bd - sundayStart) / (1000 * 60 * 60 * 24);
             const weeksDiff = Math.floor(daysDiff / 7);
             if (daysDiff >= 0 && weeksDiff % 2 === 0) { // 2주 격주
-                // 20:00 ~ 24:00 = slot 40 ~ 47 (20*2=40)
+                // 20:00 ~ 24:00 = slot 40 ~ 47
                 for (let i = 40; i < TOTAL_SLOTS; i++) st[i] = 'unavailable';
             }
         }

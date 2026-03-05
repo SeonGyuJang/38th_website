@@ -12,6 +12,7 @@ from datetime import datetime, date, timedelta
 import tempfile
 import os
 import shutil
+import threading
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -142,6 +143,12 @@ def send_email(to_email, subject, html_body):
     except Exception as e:
         print(f'[이메일 발송 실패] 수신자: {to_email}, 오류: {type(e).__name__}: {e}')
         return False
+
+
+def send_email_async(to_email, subject, html):
+    """이메일을 백그라운드 스레드에서 발송 (응답 블로킹 방지)"""
+    thread = threading.Thread(target=send_email, args=(to_email, subject, html), daemon=True)
+    thread.start()
 
 
 def send_booking_submitted_user_email(booking):
@@ -748,18 +755,18 @@ def meeting_room_book():
                     flash('회의실 1호는 해당 날짜 19:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
                     return redirect(url_for('meeting_room', date=booking_date))
 
-    # 전 회의실: 2주 격주 일요일 20:00~24:00 불가 (2026-03-08부터)
-    restricted_sunday_start = datetime.strptime('2026-03-08', '%Y-%m-%d').date()
-    if bd.weekday() == 6:  # 일요일
-        weeks_since_start = (bd - restricted_sunday_start).days // 7
-        if weeks_since_start >= 0 and weeks_since_start % 2 == 0:
-            st_hour = int(start_time.split(':')[0])
-            et_hour = int(end_time.split(':')[0])
-            et_min = int(end_time.split(':')[1])
-            # 20:00 이후 시작이거나, 종료가 20:00 초과인 경우
-            if st_hour >= 20 or et_hour > 20 or (et_hour == 20 and et_min > 0):
-                flash('해당 날짜(일요일) 20:00 ~ 24:00에는 전 회의실 대관이 불가합니다.', 'error')
-                return redirect(url_for('meeting_room', date=booking_date))
+    # 회의실 1번: 2주 격주 일요일 20:00~24:00 불가 (2026-03-08부터)
+    if room_number == 1:
+        restricted_sunday_start = datetime.strptime('2026-03-08', '%Y-%m-%d').date()
+        if bd.weekday() == 6:  # 일요일
+            weeks_since_start = (bd - restricted_sunday_start).days // 7
+            if weeks_since_start >= 0 and weeks_since_start % 2 == 0:
+                st_hour = int(start_time.split(':')[0])
+                et_hour = int(end_time.split(':')[0])
+                et_min = int(end_time.split(':')[1])
+                if st_hour >= 20 or et_hour > 20 or (et_hour == 20 and et_min > 0):
+                    flash('회의실 1호는 해당 날짜 20:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
+                    return redirect(url_for('meeting_room', date=booking_date))
 
     # 시간 중복 확인 (같은 날짜 같은 회의실)
     existing_bookings = db_helper.get_bookings_by_date(booking_date)
@@ -788,13 +795,11 @@ def meeting_room_book():
     booking = db_helper.create_meeting_room_booking(data)
 
     if booking:
-        # 이메일 발송
-        user_email_sent = send_booking_submitted_user_email(booking)
-        send_booking_admin_notification_email(booking)
-        if user_email_sent:
-            flash('대관 신청이 완료되었습니다. 확인 이메일을 발송했습니다. 승인 후 이메일로 안내해 드립니다.', 'success')
-        else:
-            flash('대관 신청이 완료되었습니다. 승인 후 이메일로 안내해 드립니다. (확인 이메일 발송에 실패했습니다)', 'success')
+        # 이메일 발송 (백그라운드 스레드로 응답 속도 향상)
+        booking_snapshot = dict(booking)
+        threading.Thread(target=send_booking_submitted_user_email, args=(booking_snapshot,), daemon=True).start()
+        threading.Thread(target=send_booking_admin_notification_email, args=(booking_snapshot,), daemon=True).start()
+        flash('대관 신청이 완료되었습니다. 확인 이메일이 곧 발송됩니다.', 'success')
     else:
         flash('대관 신청 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
 
@@ -1742,8 +1747,8 @@ def admin_meeting_room_delete(booking_id):
             return redirect(url_for('admin_meeting_rooms'))
         ok = db_helper.delete_meeting_room_booking(booking_id)
         if ok:
-            send_booking_cancelled_by_admin_email(booking)
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송되었습니다.', 'success')
+            threading.Thread(target=send_booking_cancelled_by_admin_email, args=(dict(booking),), daemon=True).start()
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송됩니다.', 'success')
         else:
             flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
     except Exception as e:
@@ -1790,9 +1795,10 @@ def meeting_room_cancel():
             else:
                 ok = db_helper.delete_meeting_room_booking(booking_id)
                 if ok:
-                    send_booking_user_cancelled_email(booking)
-                    send_cancellation_admin_notification_email(booking)
-                    flash(f'회의실 {booking["room_number"]}호 ({booking["booking_date"]} {booking["start_time"]}~{booking["end_time"]}) 예약이 취소되었습니다. 취소 확인 이메일을 발송했습니다.', 'success')
+                    b_snap = dict(booking)
+                    threading.Thread(target=send_booking_user_cancelled_email, args=(b_snap,), daemon=True).start()
+                    threading.Thread(target=send_cancellation_admin_notification_email, args=(b_snap,), daemon=True).start()
+                    flash(f'회의실 {booking["room_number"]}호 ({booking["booking_date"]} {booking["start_time"]}~{booking["end_time"]}) 예약이 취소되었습니다. 취소 확인 이메일이 곧 발송됩니다.', 'success')
                     return redirect(url_for('meeting_room_cancel'))
                 else:
                     flash('취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
