@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='defaults/logo.png') }}">
     <title>{% block title %}고려대학교 세종캠퍼스 제38대 총학생회 홈페이지{% endblock %}</title>
     <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ static_ver }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"></noscript>
 
@@ -100,8 +100,8 @@
         </div>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/widget.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v={{ static_ver }}"></script>
+    <script src="{{ url_for('static', filename='js/widget.js') }}?v={{ static_ver }}"></script>
 
     <!-- ===================== 우측 고정 위젯 ===================== -->
     <div class="side-widget" id="sideWidget">
