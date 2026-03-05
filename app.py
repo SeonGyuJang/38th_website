@@ -1676,7 +1676,7 @@ def admin_history_delete(log_id):
 @login_required
 def admin_meeting_rooms():
     status_filter = request.args.get('status', '')
-    if status_filter in ['pending', 'approved', 'rejected']:
+    if status_filter in ['pending', 'approved', 'rejected', 'cancelled']:
         bookings = db_helper.get_all_meeting_room_bookings(status=status_filter)
     else:
         bookings = db_helper.get_all_meeting_room_bookings()
