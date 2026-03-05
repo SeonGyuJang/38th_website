@@ -84,6 +84,29 @@ def _init_menu_scheduler():
 _load_menu_from_file()
 threading.Thread(target=_init_menu_scheduler, daemon=True).start()
 
+# ── 정적 파일 캐시 버스팅용 버전 문자열 ──────────────────────────────────────
+def _get_static_version():
+    """배포마다 달라지는 버전 문자열 반환 (캐시 버스팅용).
+    git commit hash를 우선 사용하고, 없으면 app.py 파일 수정 시각을 사용."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            capture_output=True, text=True, timeout=3
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    # fallback: app.py 수정 시각 (초 단위)
+    try:
+        return str(int(os.path.getmtime(os.path.abspath(__file__))))
+    except Exception:
+        return '1'
+
+_STATIC_VER = _get_static_version()
+
 app = Flask(__name__)
 app.config.from_object(Config)
 Config.init_app(app)
@@ -103,6 +126,11 @@ try:
     )
 except ImportError:
     pass  # WhiteNoise 없으면 기본 설정 사용
+
+# Jinja 전역 변수: 모든 템플릿에서 {{ static_ver }} 로 캐시 버스팅 버전 사용
+@app.context_processor
+def inject_static_version():
+    return {'static_ver': _STATIC_VER}
 
 # Supabase 초기화
 init_supabase(app)
@@ -494,8 +522,9 @@ def check_maintenance_mode():
     모든 요청 전에 유지보수 모드 확인
     관리자 경로(/admin/)와 정적 파일은 제외
     """
-    # 관리자 경로나 정적 파일은 유지보수 모드에서도 접근 가능
-    if request.path.startswith('/admin') or request.path.startswith('/static'):
+    # 관리자, 정적 파일, API, 셔틀버스 CSV는 유지보수 모드에서도 접근 가능
+    if (request.path.startswith('/admin') or request.path.startswith('/static')
+            or request.path.startswith('/api/') or request.path.startswith('/schedules/')):
         return None
 
     # 유지보수 페이지 자체는 항상 접근 가능
