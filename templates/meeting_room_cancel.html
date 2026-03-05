@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}예약 취소 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .cancel-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        border: 1px solid #e8e8ed;
+        animation: fadeInUp 0.45s cubic-bezier(0.16,1,0.3,1) backwards;
+    }
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e5e5;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+        color: #1a1a1a;
+    }
+    .form-input:focus {
+        border-color: var(--ku-crimson);
+        box-shadow: 0 0 0 3px rgba(150,26,50,0.1);
+    }
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 6px;
+    }
+    .booking-item {
+        border: 1.5px solid #e8e8ed;
+        border-radius: 14px;
+        padding: 20px 24px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .booking-item:hover {
+        border-color: var(--ku-crimson);
+        box-shadow: 0 4px 16px rgba(150,26,50,0.08);
+    }
+    .btn-primary {
+        width: 100%;
+        padding: 14px;
+        background: var(--ku-crimson);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: #7a1528; transform: translateY(-1px); }
+    .btn-cancel-action {
+        padding: 9px 18px;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-cancel-action:hover { background: #fecaca; }
+
+    /* 비밀번호 입력 모달 */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(5px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+        background: white;
+        border-radius: 20px;
+        padding: 36px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        animation: fadeInUp 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    @media (max-width: 640px) {
+        .cancel-card { padding: 28px 20px; }
+        .modal-box { padding: 28px 20px; }
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px; max-width: 640px;">
+
+    <!-- 헤더 -->
+    <div style="margin-bottom: 36px; animation: fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1);">
+        <a href="{{ url_for('meeting_room') }}" style="display:inline-flex;align-items:center;gap:6px;color:#888;font-size:0.88rem;font-weight:600;text-decoration:none;margin-bottom:20px;"
+           onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='#888';">
+            ← 회의실 대관 페이지로
+        </a>
+        <div style="display:block;margin-bottom:20px;"></div>
+        <div style="display:block;text-align:center;margin-bottom:14px;">
+            <div style="display:inline-block;padding:8px 20px;background:rgba(150,26,50,0.08);border-radius:100px;border:1px solid rgba(150,26,50,0.15);">
+                <span style="color:var(--ku-crimson);font-weight:800;letter-spacing:0.12em;text-transform:uppercase;font-size:0.78rem;">Booking Cancellation</span>
+            </div>
+        </div>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:#1a1a1a;margin:0 0 10px 0;letter-spacing:-0.02em;">예약 취소</h1>
+        <p style="color:#888;font-size:0.95rem;line-height:1.6;margin:0;">이메일로 예약을 조회한 뒤, 예약 시 설정한 비밀번호로 취소할 수 있습니다.</p>
+    </div>
+
+    <!-- 플래시 메시지 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom: 24px;">
+        {% for category, message in messages %}
+        <div style="padding: 14px 18px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+                    background: {{ '#d1fae5' if category == 'success' else ('#fef3c7' if category == 'info' else '#fee2e2') }};
+                    color: {{ '#065f46' if category == 'success' else ('#92400e' if category == 'info' else '#991b1b') }};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Step 1: 이메일 조회 카드 -->
+    <div class="cancel-card" style="margin-bottom: 24px;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 18px 0;">
+            1단계 — 이메일로 예약 조회
+        </h2>
+        <form method="POST" action="{{ url_for('meeting_room_cancel') }}">
+            <input type="hidden" name="action" value="lookup">
+            <div style="display:flex;gap:10px;align-items:flex-end;">
+                <div style="flex:1;">
+                    <label class="form-label">예약 시 입력한 이메일</label>
+                    <input type="email" name="email" class="form-input" placeholder="example@korea.ac.kr"
+                           value="{{ searched_email or '' }}" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width:auto;padding:12px 22px;white-space:nowrap;flex-shrink:0;">
+                    조회
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Step 2: 예약 목록 (이메일 조회 후) -->
+    {% if bookings is not none %}
+    <div class="cancel-card" style="animation-delay:0.08s;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 6px 0;">
+            2단계 — 취소할 예약 선택
+        </h2>
+        <p style="color:#888;font-size:0.85rem;margin:0 0 20px 0;">{{ searched_email }} 으로 조회된 예약 목록입니다.</p>
+
+        {% if bookings %}
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            {% for b in bookings %}
+            <div class="booking-item">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,var(--ku-crimson) 0%,#c0392b 100%);border-radius:8px;color:white;font-weight:800;font-size:0.9rem;flex-shrink:0;">{{ b.room_number }}</span>
+                            <span style="font-size:1rem;font-weight:800;color:#1a1a1a;">회의실 {{ b.room_number }}호</span>
+                            <span style="padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;
+                                         background:{{ '#d1fae5' if b.status == 'approved' else '#fef3c7' }};
+                                         color:{{ '#065f46' if b.status == 'approved' else '#92400e' }};">
+                                {{ '승인됨' if b.status == 'approved' else '검토 중' }}
+                            </span>
+                        </div>
+                        <div style="font-size:0.9rem;color:#444;font-weight:600;">
+                            {{ b.booking_date }} &nbsp;·&nbsp; {{ b.start_time }} ~ {{ b.end_time }}
+                        </div>
+                        {% if b.organization %}
+                        <div style="font-size:0.8rem;color:#aaa;margin-top:3px;">{{ b.organization }}</div>
+                        {% endif %}
+                        {% if not b.booking_password_hash %}
+                        <div style="font-size:0.78rem;color:#f59e0b;margin-top:6px;font-weight:600;">
+                            ⚠ 비밀번호 미설정 — 관리자에게 취소 문의 필요
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if b.booking_password_hash %}
+                    <button onclick="openCancelModal({{ b.id }}, {{ b.room_number }}, '{{ b.booking_date }}', '{{ b.start_time }}', '{{ b.end_time }}', '{{ searched_email }}')"
+                            class="btn-cancel-action" style="flex-shrink:0;">
+                        취소하기
+                    </button>
+                    {% else %}
+                    <a href="mailto:dsng3419@korea.ac.kr?subject=[예약취소 문의] 회의실 {{ b.room_number }}호 {{ b.booking_date }}"
+                       style="padding:9px 18px;background:#f3f4f6;color:#6b7280;border-radius:8px;font-size:0.85rem;font-weight:700;text-decoration:none;flex-shrink:0;display:inline-block;">
+                        문의하기
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:40px 20px;color:#aaa;">
+            <p style="font-size:0.95rem;font-weight:600;margin:0;">조회된 예약이 없습니다.</p>
+            <p style="font-size:0.85rem;margin:8px 0 0 0;">이미 취소되었거나 지난 예약은 표시되지 않습니다.</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- 비밀번호 확인 모달 -->
+<div class="modal-overlay" id="cancelModal" onclick="closeCancelModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#1a1a1a;">예약 취소 확인</h3>
+            <button onclick="closeCancelModal()" style="width:32px;height:32px;border-radius:50%;background:#f5f5f7;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+
+        <div id="cancelModalDesc" style="padding:14px 16px;background:#fff3cd;border-radius:10px;margin-bottom:20px;font-size:0.88rem;color:#92400e;font-weight:600;line-height:1.5;"></div>
+
+        <form method="POST" action="{{ url_for('meeting_room_cancel') }}" id="cancelForm">
+            <input type="hidden" name="action" value="cancel">
+            <input type="hidden" name="booking_id" id="cancelBookingId">
+            <input type="hidden" name="email" id="cancelEmail">
+            <div style="margin-bottom:20px;">
+                <label class="form-label">예약 시 설정한 비밀번호 <span style="color:var(--ku-crimson);">*</span></label>
+                <input type="password" name="booking_password" id="cancelPasswordInput" class="form-input" placeholder="비밀번호를 입력하세요" required autocomplete="current-password">
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="button" onclick="closeCancelModal()"
+                        style="flex:1;padding:13px;background:#f3f4f6;color:#555;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;">
+                    돌아가기
+                </button>
+                <button type="submit"
+                        style="flex:1;padding:13px;background:#991b1b;color:white;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:background 0.2s;"
+                        onmouseover="this.style.background='#7f1d1d';" onmouseout="this.style.background='#991b1b';">
+                    취소 확인
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openCancelModal(id, room, date, start, end, email) {
+    document.getElementById('cancelBookingId').value = id;
+    document.getElementById('cancelEmail').value = email;
+    document.getElementById('cancelPasswordInput').value = '';
+    document.getElementById('cancelModalDesc').textContent =
+        `회의실 ${room}호 — ${date} ${start}~${end} 예약을 취소하시겠습니까? 취소 후에는 되돌릴 수 없습니다.`;
+    document.getElementById('cancelModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('cancelPasswordInput').focus(), 100);
+}
+
+function closeCancelModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('cancelModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeCancelModal();
+});
+</script>
+{% endblock %}

@@ -565,13 +565,19 @@ class SupabaseHelper:
         return None
 
     def get_bookings_by_date(self, booking_date: str) -> List[Dict[str, Any]]:
-        """특정 날짜의 모든 승인된 대관 신청 조회 (가용성 확인용)"""
-        response = self.client.table('meeting_room_bookings').select('*').eq('booking_date', booking_date).in_('status', ['pending', 'approved']).execute()
+        """특정 날짜의 모든 승인된 대관 신청 조회 (가용성 확인용 — 필요 컬럼만 조회)"""
+        cols = 'id,room_number,start_time,end_time,status,applicant_name,organization,booking_date'
+        response = self.client.table('meeting_room_bookings').select(cols).eq('booking_date', booking_date).in_('status', ['pending', 'approved']).execute()
         return [self.convert_booking_dates(b) for b in response.data]
 
     def get_bookings_by_date_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         """날짜 범위의 모든 대관 신청 조회"""
         response = self.client.table('meeting_room_bookings').select('*').gte('booking_date', start_date).lte('booking_date', end_date).in_('status', ['pending', 'approved']).execute()
+        return [self.convert_booking_dates(b) for b in response.data]
+
+    def get_bookings_by_email(self, email: str) -> List[Dict[str, Any]]:
+        """이메일로 대관 신청 목록 조회 (취소되지 않은 것만, 날짜 오름차순)"""
+        response = self.admin_client.table('meeting_room_bookings').select('*').eq('applicant_email', email).in_('status', ['pending', 'approved']).order('booking_date', desc=False).execute()
         return [self.convert_booking_dates(b) for b in response.data]
 
     def create_meeting_room_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -585,52 +591,26 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
-        """회의실 대관 신청 삭제"""
-        # 1차: Supabase Python SDK (service_role → RLS 우회)
-        try:
-            self.admin_client.table('meeting_room_bookings').delete().eq('id', booking_id).execute()
-            # 실제 삭제 여부 검증
-            verify = self.admin_client.table('meeting_room_bookings').select('id').eq('id', booking_id).execute()
-            if not verify.data:
-                print(f'[DELETE SUCCESS] booking_id={booking_id}')
-                return True
-            print(f'[DELETE SDK FAILED] booking_id={booking_id} still exists, trying REST API fallback')
-        except Exception as e:
-            print(f'[DELETE SDK ERROR] booking_id={booking_id}: {e}')
-
-        # 2차: 직접 REST API 호출
+        """회의실 대관 신청 삭제 (service_role REST API 직접 호출)"""
         supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
         service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
         if not supabase_url or not service_key:
             print('[DELETE ERROR] SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY 환경 변수 누락')
             return False
+
         url = f'{supabase_url}/rest/v1/meeting_room_bookings?id=eq.{booking_id}'
         headers = {
             'apikey': service_key,
             'Authorization': f'Bearer {service_key}',
             'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
+            'Prefer': 'return=minimal',
         }
         try:
             resp = httpx.delete(url, headers=headers, timeout=10)
-            print(f'[DELETE REST] booking_id={booking_id}, HTTP {resp.status_code}, body={resp.text[:300]}')
-            if resp.status_code in (200, 204):
-                # 최종 삭제 여부 검증
-                try:
-                    verify = self.admin_client.table('meeting_room_bookings').select('id').eq('id', booking_id).execute()
-                    if not verify.data:
-                        print(f'[DELETE REST SUCCESS] booking_id={booking_id}')
-                        return True
-                    print(f'[DELETE REST FAILED] booking_id={booking_id} still exists after REST delete')
-                    return False
-                except Exception as ve:
-                    print(f'[DELETE VERIFY ERROR] booking_id={booking_id}: {ve}')
-                    # verify 실패 시 HTTP 상태 코드로 판단
-                    return resp.status_code in (200, 204)
-            print(f'[DELETE REST FAILED] HTTP {resp.status_code}')
-            return False
+            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}')
+            return resp.status_code in (200, 204)
         except Exception as e:
-            print(f'[DELETE REST ERROR] booking_id={booking_id}: {e}')
+            print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
             return False
 
     def count_pending_bookings(self) -> int:
