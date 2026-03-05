@@ -372,7 +372,7 @@ button {
 }
 
 /* 데스크톱 네비게이션 */
-@media (min-width: 1100px) {
+@media (min-width: 1220px) {
     .nav {
         height: 56px;
         padding: 0 clamp(24px, 4vw, 64px);
