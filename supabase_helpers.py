@@ -574,6 +574,11 @@ class SupabaseHelper:
         response = self.client.table('meeting_room_bookings').select('*').gte('booking_date', start_date).lte('booking_date', end_date).in_('status', ['pending', 'approved']).execute()
         return [self.convert_booking_dates(b) for b in response.data]
 
+    def get_bookings_by_email(self, email: str) -> List[Dict[str, Any]]:
+        """이메일로 대관 신청 목록 조회 (취소되지 않은 것만, 날짜 오름차순)"""
+        response = self.admin_client.table('meeting_room_bookings').select('*').eq('applicant_email', email).in_('status', ['pending', 'approved']).order('booking_date', desc=False).execute()
+        return [self.convert_booking_dates(b) for b in response.data]
+
     def create_meeting_room_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """회의실 대관 신청 생성"""
         response = self.client.table('meeting_room_bookings').insert(data).execute()

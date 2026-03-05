@@ -322,22 +322,6 @@
         document.body.style.overflow = 'hidden';
     }
 
-    function openApproveModal(bookingId, roomNum, date, startTime, endTime) {
-        const form = document.getElementById('approveForm');
-        form.action = `/admin/meeting-rooms/approve/${bookingId}`;
-        document.getElementById('approveDesc').textContent = `회의실 ${roomNum}호 (${date} ${startTime}~${endTime}) 대관 신청을 승인하시겠습니까? 신청자에게 승인 이메일이 발송됩니다.`;
-        document.getElementById('approveModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function openRejectModal(bookingId, roomNum, date) {
-        const form = document.getElementById('rejectForm');
-        form.action = `/admin/meeting-rooms/reject/${bookingId}`;
-        document.getElementById('rejectDesc').textContent = `회의실 ${roomNum}호 (${date}) 대관 신청을 거절하시겠습니까? 신청자에게 거절 이메일이 발송됩니다.`;
-        document.getElementById('rejectModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
     function confirmDelete(bookingId, roomNum) {
         if (!confirm(`회의실 ${roomNum}호 대관 신청을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
         const form = document.createElement('form');
@@ -356,9 +340,7 @@
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            ['detailModal', 'approveModal', 'rejectModal'].forEach(id => {
-                document.getElementById(id).classList.remove('active');
-            });
+            document.getElementById('detailModal').classList.remove('active');
             document.body.style.overflow = '';
         }
     });

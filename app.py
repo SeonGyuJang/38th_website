@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_compress import Compress
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from database import init_supabase
 from supabase_helpers import SupabaseHelper
@@ -276,6 +277,68 @@ def send_booking_rejected_email(booking):
         </table>
         {note_html}
         <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2025 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['applicant_email'], subject, html)
+
+
+def send_booking_cancelled_by_admin_email(booking):
+    """관리자 취소 알림 이메일 (신청자에게)"""
+    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관이 취소되었습니다'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #961A32; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">회의실 대관 취소 안내</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #fee2e2; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #991b1b; font-weight: 700; font-size: 15px;">✕ 대관 취소</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">대관이 관리자에 의해 취소되었습니다</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 예약이 취소 처리되었습니다. 문의사항이 있으시면 연락주세요.</p>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
+        </table>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr 또는 010-6598-6414로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2025 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['applicant_email'], subject, html)
+
+
+def send_booking_user_cancelled_email(booking):
+    """사용자 본인 취소 알림 이메일 (신청자에게)"""
+    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 취소 확인'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #444; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">회의실 대관 취소 확인</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #f3f4f6; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #374151; font-weight: 700; font-size: 15px;">✓ 취소 완료</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">대관 취소가 완료되었습니다</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">신청하신 예약이 정상적으로 취소되었습니다.</p>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
+        </table>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">재신청은 회의실 대관 페이지에서 하실 수 있습니다. 문의: dsng3419@korea.ac.kr</p>
       </div>
       <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
         <p style="color: #999; font-size: 12px; margin: 0;">© 2025 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
@@ -593,6 +656,7 @@ def meeting_room_book():
     start_time = request.form.get('start_time', '').strip()
     end_time = request.form.get('end_time', '').strip()
     attendees = request.form.get('attendees', 1, type=int)
+    booking_password = request.form.get('booking_password', '').strip()
 
     # 기본 유효성 검사
     if not all([room_number, applicant_name, applicant_email, purpose, booking_date, start_time, end_time]):
@@ -658,7 +722,8 @@ def meeting_room_book():
         'start_time': start_time,
         'end_time': end_time,
         'attendees': attendees,
-        'status': 'approved'
+        'status': 'approved',
+        'booking_password_hash': generate_password_hash(booking_password) if booking_password else None
     }
     booking = db_helper.create_meeting_room_booking(data)
 
@@ -1611,15 +1676,67 @@ def admin_meeting_room_reject(booking_id):
 @login_required
 def admin_meeting_room_delete(booking_id):
     try:
+        booking = db_helper.get_meeting_room_booking_by_id(booking_id)
+        if not booking:
+            flash('대관 신청을 찾을 수 없습니다.', 'error')
+            return redirect(url_for('admin_meeting_rooms'))
         ok = db_helper.delete_meeting_room_booking(booking_id)
         if ok:
-            flash('대관 신청이 삭제되었습니다.', 'success')
+            send_booking_cancelled_by_admin_email(booking)
+            flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송되었습니다.', 'success')
         else:
             flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
     except Exception as e:
         print(f'[삭제 오류] booking_id={booking_id}: {e}')
         flash('삭제 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
+
+
+@app.route('/meeting-room/cancel', methods=['GET', 'POST'])
+def meeting_room_cancel():
+    """사용자 예약 취소 페이지"""
+    bookings = None
+    searched_email = None
+
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+
+        # Step 1: 이메일로 예약 조회
+        if action == 'lookup':
+            email = request.form.get('email', '').strip().lower()
+            if not email:
+                flash('이메일을 입력해주세요.', 'error')
+            else:
+                searched_email = email
+                bookings = db_helper.get_bookings_by_email(email)
+                if not bookings:
+                    flash('해당 이메일로 등록된 예약이 없습니다.', 'info')
+
+        # Step 2: 비밀번호 인증 후 취소
+        elif action == 'cancel':
+            booking_id = request.form.get('booking_id', type=int)
+            password = request.form.get('booking_password', '').strip()
+            email = request.form.get('email', '').strip().lower()
+
+            booking = db_helper.get_meeting_room_booking_by_id(booking_id) if booking_id else None
+            if not booking:
+                flash('예약을 찾을 수 없습니다.', 'error')
+            elif booking.get('applicant_email', '').lower() != email:
+                flash('이메일이 일치하지 않습니다.', 'error')
+            elif not booking.get('booking_password_hash'):
+                flash('이 예약은 비밀번호가 설정되지 않아 직접 취소할 수 없습니다. 관리자(dsng3419@korea.ac.kr)에게 문의해 주세요.', 'error')
+            elif not check_password_hash(booking['booking_password_hash'], password):
+                flash('비밀번호가 올바르지 않습니다.', 'error')
+            else:
+                ok = db_helper.delete_meeting_room_booking(booking_id)
+                if ok:
+                    send_booking_user_cancelled_email(booking)
+                    flash(f'회의실 {booking["room_number"]}호 ({booking["booking_date"]} {booking["start_time"]}~{booking["end_time"]}) 예약이 취소되었습니다. 취소 확인 이메일을 발송했습니다.', 'success')
+                    return redirect(url_for('meeting_room_cancel'))
+                else:
+                    flash('취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+
+    return render_template('meeting_room_cancel.html', bookings=bookings, searched_email=searched_email)
 
 
 @app.route('/admin/email-test', methods=['GET', 'POST'])

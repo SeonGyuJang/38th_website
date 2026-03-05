@@ -370,6 +370,7 @@
             <li>대관 신청 가능 기간 : <strong>오늘부터 2주까지 대관 예약 가능</strong> ({{ today.strftime('%Y.%m.%d') }} ~ {{ max_date.strftime('%Y.%m.%d') }})</li>
             <li>30분 단위로 시간 블록을 클릭해 시작·종료 시간을 선택하세요.</li>
             <li>문의 : <a href="mailto:dsng3419@korea.ac.kr" style="color:var(--dark);font-weight:700;">부총학생회장 장선규(010-6598-6414)</a></li>
+            <li>예약 취소 : <a href="{{ url_for('meeting_room_cancel') }}" style="color:var(--ku-crimson);font-weight:700;">예약 취소 페이지</a>에서 이메일과 비밀번호로 직접 취소 가능</li>
         </ul>
     </div>
 </div>
@@ -466,6 +467,15 @@
                         <div>
                             <label class="form-label">사용 목적 <span class="required">*</span></label>
                             <textarea name="purpose" class="form-input" rows="2" placeholder="회의실 사용 목적을 간략히 작성해주세요." required style="resize:vertical;"></textarea>
+                        </div>
+
+                        <div style="border-top:1px solid #f0f0f0;padding-top:12px;">
+                            <label class="form-label">
+                                취소 비밀번호
+                                <span style="font-weight:500;color:#aaa;margin-left:4px;font-size:0.8rem;">(나중에 예약 취소 시 사용)</span>
+                            </label>
+                            <input type="password" name="booking_password" class="form-input" placeholder="비밀번호를 설정하면 나중에 직접 취소할 수 있습니다" autocomplete="new-password">
+                            <p style="font-size:0.78rem;color:#aaa;margin:6px 0 0 2px;">입력하지 않으면 관리자에게 문의해야 취소 가능합니다.</p>
                         </div>
 
                     </div>
