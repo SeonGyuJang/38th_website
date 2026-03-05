@@ -6,7 +6,6 @@ Supabase 헬퍼 함수
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-import httpx
 from database import get_supabase_client, get_supabase_admin_client
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -550,10 +549,12 @@ class SupabaseHelper:
         return booking
 
     def get_all_meeting_room_bookings(self, status: Optional[str] = None, order_by: str = 'created_at', ascending: bool = False) -> List[Dict[str, Any]]:
-        """모든 회의실 대관 신청 조회"""
+        """모든 회의실 대관 신청 조회 (기본적으로 cancelled 제외)"""
         query = self.admin_client.table('meeting_room_bookings').select('*')
         if status:
             query = query.eq('status', status)
+        else:
+            query = query.neq('status', 'cancelled')
         response = query.order(order_by, desc=not ascending).execute()
         return [self.convert_booking_dates(b) for b in response.data]
 
@@ -591,24 +592,22 @@ class SupabaseHelper:
         return response.data[0] if response.data else None
 
     def delete_meeting_room_booking(self, booking_id: int) -> bool:
-        """회의실 대관 신청 삭제 (service_role REST API 직접 호출)"""
-        supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
-        service_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
-        if not supabase_url or not service_key:
-            print('[DELETE ERROR] SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY 환경 변수 누락')
-            return False
-
-        url = f'{supabase_url}/rest/v1/meeting_room_bookings?id=eq.{booking_id}'
-        headers = {
-            'apikey': service_key,
-            'Authorization': f'Bearer {service_key}',
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal',
-        }
+        """회의실 대관 신청 삭제 (status를 'cancelled'로 변경하여 목록에서 제외)"""
+        print(f'[DELETE] booking_id={booking_id} 시작')
         try:
-            resp = httpx.delete(url, headers=headers, timeout=10)
-            print(f'[DELETE] booking_id={booking_id}, HTTP {resp.status_code}')
-            return resp.status_code in (200, 204)
+            result = self.update_meeting_room_booking(booking_id, {'status': 'cancelled'})
+            print(f'[DELETE] update 결과: {result}')
+            if not result:
+                print(f'[DELETE FAILED] booking_id={booking_id} update returned None/empty')
+                return False
+            # 업데이트 후 재조회해서 실제로 반영됐는지 검증
+            verify = self.get_meeting_room_booking_by_id(booking_id)
+            print(f'[DELETE] 검증 재조회 결과: status={verify.get("status") if verify else "NOT FOUND"}')
+            if verify and verify.get('status') == 'cancelled':
+                print(f'[DELETE SUCCESS] booking_id={booking_id} cancelled 확인됨')
+                return True
+            print(f'[DELETE VERIFY FAILED] booking_id={booking_id} status={verify.get("status") if verify else None}')
+            return False
         except Exception as e:
             print(f'[DELETE ERROR] booking_id={booking_id}: {e}')
             return False

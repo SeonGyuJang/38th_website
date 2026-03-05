@@ -209,9 +209,12 @@
                                             onmouseout="this.style.background='#f0f0f0'; this.style.transform='translateY(0)';">
                                         상세
                                     </button>
-                                    <button onclick="confirmDelete({{ booking.id }}, {{ booking.room_number }})" class="action-btn btn-delete">
-                                        삭제
-                                    </button>
+                                    <form method="POST"
+                                          action="{{ url_for('admin_meeting_room_delete', booking_id=booking.id) }}"
+                                          style="display:inline; margin:0;"
+                                          onsubmit="return confirm('회의실 {{ booking.room_number }}호 대관 신청을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');">
+                                        <button type="submit" class="action-btn btn-delete">삭제</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -331,16 +334,6 @@
         `;
         document.getElementById('detailModal').classList.add('active');
         document.body.style.overflow = 'hidden';
-    }
-
-    function confirmDelete(bookingId, roomNum) {
-        if (!confirm(`${ADMIN_ROOM_DISPLAY_NAMES[roomNum]} 대관 신청을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/meeting-rooms/delete/${bookingId}`;
-        form.style.display = 'none';
-        document.body.appendChild(form);
-        form.submit();
     }
 
     function closeModal(modalId, event) {
