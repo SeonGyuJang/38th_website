@@ -317,7 +317,11 @@
                     const cell = tbody.rows[rowIdx]?.cells[dayIdx + 1];
                     if (cell) {
                         cell.innerHTML = dayMenus[meal.type].메뉴
-                            .map(item => `<span class="widget-menu-item">${item}</span>`)
+                            .filter(item => item !== 'kcal' && !/^\d+$/.test(item.trim()))
+                            .map(item => {
+                                const cleaned = item.replace(/\([0-9,\s]+\)/g, '').trim();
+                                return `<span class="widget-menu-item">${cleaned}</span>`;
+                            })
                             .join('');
                     }
                 }
@@ -345,7 +349,11 @@
                 const cell = tbody.rows[0]?.cells[dayIdx + 1];
                 if (cell) {
                     cell.innerHTML = dayMenus.중식.메뉴
-                        .map(item => `<span class="widget-menu-item">${item}</span>`)
+                        .filter(item => item !== 'kcal' && !/^\d+$/.test(item.trim()))
+                        .map(item => {
+                            const cleaned = item.replace(/\([0-9,\s]+\)/g, '').trim();
+                            return `<span class="widget-menu-item">${cleaned}</span>`;
+                        })
                         .join('');
                 }
             }
@@ -464,5 +472,19 @@
 
         initMenuTabs();
         initFullscreenToggle();
+
+        // 모바일 위젯 접기/펼치기
+        const collapseBtn = document.getElementById('widgetCollapseBtn');
+        const sideWidget  = document.getElementById('sideWidget');
+        if (collapseBtn && sideWidget) {
+            collapseBtn.addEventListener('click', () => {
+                sideWidget.classList.toggle('widget-collapsed');
+                // 접을 때 열려있는 모달 닫기
+                if (sideWidget.classList.contains('widget-collapsed')) {
+                    document.querySelectorAll('.widget-modal-overlay.active').forEach(m => closeModal(m));
+                    stopBusTimer();
+                }
+            });
+        }
     });
 })();
