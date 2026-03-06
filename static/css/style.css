@@ -1776,6 +1776,28 @@ footer a:hover {
         border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     }
 
+    /* 식단표 — 모바일: 오늘 컬럼만 표시 */
+    .widget-menu-table {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .widget-menu-table thead th:not(:first-child):not(.is-today),
+    .widget-menu-table tbody td:not(.is-today) {
+        display: none;
+    }
+
+    .widget-menu-table thead th.is-today {
+        min-width: unset;
+        width: auto;
+    }
+
+    .widget-menu-table tbody td.is-today {
+        min-width: unset;
+        width: auto;
+        text-align: left;
+    }
+
     .widget-modal--menu.is-fullscreen {
         max-height: 100vh;
         border-radius: 0;

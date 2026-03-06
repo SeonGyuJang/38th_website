@@ -260,6 +260,29 @@
     }
 
     const DAY_ORDER = ['월', '화', '수', '목', '금'];
+
+    // 오늘 요일에 해당하는 컬럼 인덱스 반환 (1=월 ~ 5=금, 주말이면 null)
+    function getTodayColIdx() {
+        const day = new Date().getDay(); // 0=일, 1=월, ..., 5=금, 6=토
+        const map = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };
+        return map[day] ?? null;
+    }
+
+    // 오늘 컬럼 셀에 is-today 클래스 추가
+    function markTodayColumn(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        const col = getTodayColIdx();
+        if (col === null) return; // 주말: 전체 표시
+        table.querySelectorAll('thead tr th').forEach((th, i) => {
+            if (i === col) th.classList.add('is-today');
+        });
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const tds = row.querySelectorAll('td');
+            if (tds[col - 1]) tds[col - 1].classList.add('is-today');
+        });
+    }
+
     const STUDENT_MEAL_TYPES = [
         { type: '조식',      time: '07:30~09:00' },
         { type: '중식-한식', time: '11:30~13:30' },
@@ -300,6 +323,7 @@
                 }
             });
         });
+        markTodayColumn('studentMenuTable');
     }
 
     function renderStaffMenu(data) {
@@ -326,6 +350,7 @@
                 }
             }
         });
+        markTodayColumn('staffMenuTable');
     }
 
     // ── 탭 전환 ───────────────────────────────────────────────────────────
