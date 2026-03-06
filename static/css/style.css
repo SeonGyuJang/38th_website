@@ -1599,18 +1599,44 @@ footer a:hover {
 }
 
 /* ---- 식단표 ---- */
+.menu-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
 .menu-week-info {
     text-align: center;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--ku-crimson);
-    margin-bottom: 14px;
     padding: 8px 14px;
     background: rgba(150, 26, 50, 0.05);
     border-radius: var(--radius-full);
-    display: inline-block;
-    width: 100%;
+    flex: 1;
     box-sizing: border-box;
+}
+
+/* 전체/오늘 토글 — 모바일에서만 표시 */
+.menu-view-toggle {
+    display: none;
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border: 1.5px solid var(--ku-crimson);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--ku-crimson);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+}
+
+.menu-view-toggle.is-all {
+    background: var(--ku-crimson);
+    color: white;
 }
 
 .menu-tabs {
@@ -1681,7 +1707,7 @@ footer a:hover {
 }
 
 .widget-menu-table tbody th {
-    background: rgba(150, 26, 50, 0.04);
+    background: #fdf0f2;
     font-weight: 700;
     color: var(--ku-crimson);
     font-size: 0.8rem;
@@ -1776,26 +1802,32 @@ footer a:hover {
         border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     }
 
-    /* 식단표 — 모바일: 오늘 컬럼만 표시 */
-    .widget-menu-table {
+    /* 식단표 — 모바일: 오늘 컬럼만 표시 (기본값) */
+    .widget-menu-table:not(.show-all) {
         min-width: unset;
         width: 100%;
     }
 
-    .widget-menu-table thead th:not(:first-child):not(.is-today),
-    .widget-menu-table tbody td:not(.is-today) {
+    .widget-menu-table:not(.show-all) thead th:not(:first-child):not(.is-today),
+    .widget-menu-table:not(.show-all) tbody td:not(.is-today) {
         display: none;
     }
 
-    .widget-menu-table thead th.is-today {
+    .widget-menu-table:not(.show-all) thead th.is-today,
+    .widget-menu-table:not(.show-all) tbody td.is-today {
         min-width: unset;
         width: auto;
     }
 
-    .widget-menu-table tbody td.is-today {
-        min-width: unset;
-        width: auto;
-        text-align: left;
+    /* 전체 보기 모드 */
+    .widget-menu-table.show-all {
+        font-size: 0.78rem;
+        min-width: 480px;
+    }
+
+    /* 토글 버튼 표시 */
+    .menu-view-toggle {
+        display: block;
     }
 
     .widget-modal--menu.is-fullscreen {
@@ -1805,7 +1837,6 @@ footer a:hover {
 
     .widget-menu-table {
         font-size: 0.78rem;
-        min-width: 480px;
     }
 
     .widget-menu-table th,

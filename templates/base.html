@@ -188,7 +188,10 @@
                 <div id="menuLoadingIndicator" class="widget-loading">식단표를 불러오는 중...</div>
                 <div id="menuErrorMessage" class="widget-error" style="display:none;"></div>
                 <div id="menuContent" style="display:none;">
-                    <div class="menu-week-info" id="menuWeekInfo"></div>
+                    <div class="menu-top-row">
+                        <div class="menu-week-info" id="menuWeekInfo"></div>
+                        <button class="menu-view-toggle" id="menuViewToggle" aria-label="전체 보기">전체</button>
+                    </div>
                     <div class="menu-tabs">
                         <button class="menu-tab active" data-tab="student">학생식당</button>
                         <button class="menu-tab" data-tab="staff">교직원식당</button>

@@ -449,6 +449,19 @@
             if (e.key === 'Escape' && menuOverlay && menuOverlay.classList.contains('active')) resetFullscreen();
         });
 
+        // 모바일 전체/오늘 토글
+        const menuViewToggle = document.getElementById('menuViewToggle');
+        if (menuViewToggle) {
+            menuViewToggle.addEventListener('click', () => {
+                const isAll = menuViewToggle.classList.toggle('is-all');
+                menuViewToggle.textContent = isAll ? '오늘' : '전체';
+                ['studentMenuTable', 'staffMenuTable'].forEach(id => {
+                    const t = document.getElementById(id);
+                    if (t) t.classList.toggle('show-all', isAll);
+                });
+            });
+        }
+
         initMenuTabs();
         initFullscreenToggle();
     });
