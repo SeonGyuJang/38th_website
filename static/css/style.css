@@ -1870,6 +1870,68 @@ footer a:hover {
     }
 }
 
+/* ============================================
+   위젯 접기 탭 (모바일 전용)
+   ============================================ */
+
+.widget-collapse-tab {
+    display: none; /* 데스크톱에서 숨김 */
+}
+
+@media (max-width: 768px) {
+    /* 위젯 슬라이드 트랜지션 */
+    .side-widget {
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.25s ease;
+        overflow: visible;
+    }
+
+    /* 접기 탭 — 위젯 왼쪽에 붙는 핸들 */
+    .widget-collapse-tab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: -22px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 10px 0 0 10px;
+        cursor: pointer;
+        box-shadow: -3px 0 12px rgba(0, 0, 0, 0.1);
+        color: var(--text-secondary);
+        -webkit-tap-highlight-color: transparent;
+        padding: 0;
+        transition: background 0.2s ease;
+    }
+
+    .widget-collapse-tab:active {
+        background: rgba(245, 245, 247, 0.95);
+    }
+
+    .widget-collapse-tab svg {
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 접혀진 상태 — 위젯을 오른쪽으로 슬라이드 */
+    .side-widget.widget-collapsed {
+        transform: translateY(-50%) translateX(calc(100% + 10px));
+    }
+
+    /* 접혀진 상태에서 아이콘 좌우 반전 */
+    .side-widget.widget-collapsed .widget-collapse-tab svg {
+        transform: rotate(180deg);
+    }
+}
+
 /* 아주 좁은 화면 (360px 이하) */
 @media (max-width: 380px) {
     .side-widget {
@@ -1893,5 +1955,15 @@ footer a:hover {
 
     .widget-label {
         display: none;
+    }
+
+    /* 380px에서 접힌 상태 — right: 6px 보정 */
+    .side-widget.widget-collapsed {
+        transform: translateY(-50%) translateX(calc(100% + 6px));
+    }
+
+    .widget-collapse-tab {
+        left: -20px;
+        width: 20px;
     }
 }
