@@ -125,10 +125,18 @@
     }
 
     @media (max-width: 768px) {
+        .pdf-modal {
+            padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 0)
+                     env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 0);
+            align-items: center;
+            justify-content: center;
+        }
+
         .pdf-modal-content {
             width: 95%;
-            height: 85vh;
-            max-height: 85vh;
+            /* svh = small viewport height, 브라우저 UI(주소창·내비게이션바)를 제외한 안전한 높이 */
+            height: min(85svh, calc(100dvh - 40px));
+            max-height: min(85svh, calc(100dvh - 40px));
             margin: 0;
         }
     }
@@ -281,7 +289,21 @@
         const modal = document.getElementById('pdfModal');
         const viewer = document.getElementById('pdfViewer');
 
-        viewer.src = pdfUrl;
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            // 모바일: PDF를 페이지 너비에 맞게 표시
+            // Google Drive URL인 경우 preview 모드로 변환
+            if (pdfUrl.includes('drive.google.com') && pdfUrl.includes('/view')) {
+                viewer.src = pdfUrl.replace('/view', '/preview');
+            } else if (!pdfUrl.includes('#')) {
+                viewer.src = pdfUrl + '#zoom=page-width&toolbar=0';
+            } else {
+                viewer.src = pdfUrl;
+            }
+        } else {
+            viewer.src = pdfUrl;
+        }
+
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden'; // 스크롤 방지
     }

@@ -477,6 +477,11 @@
         const collapseBtn = document.getElementById('widgetCollapseBtn');
         const sideWidget  = document.getElementById('sideWidget');
         if (collapseBtn && sideWidget) {
+            // 모바일에서는 기본적으로 접힌 상태로 시작
+            if (window.innerWidth <= 768) {
+                sideWidget.classList.add('widget-collapsed');
+            }
+
             collapseBtn.addEventListener('click', () => {
                 sideWidget.classList.toggle('widget-collapsed');
                 // 접을 때 열려있는 모달 닫기
