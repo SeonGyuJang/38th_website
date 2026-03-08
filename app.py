@@ -812,7 +812,7 @@ def meeting_room_book():
     booking_password = request.form.get('booking_password', '').strip()
 
     # 기본 유효성 검사
-    if not all([room_number, applicant_name, applicant_email, purpose, booking_date, start_time, end_time]):
+    if not all([room_number, applicant_name, applicant_email, purpose, booking_date, start_time, end_time, booking_password]):
         flash('필수 항목을 모두 입력해주세요.', 'error')
         return redirect(url_for('meeting_room', date=booking_date))
 
@@ -886,7 +886,7 @@ def meeting_room_book():
         'end_time': end_time,
         'attendees': attendees,
         'status': 'approved',
-        'booking_password_hash': generate_password_hash(booking_password) if booking_password else None
+        'booking_password_hash': generate_password_hash(booking_password)
     }
     booking = db_helper.create_meeting_room_booking(data)
 
@@ -1885,13 +1885,13 @@ def meeting_room_cancel():
 
             booking = db_helper.get_meeting_room_booking_by_id(booking_id) if booking_id else None
             if not booking:
-                flash('예약을 찾을 수 없습니다.', 'error')
+                flash('예약을 찾을 수 없습니다. 문의해주세요.', 'error')
             elif booking.get('applicant_email', '').lower() != email:
-                flash('이메일이 일치하지 않습니다.', 'error')
+                flash('이메일이 일치하지 않습니다. 문의해주세요.', 'error')
             elif not booking.get('booking_password_hash'):
-                flash('이 예약은 비밀번호가 설정되지 않아 직접 취소할 수 없습니다. 관리자(dsng3419@korea.ac.kr)에게 문의해 주세요.', 'error')
+                flash('이 예약은 비밀번호 오류가 발생했습니다. 관리자에게 문의해주세요.', 'error')
             elif not check_password_hash(booking['booking_password_hash'], password):
-                flash('비밀번호가 올바르지 않습니다.', 'error')
+                flash('비밀번호가 올바르지 않습니다. 다시 시도하거나 문의해주세요.', 'error')
             else:
                 ok = db_helper.delete_meeting_room_booking(booking_id)
                 if ok:

@@ -119,7 +119,7 @@
             </div>
         </div>
         <h1 style="font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:#1a1a1a;margin:0 0 10px 0;letter-spacing:-0.02em;">예약 취소</h1>
-        <p style="color:#888;font-size:0.95rem;line-height:1.6;margin:0;">이메일로 예약을 조회한 뒤, 예약 시 설정한 비밀번호로 취소할 수 있습니다.</p>
+        <p style="color:#888;font-size:0.95rem;line-height:1.6;margin:0;">이메일로 예약을 조회한 뒤, 예약 시 설정한 필수 비밀번호로 취소할 수 있습니다. 문제가 있으면 문의해주세요.</p>
     </div>
 
     <!-- 플래시 메시지 -->
@@ -188,7 +188,7 @@
                         {% endif %}
                         {% if not b.booking_password_hash %}
                         <div style="font-size:0.78rem;color:#f59e0b;margin-top:6px;font-weight:600;">
-                            ⚠ 비밀번호 미설정 — 관리자에게 취소 문의 필요
+                            ⚠ 비밀번호 설정 오류 — 관리자에게 문의해주세요
                         </div>
                         {% endif %}
                     </div>
