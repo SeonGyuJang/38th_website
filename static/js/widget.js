@@ -43,6 +43,7 @@
 
     let _busScheduleData = null;
     let _busTimerInterval = null;
+    let _busShowAll = false; // 전체 시간표 표시 여부
 
     async function loadBusScheduleData() {
         if (_busScheduleData) return _busScheduleData;
@@ -123,6 +124,18 @@
             .slice(0, count);
     }
 
+    // 전체 시간표 표시용: 금요일 미운행 표시만 추가하고 전체 반환
+    function markFridayNoService(list, routeKey) {
+        const isFri = new Date().getDay() === 5;
+        return list.map(s => {
+            const copy = Object.assign({}, s);
+            if (isFri && routeKey && isFridayNoService(routeKey, copy.departure)) {
+                copy._fridayNoService = true;
+            }
+            return copy;
+        });
+    }
+
     function renderBusList(buses, containerId, routeKey) {
         const el = document.getElementById(containerId);
         if (!el) return;
@@ -133,13 +146,26 @@
             return;
         }
 
+        const now = new Date();
+        const curMin = now.getHours() * 60 + now.getMinutes();
+
         buses.forEach(bus => {
             const div = document.createElement('div');
+            const [h, m] = bus.departure.split(':').map(Number);
+            const depMin = h * 60 + m;
+            const isPast = depMin < curMin;
+
             if (bus._fridayNoService) {
                 div.className = 'bus-item bus-friday';
                 div.innerHTML = `
                     <span class="bus-departure">${bus.departure}</span>
                     <span class="bus-note">금요일 미운행</span>
+                `;
+            } else if (isPast && _busShowAll) {
+                div.className = 'bus-item bus-past';
+                div.innerHTML = `
+                    <span class="bus-departure">${bus.departure}</span>
+                    <span class="bus-note">${bus.note || ''}</span>
                 `;
             } else {
                 const rem = getRemainingTime(bus.departure);
@@ -195,9 +221,16 @@
         }
 
         const src = isSun ? data.sunday : data.weekday;
-        const buses1 = findNextBuses(src.schoolToStation, 3, 'schoolToStation');
-        const buses2 = findNextBuses(src.stationToSchool, 3, 'stationToSchool');
-        const buses3 = isSun ? [] : findNextBuses(data.weekday.osong, 3, 'osong');
+        let buses1, buses2, buses3;
+        if (_busShowAll) {
+            buses1 = markFridayNoService(src.schoolToStation, 'schoolToStation');
+            buses2 = markFridayNoService(src.stationToSchool, 'stationToSchool');
+            buses3 = isSun ? [] : markFridayNoService(data.weekday.osong, 'osong');
+        } else {
+            buses1 = findNextBuses(src.schoolToStation, 3, 'schoolToStation');
+            buses2 = findNextBuses(src.stationToSchool, 3, 'stationToSchool');
+            buses3 = isSun ? [] : findNextBuses(data.weekday.osong, 3, 'osong');
+        }
 
         renderBusList(buses1, 'widgetSchoolToStation', 'schoolToStation');
         renderBusList(buses2, 'widgetStationToSchool', 'stationToSchool');
@@ -415,6 +448,17 @@
         setupModal('widgetBusBtn', 'busModal', 'busModalClose', () => {
             startBusTimer();
         });
+
+        // 버스 전체/다음 토글
+        const busViewToggle = document.getElementById('busViewToggle');
+        if (busViewToggle) {
+            busViewToggle.addEventListener('click', () => {
+                _busShowAll = !_busShowAll;
+                busViewToggle.textContent = _busShowAll ? '다음' : '전체';
+                busViewToggle.classList.toggle('is-all', _busShowAll);
+                refreshBusDisplay();
+            });
+        }
 
         // 버스 모달 닫힐 때 타이머 중지
         const busOverlay = document.getElementById('busModal');

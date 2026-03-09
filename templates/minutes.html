@@ -75,7 +75,10 @@
                             </h3>
                             {% if minute.meeting_type %}
                             <span style="flex-shrink: 0; padding: 8px 18px;
-                                {% if '정기' in minute.meeting_type %}background: #7D8590; box-shadow: 0 2px 8px rgba(125, 133, 144, 0.15);
+                                {% if minute.meeting_type == '중앙운영위원회의' %}background: #961A32; box-shadow: 0 2px 8px rgba(150, 26, 50, 0.25);
+                                {% elif minute.meeting_type == '전체회의' %}background: #0550AE; box-shadow: 0 2px 8px rgba(5, 80, 174, 0.15);
+                                {% elif minute.meeting_type == '전체학생대표자회의' %}background: #1A7F37; box-shadow: 0 2px 8px rgba(26, 127, 55, 0.15);
+                                {% elif '정기' in minute.meeting_type %}background: #7D8590; box-shadow: 0 2px 8px rgba(125, 133, 144, 0.15);
                                 {% elif '임시' in minute.meeting_type or '긴급' in minute.meeting_type %}background: #CF222E; box-shadow: 0 2px 8px rgba(207, 34, 46, 0.15);
                                 {% elif '간담회' in minute.meeting_type %}background: #0550AE; box-shadow: 0 2px 8px rgba(5, 80, 174, 0.15);
                                 {% else %}background: #6639BA; box-shadow: 0 2px 8px rgba(102, 57, 186, 0.15);{% endif %}

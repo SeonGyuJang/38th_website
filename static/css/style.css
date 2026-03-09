@@ -1574,6 +1574,31 @@ footer a:hover {
     opacity: 0.55;
 }
 
+.bus-item.bus-past {
+    opacity: 0.4;
+}
+
+/* 버스 전체/다음 토글 버튼 */
+.bus-view-toggle {
+    padding: 5px 14px;
+    background: rgba(150, 26, 50, 0.08);
+    color: var(--ku-crimson);
+    border: 1px solid rgba(150, 26, 50, 0.2);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 4px;
+}
+
+.bus-view-toggle:hover,
+.bus-view-toggle.is-all {
+    background: var(--ku-crimson);
+    color: white;
+    border-color: var(--ku-crimson);
+}
+
 .bus-departure {
     font-weight: 700;
     color: var(--text-primary);

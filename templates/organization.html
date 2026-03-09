@@ -40,7 +40,7 @@
                         <div style="flex: 1;">
                         <!-- 해당 위원장의 국서들 표시 -->
                         {% if '중앙집행위원장' in h.position %}
-                            {% for dept_name in ['중앙집행위원회 미디어소통국', '중앙집행위원회 사무국', '중앙집행위원회 재정국'] %}
+                            {% for dept_name in ['중앙집행위원회 사무국', '중앙집행위원회 재정국', '중앙집행위원회 미디어소통국'] %}
                             {% if departments.get(dept_name) %}
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
                                 <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
@@ -55,7 +55,7 @@
                             {% endif %}
                             {% endfor %}
                         {% elif '기획정책위원장' in h.position %}
-                            {% for dept_name in ['기획정책위원회 문화기획국', '기획정책위원회 대외협력국', '기획정책위원회 정책국'] %}
+                            {% for dept_name in ['기획정책위원회 정책국', '기획정책위원회 문화기획국', '기획정책위원회 대외협력국'] %}
                             {% if departments.get(dept_name) %}
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
                                 <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] }}</div>
@@ -92,13 +92,13 @@
                     {% endif %}
                     {% endfor %}
 
-                    <!-- 인권/복지부 -->
+                    <!-- 인권복지위원회 -->
                     <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px); display: flex; flex-direction: column;">
-                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">인권/복지부</div>
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">인권복지위원회</div>
 
                         <div style="flex: 1;">
-                        <!-- 인권/복지부 산하 국들 -->
-                        {% for dept_name in ['인권/복지부 홍보국', '인권/복지부 기획국', '인권/복지부 사무재정국'] %}
+                        <!-- 인권복지위원회 산하 국들 -->
+                        {% for dept_name in ['인권복지위원회 사무재정국', '인권복지위원회 기획국', '인권복지위원회 홍보국'] %}
                         {% if departments.get(dept_name) %}
                         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
                             <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] if ' ' in dept_name else dept_name }}</div>
@@ -115,13 +115,13 @@
                         </div>
                     </div>
 
-                    <!-- 교육/복지부 -->
+                    <!-- 교육복지위원회 -->
                     <div class="apple-card" style="text-align: center; padding: clamp(20px, 4vw, 24px); display: flex; flex-direction: column;">
-                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">교육/복지부</div>
+                        <div style="font-weight: 700; color: var(--ku-crimson); font-size: clamp(0.75rem, 1.7vw, 0.85rem); margin-bottom: 10px;">교육복지위원회</div>
 
                         <div style="flex: 1;">
-                        <!-- 교육/복지부 산하 국들 -->
-                        {% for dept_name in ['교육/복지부 홍보국', '교육/복지부 기획국', '교육/복지부 사무재정국'] %}
+                        <!-- 교육복지위원회 산하 국들 -->
+                        {% for dept_name in ['교육복지위원회 사무재정국', '교육복지위원회 기획국', '교육복지위원회 홍보국'] %}
                         {% if departments.get(dept_name) %}
                         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
                             <div style="font-weight: 600; color: var(--ku-crimson); font-size: 0.75rem; margin-bottom: 8px;">{{ dept_name.split(' ')[1] if ' ' in dept_name else dept_name }}</div>
