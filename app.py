@@ -70,6 +70,28 @@ def _perform_crawling():
     finally:
         _is_crawling = False
 
+def _is_menu_stale():
+    """저장된 메뉴 데이터가 현재 날짜 기준으로 만료됐는지 확인"""
+    global _menu_data
+    if not _menu_data or not _menu_data.get('success'):
+        return True
+    try:
+        period = None
+        data = _menu_data.get('data', {})
+        # 학생식당 기간 정보 확인
+        if '학생식당' in data and '기간' in data['학생식당']:
+            period = data['학생식당']['기간']
+        elif '기간' in data:
+            period = data['기간']
+        if not period:
+            return True
+        end_str = period.get('종료일', '')
+        # "2026.03.08" 형식 파싱
+        end_date = datetime.strptime(end_str.replace('.', '-'), '%Y-%m-%d').date()
+        return date.today() > end_date
+    except Exception:
+        return True
+
 def _init_menu_scheduler():
     """메뉴 자동 갱신 스케줄러 설정 (매주 월요일)"""
     try:
@@ -82,6 +104,9 @@ def _init_menu_scheduler():
 
 # 서버 시작 시 메뉴 초기화
 _load_menu_from_file()
+# 데이터가 만료됐으면 즉시 재크롤링
+if _is_menu_stale():
+    threading.Thread(target=_perform_crawling, daemon=True).start()
 threading.Thread(target=_init_menu_scheduler, daemon=True).start()
 
 # ── 정적 파일 캐시 버스팅용 버전 문자열 ──────────────────────────────────────
@@ -589,12 +614,19 @@ def organization():
         '기정위_문화기획국': '기획정책위원회 문화기획국',
         '기정위_대외협력국': '기획정책위원회 대외협력국',
         '기정위_정책국': '기획정책위원회 정책국',
-        '인복위_홍보국': '인권/복지부 홍보국',
-        '인복위_기획국': '인권/복지부 기획국',
-        '인복위_사무재정국': '인권/복지부 사무재정국',
-        '교복위_홍보국': '교육/복지부 홍보국',
-        '교복위_기획국': '교육/복지부 기획국',
-        '교복위_사무재정국': '교육/복지부 사무재정국'
+        '인복위_홍보국': '인권복지위원회 홍보국',
+        '인복위_기획국': '인권복지위원회 기획국',
+        '인복위_사무재정국': '인권복지위원회 사무재정국',
+        '교복위_홍보국': '교육복지위원회 홍보국',
+        '교복위_기획국': '교육복지위원회 기획국',
+        '교복위_사무재정국': '교육복지위원회 사무재정국',
+        # 이전 형태 호환성 (기존 데이터)
+        '인권/복지부 홍보국': '인권복지위원회 홍보국',
+        '인권/복지부 기획국': '인권복지위원회 기획국',
+        '인권/복지부 사무재정국': '인권복지위원회 사무재정국',
+        '교육/복지부 홍보국': '교육복지위원회 홍보국',
+        '교육/복지부 기획국': '교육복지위원회 기획국',
+        '교육/복지부 사무재정국': '교육복지위원회 사무재정국'
     }
 
     # 간략 보기용 데이터 (회장단)
@@ -1526,12 +1558,19 @@ def admin_organization_edit(member_id):
         '기정위_문화기획국': '기획정책위원회 문화기획국',
         '기정위_대외협력국': '기획정책위원회 대외협력국',
         '기정위_정책국': '기획정책위원회 정책국',
-        '인복위_홍보국': '인권/복지부 홍보국',
-        '인복위_기획국': '인권/복지부 기획국',
-        '인복위_사무재정국': '인권/복지부 사무재정국',
-        '교복위_홍보국': '교육/복지부 홍보국',
-        '교복위_기획국': '교육/복지부 기획국',
-        '교복위_사무재정국': '교육/복지부 사무재정국'
+        '인복위_홍보국': '인권복지위원회 홍보국',
+        '인복위_기획국': '인권복지위원회 기획국',
+        '인복위_사무재정국': '인권복지위원회 사무재정국',
+        '교복위_홍보국': '교육복지위원회 홍보국',
+        '교복위_기획국': '교육복지위원회 기획국',
+        '교복위_사무재정국': '교육복지위원회 사무재정국',
+        # 이전 형태 호환성 (기존 데이터)
+        '인권/복지부 홍보국': '인권복지위원회 홍보국',
+        '인권/복지부 기획국': '인권복지위원회 기획국',
+        '인권/복지부 사무재정국': '인권복지위원회 사무재정국',
+        '교육/복지부 홍보국': '교육복지위원회 홍보국',
+        '교육/복지부 기획국': '교육복지위원회 기획국',
+        '교육/복지부 사무재정국': '교육복지위원회 사무재정국'
     }
 
     member = db_helper.get_organization_by_id(member_id)
@@ -1975,6 +2014,9 @@ def api_menu():
     if _menu_data is None or not _menu_data.get('success'):
         threading.Thread(target=_perform_crawling, daemon=True).start()
         return jsonify({'success': False, 'message': '식단표를 불러오는 중입니다. 잠시 후 다시 시도해주세요.'})
+    # 메뉴 기간이 만료됐으면 백그라운드에서 재크롤링 후 현재 데이터 반환
+    if _is_menu_stale() and not _is_crawling:
+        threading.Thread(target=_perform_crawling, daemon=True).start()
     return jsonify(_menu_data)
 
 # ============================================

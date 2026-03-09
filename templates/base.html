@@ -153,7 +153,10 @@
         <div class="widget-modal">
             <div class="widget-modal-header">
                 <h2>셔틀버스 시간표</h2>
-                <button class="widget-modal-close" id="busModalClose" aria-label="닫기">&times;</button>
+                <div class="widget-modal-actions">
+                    <button class="bus-view-toggle" id="busViewToggle" aria-label="전체 시간표 보기">전체</button>
+                    <button class="widget-modal-close" id="busModalClose" aria-label="닫기">&times;</button>
+                </div>
             </div>
             <div class="widget-modal-body">
                 <div class="bus-time-display" id="widgetCurrentTime"></div>

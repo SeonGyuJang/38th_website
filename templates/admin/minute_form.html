@@ -43,16 +43,19 @@
                         <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;" for="meeting_type">
                             회의 유형
                         </label>
-                        <input
-                            type="text"
+                        <select
                             id="meeting_type"
                             name="meeting_type"
-                            value="{{ minute.meeting_type if minute else '' }}"
-                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary);"
+                            style="width: 100%; padding: 14px 16px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: var(--transition-base); background: var(--bg-secondary); appearance: none; cursor: pointer;"
                             onfocus="this.style.borderColor='var(--apple-blue)'; this.style.background='white';"
                             onblur="this.style.borderColor='var(--border-color)'; this.style.background='var(--bg-secondary)';"
-                            placeholder="예: 정기회의, 임시회의"
                         >
+                            <option value="">회의 유형 선택</option>
+                            <option value="중앙운영위원회의" {% if minute and minute.meeting_type == '중앙운영위원회의' %}selected{% endif %}>중앙운영위원회의</option>
+                            <option value="전체회의" {% if minute and minute.meeting_type == '전체회의' %}selected{% endif %}>전체회의</option>
+                            <option value="전체학생대표자회의" {% if minute and minute.meeting_type == '전체학생대표자회의' %}selected{% endif %}>전체학생대표자회의</option>
+                            <option value="기타 회의" {% if minute and minute.meeting_type == '기타 회의' %}selected{% endif %}>기타 회의</option>
+                        </select>
                     </div>
 
                     <div>
