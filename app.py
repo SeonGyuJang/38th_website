@@ -413,9 +413,16 @@ def send_booking_rejected_email(booking):
     return send_email(booking['applicant_email'], subject, html)
 
 
-def send_booking_cancelled_by_admin_email(booking):
+def send_booking_cancelled_by_admin_email(booking, cancel_reason=None):
     """관리자 취소 알림 이메일 (신청자에게)"""
     subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관이 취소되었습니다'
+    reason_html = ''
+    if cancel_reason:
+        reason_html = f"""
+        <div style="margin-top: 24px; padding: 16px 20px; background: #fff3cd; border-left: 4px solid #92400e; border-radius: 6px;">
+          <p style="margin: 0 0 4px 0; font-weight: 700; color: #92400e; font-size: 14px;">취소 사유</p>
+          <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">{cancel_reason}</p>
+        </div>"""
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
       <div style="background: #961A32; padding: 32px 40px;">
@@ -434,6 +441,7 @@ def send_booking_cancelled_by_admin_email(booking):
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
         </table>
+        {reason_html}
         <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr 또는 010-6598-6414로 연락주세요.</p>
       </div>
       <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
@@ -1883,10 +1891,11 @@ def admin_meeting_room_delete(booking_id):
             print(f'[DELETE ROUTE] booking_id={booking_id} 찾을 수 없음')
             flash('대관 신청을 찾을 수 없습니다.', 'error')
             return redirect(url_for('admin_meeting_rooms'))
+        cancel_reason = request.form.get('cancel_reason', '').strip()
         ok = db_helper.delete_meeting_room_booking(booking_id)
         print(f'[DELETE ROUTE] delete 결과: ok={ok}')
         if ok:
-            threading.Thread(target=send_booking_cancelled_by_admin_email, args=(dict(booking),), daemon=True).start()
+            threading.Thread(target=send_booking_cancelled_by_admin_email, args=(dict(booking), cancel_reason or None), daemon=True).start()
             flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송됩니다.', 'success')
         else:
             flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
