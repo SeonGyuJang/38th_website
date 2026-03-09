@@ -1,6 +1,5 @@
 Departure_Time,Route,Type,Note
-08:30,Station_to_School,Weekday,조치원역 → 오송역 → 조치원역 → 학교
-08:40,School_to_Station,Weekday,영진관광(평일)
+08:45,School_to_Station,Weekday,영진관광(평일)
 09:10,School_to_Station,Weekday,영진관광(평일)
 09:30,School_to_Station,Weekday,영진관광(평일)
 09:40,School_to_Station,Weekday,영진관광(평일)
