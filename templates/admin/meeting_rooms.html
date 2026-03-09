@@ -209,12 +209,8 @@
                                             onmouseout="this.style.background='#f0f0f0'; this.style.transform='translateY(0)';">
                                         상세
                                     </button>
-                                    <form method="POST"
-                                          action="{{ url_for('admin_meeting_room_delete', booking_id=booking.id) }}"
-                                          style="display:inline; margin:0;"
-                                          onsubmit="return confirm('회의실 {{ booking.room_number }}호 대관 신청을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');">
-                                        <button type="submit" class="action-btn btn-delete">삭제</button>
-                                    </form>
+                                    <button type="button" class="action-btn btn-delete"
+                                            onclick="openCancelModal({{ booking.id }}, {{ booking.room_number }})">삭제</button>
                                 </div>
                             </td>
                         </tr>
@@ -236,6 +232,43 @@
         </div>
     </div>
 </div>
+
+<!-- 취소 사유 모달 -->
+<div class="modal-overlay" id="cancelModal" onclick="closeModal('cancelModal', event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #1a1a1a;">대관 취소 처리</h3>
+            <button onclick="closeModal('cancelModal')" style="width: 32px; height: 32px; border-radius: 50%; background: #f5f5f7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <p style="color: #555; font-size: 0.9rem; margin: 0 0 16px 0;">
+            <strong id="cancelRoomLabel"></strong> 대관 신청을 취소합니다.<br>
+            취소 사유를 입력하면 신청자에게 발송되는 이메일에 함께 전달됩니다.
+        </p>
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #444; margin-bottom: 6px;">취소 사유 <span style="color: #888; font-weight: 500;">(선택)</span></label>
+            <textarea id="cancelReasonInput" class="form-input" rows="3"
+                      placeholder="예) 소속 단체명이 정확하지 않아 예약이 취소되었습니다."
+                      style="resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="closeModal('cancelModal')"
+                    style="padding: 10px 20px; background: #f3f4f6; color: #555; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                취소
+            </button>
+            <button onclick="submitCancelForm()"
+                    style="padding: 10px 20px; background: #991b1b; color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                예약 취소 확정
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 취소 전송용 숨김 폼 -->
+<form id="cancelForm" method="POST" style="display: none;">
+    <input type="hidden" name="cancel_reason" id="cancelReasonField">
+</form>
 
 <!-- 상세 정보 모달 -->
 <div class="modal-overlay" id="detailModal" onclick="closeModal('detailModal', event)">
@@ -285,6 +318,20 @@
         3: '학생회관 Room 220',
         4: '학생회관 Room 221'
     };
+
+    function openCancelModal(bookingId, roomNumber) {
+        document.getElementById('cancelRoomLabel').textContent = '회의실 ' + roomNumber + '호';
+        document.getElementById('cancelReasonInput').value = '';
+        document.getElementById('cancelForm').action = '/admin/meeting-rooms/delete/' + bookingId;
+        document.getElementById('cancelModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function submitCancelForm() {
+        const reason = document.getElementById('cancelReasonInput').value.trim();
+        document.getElementById('cancelReasonField').value = reason;
+        document.getElementById('cancelForm').submit();
+    }
 
     function showDetail(index) {
         const b = bookingsData[index];
@@ -345,6 +392,7 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             document.getElementById('detailModal').classList.remove('active');
+            document.getElementById('cancelModal').classList.remove('active');
             document.body.style.overflow = '';
         }
     });
