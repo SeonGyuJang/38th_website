@@ -1,6 +1,6 @@
 Departure_Time,Route,Type,Note
-08:20,Station_to_School,Weekday,조치원역 → 오송역 → 조치원역 → 학교
-08:50,School_to_Station,Weekday,영진관광(평일)
+08:30,Station_to_School,Weekday,조치원역 → 오송역 → 조치원역 → 학교
+08:40,School_to_Station,Weekday,영진관광(평일)
 09:10,School_to_Station,Weekday,영진관광(평일)
 09:30,School_to_Station,Weekday,영진관광(평일)
 09:40,School_to_Station,Weekday,영진관광(평일)
@@ -28,16 +28,17 @@ Departure_Time,Route,Type,Note
 16:50,School_to_Station,Weekday,영진관광(평일)
 17:10,School_to_Station,Weekday,영진관광(평일)
 17:25,School_to_Station,Weekday,영진관광(평일)
-17:40,School_to_Station,Weekday,영진관광(평일)
-18:00,School_to_Station,Weekday,영진관광(평일)
-18:25,School_to_Station,Weekday,조치원역 경유/오송역 도착
+17:34,School_to_Station,Weekday,영진관광(평일)
+18:10,School_to_Station,Weekday,영진관광(평일)
+18:20,School_to_Station,Weekday,조치원역 경유/오송역 도착
 18:40,School_to_Station,Weekday,영진관광(평일)
 19:10,School_to_Station,Weekday,영진관광(평일)
 19:40,School_to_Station,Weekday,영진관광(평일)
 20:10,School_to_Station,Weekday,영진관광(평일)
 20:50,School_to_Station,Weekday,영진관광(평일)
+08:35,Station_to_School,Weekday,영진관광(평일)
 08:45,Station_to_School,Weekday,영진관광(평일)
-09:00,Station_to_School,Weekday,영진관광(평일)
+09:55,Station_to_School,Weekday,영진관광(평일)
 09:20,Station_to_School,Weekday,영진관광(평일)
 09:40,Station_to_School,Weekday,영진관광(평일)
 09:50,Station_to_School,Weekday,영진관광(평일)
@@ -64,9 +65,9 @@ Departure_Time,Route,Type,Note
 16:40,Station_to_School,Weekday,영진관광(평일)
 17:00,Station_to_School,Weekday,영진관광(평일)
 17:20,Station_to_School,Weekday,영진관광(평일)
-17:35,Station_to_School,Weekday,영진관광(평일)
-17:50,Station_to_School,Weekday,영진관광(평일)
-18:10,Station_to_School,Weekday,영진관광(평일)
+17:30,Station_to_School,Weekday,영진관광(평일)
+17:45,Station_to_School,Weekday,영진관광(평일)
+18:30,Station_to_School,Weekday,영진관광(평일)
 18:50,Station_to_School,Weekday,영진관광(평일)
 19:20,Station_to_School,Weekday,영진관광(평일)
 19:50,Station_to_School,Weekday,영진관광(평일)
@@ -87,5 +88,5 @@ Departure_Time,Route,Type,Note
 19:50,Station_to_School,Sunday,영진관광(일요일)
 20:35,Station_to_School,Sunday,영진관광(일요일)
 21:20,Station_to_School,Sunday,영진관광(일요일)
-08:20,Station_to_Osong,Weekday,조치원역 → 오송역(평일)
-18:25,School_to_Osong,Weekday,학교 → 조치원역 → 오송역(평일)
+08:30,Station_to_Osong,Weekday,오송역(평일) → 조치원역 → 학교
+18:10,School_to_Osong,Weekday,학교 → 조치원역 → 오송역(평일)
