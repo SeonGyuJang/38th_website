@@ -644,8 +644,8 @@ class SupabaseHelper:
         return None
 
     def create_inquiry(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """문의사항 생성 (공개 클라이언트 사용 - RLS public insert)"""
-        response = self.client.table('inquiries').insert(data).execute()
+        """문의사항 생성 (admin 클라이언트 사용 - RLS 우회)"""
+        response = self.admin_client.table('inquiries').insert(data).execute()
         return response.data[0] if response.data else None
 
     def update_inquiry(self, inquiry_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
