@@ -7,17 +7,18 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-    const btn       = document.getElementById('chatWidgetBtn');
-    const panel     = document.getElementById('chatPanel');
-    const closeBtn  = document.getElementById('chatPanelClose');
-    const startBtn  = document.getElementById('chatStartBtn');
-    const backBtn   = document.getElementById('chatBackBtn');
-    const anotherBtn = document.getElementById('chatAnotherBtn');
-    const form      = document.getElementById('chatInquiryForm');
-    const submitBtn = document.getElementById('chatSubmitBtn');
-    const submitText    = document.getElementById('chatSubmitText');
-    const submitSpinner = document.getElementById('chatSubmitSpinner');
-    const formError = document.getElementById('chatFormError');
+    const btn            = document.getElementById('chatWidgetBtn');
+    const widgetBtn      = document.getElementById('widgetInquiryBtn');
+    const panel          = document.getElementById('chatPanel');
+    const closeBtn       = document.getElementById('chatPanelClose');
+    const startBtn       = document.getElementById('chatStartBtn');
+    const backBtn        = document.getElementById('chatBackBtn');
+    const anotherBtn     = document.getElementById('chatAnotherBtn');
+    const form           = document.getElementById('chatInquiryForm');
+    const submitBtn      = document.getElementById('chatSubmitBtn');
+    const submitText     = document.getElementById('chatSubmitText');
+    const submitSpinner  = document.getElementById('chatSubmitSpinner');
+    const formError      = document.getElementById('chatFormError');
 
     const bodyWelcome = document.getElementById('chatBodyWelcome');
     const bodyForm    = document.getElementById('chatBodyForm');
@@ -26,7 +27,7 @@
     const openIcon  = btn ? btn.querySelector('.chat-widget-icon--open') : null;
     const closeIcon = btn ? btn.querySelector('.chat-widget-icon--close') : null;
 
-    if (!btn || !panel) return;
+    if (!panel) return;
 
     let isOpen = false;
 
@@ -36,6 +37,7 @@
         panel.setAttribute('aria-hidden', 'false');
         if (openIcon)  openIcon.style.display  = 'none';
         if (closeIcon) closeIcon.style.display = '';
+        if (widgetBtn) widgetBtn.classList.add('is-active');
     }
 
     function closePanel() {
@@ -44,6 +46,7 @@
         panel.setAttribute('aria-hidden', 'true');
         if (openIcon)  openIcon.style.display  = '';
         if (closeIcon) closeIcon.style.display = 'none';
+        if (widgetBtn) widgetBtn.classList.remove('is-active');
     }
 
     function showScreen(screen) {
@@ -68,20 +71,33 @@
         formError.style.display = 'none';
     }
 
-    // 버튼 클릭: 토글
-    btn.addEventListener('click', function () {
-        if (isOpen) closePanel();
-        else openPanel();
-    });
+    // 플로팅 버튼 클릭: 토글
+    if (btn) {
+        btn.addEventListener('click', function () {
+            if (isOpen) closePanel();
+            else openPanel();
+        });
+    }
+
+    // 사이드 위젯 문의 버튼 클릭: 토글
+    if (widgetBtn) {
+        widgetBtn.addEventListener('click', function () {
+            if (isOpen) closePanel();
+            else openPanel();
+        });
+    }
 
     // 닫기 버튼
     closeBtn.addEventListener('click', closePanel);
 
     // 패널 외부 클릭 시 닫기
     document.addEventListener('click', function (e) {
-        if (isOpen && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-            closePanel();
-        }
+        if (!isOpen) return;
+        const clickedOutside =
+            !panel.contains(e.target) &&
+            !(btn && (e.target === btn || btn.contains(e.target))) &&
+            !(widgetBtn && (e.target === widgetBtn || widgetBtn.contains(e.target)));
+        if (clickedOutside) closePanel();
     });
 
     // ESC 키로 닫기
