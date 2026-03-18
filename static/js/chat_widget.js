@@ -7,8 +7,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-    const btn            = document.getElementById('chatWidgetBtn');
     const widgetBtn      = document.getElementById('widgetInquiryBtn');
+    const footerBtn      = document.getElementById('footerInquiryBtn');
     const panel          = document.getElementById('chatPanel');
     const closeBtn       = document.getElementById('chatPanelClose');
     const startBtn       = document.getElementById('chatStartBtn');
@@ -24,19 +24,24 @@
     const bodyForm    = document.getElementById('chatBodyForm');
     const bodySuccess = document.getElementById('chatBodySuccess');
 
-    const openIcon  = btn ? btn.querySelector('.chat-widget-icon--open') : null;
-    const closeIcon = btn ? btn.querySelector('.chat-widget-icon--close') : null;
+    // 모바일 사이드 위젯 접기용
+    const sideWidget = document.getElementById('sideWidget');
 
     if (!panel) return;
 
     let isOpen = false;
 
+    function collapseWidgetOnMobile() {
+        if (window.innerWidth <= 768 && sideWidget && !sideWidget.classList.contains('widget-collapsed')) {
+            sideWidget.classList.add('widget-collapsed');
+        }
+    }
+
     function openPanel() {
+        collapseWidgetOnMobile();
         isOpen = true;
         panel.classList.add('active');
         panel.setAttribute('aria-hidden', 'false');
-        if (openIcon)  openIcon.style.display  = 'none';
-        if (closeIcon) closeIcon.style.display = '';
         if (widgetBtn) widgetBtn.classList.add('is-active');
     }
 
@@ -44,8 +49,6 @@
         isOpen = false;
         panel.classList.remove('active');
         panel.setAttribute('aria-hidden', 'true');
-        if (openIcon)  openIcon.style.display  = '';
-        if (closeIcon) closeIcon.style.display = 'none';
         if (widgetBtn) widgetBtn.classList.remove('is-active');
     }
 
@@ -71,17 +74,17 @@
         formError.style.display = 'none';
     }
 
-    // 플로팅 버튼 클릭: 토글
-    if (btn) {
-        btn.addEventListener('click', function () {
+    // 사이드 위젯 문의 버튼
+    if (widgetBtn) {
+        widgetBtn.addEventListener('click', function () {
             if (isOpen) closePanel();
             else openPanel();
         });
     }
 
-    // 사이드 위젯 문의 버튼 클릭: 토글
-    if (widgetBtn) {
-        widgetBtn.addEventListener('click', function () {
+    // 푸터 문의 버튼
+    if (footerBtn) {
+        footerBtn.addEventListener('click', function () {
             if (isOpen) closePanel();
             else openPanel();
         });
@@ -93,10 +96,10 @@
     // 패널 외부 클릭 시 닫기
     document.addEventListener('click', function (e) {
         if (!isOpen) return;
+        const triggers = [widgetBtn, footerBtn].filter(Boolean);
         const clickedOutside =
             !panel.contains(e.target) &&
-            !(btn && (e.target === btn || btn.contains(e.target))) &&
-            !(widgetBtn && (e.target === widgetBtn || widgetBtn.contains(e.target)));
+            !triggers.some(t => e.target === t || t.contains(e.target));
         if (clickedOutside) closePanel();
     });
 
