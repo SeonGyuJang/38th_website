@@ -5,6 +5,8 @@
 (function () {
     'use strict';
 
+    document.addEventListener('DOMContentLoaded', function () {
+
     const btn       = document.getElementById('chatWidgetBtn');
     const panel     = document.getElementById('chatPanel');
     const closeBtn  = document.getElementById('chatPanelClose');
@@ -148,4 +150,5 @@
         }
     });
 
+    }); // DOMContentLoaded
 })();
