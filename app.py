@@ -524,6 +524,81 @@ def send_cancellation_admin_notification_email(booking):
 
 
 # ============================================
+# 문의사항(챗봇) 이메일 함수
+# ============================================
+
+def send_inquiry_admin_notification(inquiry):
+    """새 문의 접수 알림 이메일 (관리자에게)"""
+    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    admin_email = app.config.get('ADMIN_EMAIL', '')
+    all_emails = list(set(admin_emails + ([admin_email] if admin_email else [])))
+    if not all_emails:
+        return False
+
+    subject = f'[총학생회] 새로운 문의사항 접수 - {inquiry["name"]}'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #961A32; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">새로운 문의사항이 접수되었습니다</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 24px 0;">문의 내용</h2>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 100px; border-bottom: 1px solid #eee;">이름</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{inquiry['name']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">이메일</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{inquiry['email']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">문의 내용</td><td style="padding: 12px 16px; color: #1a1a1a; white-space: pre-wrap;">{inquiry['message']}</td></tr>
+        </table>
+        <div style="margin-top: 24px; padding: 16px; background: #fff3cd; border-radius: 8px;">
+          <p style="margin: 0; color: #856404; font-size: 14px; font-weight: 600;">관리자 페이지에서 답변을 작성하면 신청자에게 이메일로 자동 발송됩니다.</p>
+        </div>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    result = True
+    for email in all_emails:
+        if not send_email(email, subject, html):
+            result = False
+    return result
+
+
+def send_inquiry_reply_email(inquiry, reply_text):
+    """문의 답변 이메일 (문의자에게)"""
+    subject = f'[총학생회] 문의하신 내용에 대한 답변입니다'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #961A32; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">문의사항 답변 안내</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #d4edda; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #155724; font-weight: 700; font-size: 15px;">✓ 답변 완료</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">안녕하세요, {inquiry['name']}님!</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">문의하신 내용에 대한 답변을 보내드립니다.</p>
+        <div style="background: #f9f9f9; border-radius: 8px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #ddd;">
+          <p style="color: #888; font-size: 12px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em;">원래 문의 내용</p>
+          <p style="color: #555; font-size: 14px; margin: 0; white-space: pre-wrap;">{inquiry['message']}</p>
+        </div>
+        <div style="background: #f0f7ff; border-radius: 8px; padding: 20px; border-left: 4px solid #961A32;">
+          <p style="color: #961A32; font-size: 12px; font-weight: 700; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em;">총학생회 답변</p>
+          <p style="color: #1a1a1a; font-size: 15px; margin: 0; white-space: pre-wrap;">{reply_text}</p>
+        </div>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">추가 문의사항이 있으시면 dsng3419@korea.ac.kr로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(inquiry['email'], subject, html)
+
+
+# ============================================
 # 유지보수 모드
 # ============================================
 
@@ -996,7 +1071,8 @@ def admin_dashboard():
         'promises': db_helper.count_promises(),
         'minutes': db_helper.count_minutes(),
         'programs': db_helper.count_active_programs(),
-        'pending_bookings': db_helper.count_pending_bookings()
+        'pending_bookings': db_helper.count_pending_bookings(),
+        'pending_inquiries': db_helper.count_pending_inquiries()
     }
     maintenance_mode = is_maintenance_mode()
     return render_template('admin/dashboard.html', stats=stats, maintenance_mode=maintenance_mode)
@@ -1980,6 +2056,105 @@ def admin_email_test():
             test_result = ('success', f'{to_email} 으로 테스트 이메일 발송 성공!') if ok else ('error', '발송 실패 — 서버 로그(터미널)를 확인하세요.')
 
     return render_template('admin/email_test.html', config_status=config_status, test_result=test_result)
+
+
+# ============================================
+# 문의사항 (챗봇 위젯) API
+# ============================================
+
+@app.route('/api/inquiry', methods=['POST'])
+def api_submit_inquiry():
+    """문의사항 제출 API (공개)"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': '잘못된 요청입니다.'}), 400
+
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip()
+    message = (data.get('message') or '').strip()
+
+    if not name or not email or not message:
+        return jsonify({'success': False, 'message': '이름, 이메일, 문의 내용을 모두 입력해주세요.'}), 400
+
+    if '@' not in email:
+        return jsonify({'success': False, 'message': '올바른 이메일 주소를 입력해주세요.'}), 400
+
+    inquiry_data = {
+        'name': name,
+        'email': email,
+        'message': message,
+        'status': 'pending',
+        'created_at': datetime.now().isoformat()
+    }
+
+    inquiry = db_helper.create_inquiry(inquiry_data)
+    if not inquiry:
+        return jsonify({'success': False, 'message': '문의 저장 중 오류가 발생했습니다.'}), 500
+
+    threading.Thread(
+        target=send_inquiry_admin_notification,
+        args=(inquiry,),
+        daemon=True
+    ).start()
+
+    return jsonify({'success': True, 'message': '문의가 접수되었습니다. 빠른 시일 내에 답변 드리겠습니다.'})
+
+
+# ============================================
+# 문의사항 관리 (관리자)
+# ============================================
+
+@app.route('/admin/inquiries')
+@login_required
+def admin_inquiries():
+    """문의사항 목록 페이지"""
+    status_filter = request.args.get('status', '')
+    inquiries = db_helper.get_all_inquiries(status=status_filter if status_filter else None)
+    pending_count = db_helper.count_pending_inquiries()
+    return render_template('admin/inquiries.html', inquiries=inquiries, status_filter=status_filter, pending_count=pending_count)
+
+
+@app.route('/admin/inquiries/<int:inquiry_id>/reply', methods=['POST'])
+@login_required
+def admin_inquiry_reply(inquiry_id):
+    """문의사항 답변 처리 및 이메일 발송"""
+    inquiry = db_helper.get_inquiry_by_id(inquiry_id)
+    if not inquiry:
+        flash('문의사항을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_inquiries'))
+
+    reply_text = request.form.get('reply', '').strip()
+    if not reply_text:
+        flash('답변 내용을 입력해주세요.', 'error')
+        return redirect(url_for('admin_inquiries'))
+
+    update_data = {
+        'reply': reply_text,
+        'status': 'replied',
+        'replied_by': current_user.name,
+        'replied_at': datetime.now().isoformat()
+    }
+    updated = db_helper.update_inquiry(inquiry_id, update_data)
+    if not updated:
+        flash('답변 저장 중 오류가 발생했습니다.', 'error')
+        return redirect(url_for('admin_inquiries'))
+
+    email_sent = send_inquiry_reply_email(inquiry, reply_text)
+    if email_sent:
+        flash(f'{inquiry["name"]}님께 답변 이메일이 발송되었습니다.', 'success')
+    else:
+        flash(f'답변이 저장되었지만 이메일 발송에 실패했습니다. (수신자: {inquiry["email"]})', 'warning')
+
+    return redirect(url_for('admin_inquiries'))
+
+
+@app.route('/admin/inquiries/<int:inquiry_id>/delete', methods=['POST'])
+@login_required
+def admin_inquiry_delete(inquiry_id):
+    """문의사항 삭제"""
+    db_helper.delete_inquiry(inquiry_id)
+    flash('문의사항이 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_inquiries'))
 
 
 # ============================================

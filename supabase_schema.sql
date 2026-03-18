@@ -183,6 +183,19 @@ CREATE TABLE IF NOT EXISTS history_logs (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 14. Inquiry 테이블 (문의사항 - 챗봇 위젯)
+CREATE TABLE IF NOT EXISTS inquiries (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    reply TEXT,
+    replied_by VARCHAR(100),
+    replied_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- 인덱스 생성
 -- ============================================
@@ -229,6 +242,10 @@ CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_date ON meeting_room_bookin
 CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_room ON meeting_room_bookings(room_number);
 CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_status ON meeting_room_bookings(status);
 
+-- 문의사항 검색 최적화
+CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
+
 -- ============================================
 -- Row Level Security (RLS) 정책
 -- ============================================
@@ -247,6 +264,7 @@ ALTER TABLE archives ENABLE ROW LEVEL SECURITY;
 ALTER TABLE archive_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE history_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meeting_room_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 
 -- 모든 테이블에 대한 공개 읽기 정책 (SELECT)
 CREATE POLICY "Public read access" ON schedules FOR SELECT USING (true);
@@ -278,6 +296,10 @@ CREATE POLICY "Authenticated write access" ON archive_images FOR ALL USING (auth
 CREATE POLICY "Public read access" ON meeting_room_bookings FOR SELECT USING (true);
 CREATE POLICY "Authenticated write access" ON meeting_room_bookings FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Public insert access" ON meeting_room_bookings FOR INSERT WITH CHECK (true);
+
+-- 문의사항 정책
+CREATE POLICY "Public insert access" ON inquiries FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated write access" ON inquiries FOR ALL USING (auth.role() = 'service_role');
 
 -- ============================================
 -- 트리거: updated_at 자동 업데이트

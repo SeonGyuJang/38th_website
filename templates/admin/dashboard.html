@@ -111,6 +111,16 @@
                 </div>
                 <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; color: {% if stats.pending_bookings > 0 %}#92400e{% else %}#1a1a1a{% endif %};">{{ stats.pending_bookings }}</div>
             </div>
+
+            <div class="admin-card" style="background: white; border-radius: 12px; padding: 28px; border: 1px solid {% if stats.pending_inquiries > 0 %}rgba(150,26,50,0.35){% else %}#E5E5E5{% endif %}; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.boxShadow='0 4px 24px rgba(150, 26, 50, 0.08)';" onmouseout="this.style.borderColor='{% if stats.pending_inquiries > 0 %}rgba(150,26,50,0.35){% else %}#E5E5E5{% endif %}'; this.style.boxShadow='none';">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #999; letter-spacing: 0.02em;">문의사항 (미답변)</div>
+                    {% if stats.pending_inquiries > 0 %}
+                    <div style="width: 8px; height: 8px; background: var(--ku-crimson); border-radius: 50%; animation: pulse 1.5s infinite;"></div>
+                    {% endif %}
+                </div>
+                <div style="font-size: 2.5rem; font-weight: 800; line-height: 1; color: {% if stats.pending_inquiries > 0 %}var(--ku-crimson){% else %}#1a1a1a{% endif %};">{{ stats.pending_inquiries }}</div>
+            </div>
         </div>
 
         <style>
@@ -272,6 +282,25 @@
                             <div style="font-size: 1rem; font-weight: 700; color: #1a1a1a;">회의실 대관 관리</div>
                             <div style="font-size: 0.85rem; color: {% if stats.pending_bookings > 0 %}#92400e{% else %}#999{% endif %}; margin-top: 2px; font-weight: {% if stats.pending_bookings > 0 %}700{% else %}400{% endif %};">
                                 {% if stats.pending_bookings > 0 %}검토 대기 {{ stats.pending_bookings }}건{% else %}대관 신청 승인 및 관리{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('admin_inquiries') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: {% if stats.pending_inquiries > 0 %}2px solid rgba(150,26,50,0.35){% else %}1px solid #E5E5E5{% endif %}; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='{% if stats.pending_inquiries > 0 %}rgba(150,26,50,0.35){% else %}#E5E5E5{% endif %}'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            {% if stats.pending_inquiries > 0 %}
+                            <div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: #dc2626; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: white; font-weight: 800;">{{ stats.pending_inquiries if stats.pending_inquiries < 10 else '9+' }}</div>
+                            {% endif %}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 1rem; font-weight: 700; color: #1a1a1a;">문의사항 관리</div>
+                            <div style="font-size: 0.85rem; color: {% if stats.pending_inquiries > 0 %}var(--ku-crimson){% else %}#999{% endif %}; margin-top: 2px; font-weight: {% if stats.pending_inquiries > 0 %}700{% else %}400{% endif %};">
+                                {% if stats.pending_inquiries > 0 %}미답변 {{ stats.pending_inquiries }}건{% else %}학우 문의사항 답변{% endif %}
                             </div>
                         </div>
                     </div>

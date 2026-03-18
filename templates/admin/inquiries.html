@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}문의사항 관리 - 관리자{% endblock %}
+
+{% block content %}
+<style>
+    .inquiry-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border-light);
+        padding: 24px;
+        margin-bottom: 16px;
+        transition: box-shadow 0.2s;
+    }
+    .inquiry-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .inquiry-status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .badge-replied {
+        background: #d4edda;
+        color: #155724;
+    }
+    .reply-form {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-light);
+    }
+    .reply-form.active {
+        display: block;
+    }
+    .reply-box {
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 12px;
+        border-left: 4px solid var(--ku-crimson);
+    }
+    .filter-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.15s;
+        border: 1px solid var(--border-light);
+        color: var(--text-secondary);
+        background: white;
+    }
+    .filter-tab.active, .filter-tab:hover {
+        background: var(--ku-crimson);
+        color: white;
+        border-color: var(--ku-crimson);
+    }
+    .inquiry-message-text {
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 8px 0 0 0;
+    }
+</style>
+
+<div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
+    <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
+
+        <!-- 헤더 -->
+        <div style="margin-bottom: 40px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div style="width: 6px; height: 6px; background: var(--ku-crimson); border-radius: 50%;"></div>
+                <span style="color: var(--ku-crimson); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem;">Admin</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; margin-bottom: 8px; color: #1a1a1a; letter-spacing: -0.03em;">
+                        문의사항 관리
+                    </h1>
+                    <p style="color: #666; font-size: 0.95rem;">
+                        학우들의 문의사항을 확인하고 답변을 작성하세요.
+                        {% if pending_count > 0 %}
+                        <span style="color: var(--ku-crimson); font-weight: 700;">미답변 {{ pending_count }}건</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{{ url_for('admin_dashboard') }}" style="padding: 10px 20px; background: white; border: 1px solid var(--border-light); border-radius: 8px; text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 0.9rem;">
+                    ← 대시보드
+                </a>
+            </div>
+        </div>
+
+        <!-- 필터 탭 -->
+        <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+            <a href="{{ url_for('admin_inquiries') }}" class="filter-tab {% if not status_filter %}active{% endif %}">
+                전체
+            </a>
+            <a href="{{ url_for('admin_inquiries', status='pending') }}" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">
+                미답변
+                {% if pending_count > 0 %}
+                <span style="margin-left: 6px; background: {% if status_filter == 'pending' %}rgba(255,255,255,0.3){% else %}var(--ku-crimson){% endif %}; color: {% if status_filter == 'pending' %}white{% else %}white{% endif %}; border-radius: 10px; padding: 1px 7px; font-size: 0.75rem;">{{ pending_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin_inquiries', status='replied') }}" class="filter-tab {% if status_filter == 'replied' %}active{% endif %}">
+                답변 완료
+            </a>
+        </div>
+
+        <!-- 문의 목록 -->
+        {% if inquiries %}
+            {% for inquiry in inquiries %}
+            <div class="inquiry-card" id="inquiry-{{ inquiry.id }}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <span class="inquiry-status-badge {% if inquiry.status == 'replied' %}badge-replied{% else %}badge-pending{% endif %}">
+                            {% if inquiry.status == 'replied' %}✓ 답변 완료{% else %}미답변{% endif %}
+                        </span>
+                        <div>
+                            <span style="font-weight: 700; color: #1a1a1a; font-size: 1rem;">{{ inquiry.name }}</span>
+                            <span style="color: #888; font-size: 0.88rem; margin-left: 8px;">{{ inquiry.email }}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: #aaa; font-size: 0.82rem;">
+                            {{ inquiry.created_at.strftime('%Y.%m.%d %H:%M') if inquiry.created_at else '' }}
+                        </span>
+                        <form method="POST" action="{{ url_for('admin_inquiry_delete', inquiry_id=inquiry.id) }}" style="margin: 0;" onsubmit="return confirm('이 문의사항을 삭제하시겠습니까?')">
+                            <button type="submit" style="padding: 5px 12px; background: white; border: 1px solid #fca5a5; border-radius: 6px; color: #dc2626; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='white'">삭제</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 문의 내용 -->
+                <p class="inquiry-message-text">{{ inquiry.message }}</p>
+
+                <!-- 기존 답변 표시 -->
+                {% if inquiry.status == 'replied' and inquiry.reply %}
+                <div class="reply-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--ku-crimson); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">총학생회 답변</span>
+                        <span style="color: #aaa; font-size: 0.8rem;">
+                            {{ inquiry.replied_by }} ·
+                            {{ inquiry.replied_at.strftime('%Y.%m.%d %H:%M') if inquiry.replied_at else '' }}
+                        </span>
+                    </div>
+                    <p style="margin: 0; color: #1a1a1a; font-size: 0.93rem; line-height: 1.6; white-space: pre-wrap;">{{ inquiry.reply }}</p>
+                </div>
+                {% endif %}
+
+                <!-- 답변 작성 버튼 / 폼 -->
+                {% if inquiry.status == 'pending' %}
+                <div style="margin-top: 16px;">
+                    <button onclick="toggleReplyForm({{ inquiry.id }})" style="padding: 9px 20px; background: var(--ku-crimson); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                        답변 작성
+                    </button>
+                </div>
+                {% else %}
+                <div style="margin-top: 12px;">
+                    <button onclick="toggleReplyForm({{ inquiry.id }})" style="padding: 7px 16px; background: white; border: 1px solid var(--border-light); border-radius: 8px; color: #666; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: all 0.15s;">
+                        답변 수정
+                    </button>
+                </div>
+                {% endif %}
+
+                <div class="reply-form" id="reply-form-{{ inquiry.id }}">
+                    <form method="POST" action="{{ url_for('admin_inquiry_reply', inquiry_id=inquiry.id) }}">
+                        <label style="font-weight: 700; color: #1a1a1a; font-size: 0.9rem; display: block; margin-bottom: 8px;">
+                            {{ inquiry.name }}님께 보낼 답변
+                        </label>
+                        <textarea name="reply" rows="5" placeholder="답변을 입력하세요. 작성 후 '이메일로 발송'을 누르면 신청자 이메일로 자동 발송됩니다." style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.93rem; line-height: 1.6; resize: vertical; font-family: inherit; box-sizing: border-box;" required>{{ inquiry.reply or '' }}</textarea>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button type="submit" style="padding: 10px 24px; background: var(--ku-crimson); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.15s;">
+                                이메일로 발송
+                            </button>
+                            <button type="button" onclick="toggleReplyForm({{ inquiry.id }})" style="padding: 10px 18px; background: white; border: 1px solid var(--border-light); border-radius: 8px; color: #666; font-weight: 600; font-size: 0.9rem; cursor: pointer;">
+                                취소
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 80px 20px; color: #aaa;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px; opacity: 0.5;">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <p style="font-size: 1.1rem; font-weight: 600; margin: 0 0 8px 0;">문의사항이 없습니다</p>
+                <p style="font-size: 0.9rem; margin: 0;">
+                    {% if status_filter == 'pending' %}미답변 문의사항이 없습니다.
+                    {% elif status_filter == 'replied' %}답변 완료된 문의사항이 없습니다.
+                    {% else %}아직 접수된 문의사항이 없습니다.{% endif %}
+                </p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+function toggleReplyForm(inquiryId) {
+    const form = document.getElementById('reply-form-' + inquiryId);
+    form.classList.toggle('active');
+    if (form.classList.contains('active')) {
+        form.querySelector('textarea').focus();
+    }
+}
+</script>
+{% endblock %}
