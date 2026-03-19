@@ -616,3 +616,49 @@ class SupabaseHelper:
         """대기 중인 대관 신청 수 조회"""
         response = self.admin_client.table('meeting_room_bookings').select('id', count='exact').eq('status', 'pending').execute()
         return response.count or 0
+
+    # ============ Inquiry 관련 (문의사항 챗봇) ============
+
+    def convert_inquiry_dates(self, inquiry: Dict[str, Any]) -> Dict[str, Any]:
+        """문의사항 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if inquiry:
+            if 'created_at' in inquiry:
+                inquiry['created_at'] = self.parse_datetime(inquiry['created_at'])
+            if 'replied_at' in inquiry:
+                inquiry['replied_at'] = self.parse_datetime(inquiry['replied_at'])
+        return inquiry
+
+    def get_all_inquiries(self, status: Optional[str] = None) -> List[Dict[str, Any]]:
+        """모든 문의사항 조회 (최신순)"""
+        query = self.admin_client.table('inquiries').select('*')
+        if status:
+            query = query.eq('status', status)
+        response = query.order('created_at', desc=True).execute()
+        return [self.convert_inquiry_dates(i) for i in response.data]
+
+    def get_inquiry_by_id(self, inquiry_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 문의사항 조회"""
+        response = self.admin_client.table('inquiries').select('*').eq('id', inquiry_id).execute()
+        if response.data:
+            return self.convert_inquiry_dates(response.data[0])
+        return None
+
+    def create_inquiry(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """문의사항 생성 (admin 클라이언트 사용 - RLS 우회)"""
+        response = self.admin_client.table('inquiries').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_inquiry(self, inquiry_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """문의사항 수정"""
+        response = self.admin_client.table('inquiries').update(data).eq('id', inquiry_id).execute()
+        return response.data[0] if response.data else None
+
+    def delete_inquiry(self, inquiry_id: int) -> bool:
+        """문의사항 삭제"""
+        response = self.admin_client.table('inquiries').delete().eq('id', inquiry_id).execute()
+        return len(response.data) > 0
+
+    def count_pending_inquiries(self) -> int:
+        """답변 대기 중인 문의사항 수 조회"""
+        response = self.admin_client.table('inquiries').select('id', count='exact').eq('status', 'pending').execute()
+        return response.count or 0

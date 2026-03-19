@@ -81,10 +81,10 @@
                             <img src="{{ url_for('static', filename='defaults/icons/instagram.svg') }}" alt="Instagram" style="width: 32px; height: 32px; object-fit: contain;">
                             <span style="font-weight: 600; color: #bc1888; font-size: 0.95rem;">Instagram</span>
                         </a>
-                        <a href="http://pf.kakao.com/_axgxfRX" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); transition: all 0.2s; padding: 10px 14px; border-radius: 8px; background: rgba(254, 229, 0, 0.15);" onmouseover="this.style.background='rgba(254, 229, 0, 0.25)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(254, 229, 0, 0.15)'; this.style.transform='translateY(0)';">
-                            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" style="width: 32px; height: 32px; object-fit: contain;">
-                            <span style="font-weight: 600; color: #3c1e1e; font-size: 0.95rem;">KakaoTalk</span>
-                        </a>
+                        <button id="footerInquiryBtn" style="display: flex; align-items: center; gap: 10px; cursor: pointer; border: none; transition: all 0.2s; padding: 10px 14px; border-radius: 8px; background: rgba(150, 26, 50, 0.07); font-family: inherit;" onmouseover="this.style.background='rgba(150, 26, 50, 0.14)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(150, 26, 50, 0.07)'; this.style.transform='translateY(0)';">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ku-crimson, #961A32)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <span style="font-weight: 600; color: var(--ku-crimson, #961A32); font-size: 0.95rem;">문의하기</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -104,6 +104,7 @@
 
     <script src="{{ url_for('static', filename='js/main.js') }}?v={{ static_ver }}"></script>
     <script src="{{ url_for('static', filename='js/widget.js') }}?v={{ static_ver }}"></script>
+    <script src="{{ url_for('static', filename='js/chat_widget.js') }}?v={{ static_ver }}"></script>
 
     <!-- ===================== 우측 고정 위젯 ===================== -->
     <div class="side-widget" id="sideWidget">
@@ -133,11 +134,13 @@
             <span class="widget-label">인스타</span>
         </a>
 
-        <!-- 카카오톡 -->
-        <a class="widget-btn" href="http://pf.kakao.com/_axgxfRX" target="_blank" rel="noopener noreferrer" title="카카오톡" aria-label="카카오톡">
-            <img src="{{ url_for('static', filename='defaults/icons/kakao.svg') }}" alt="KakaoTalk" class="widget-icon-img">
-            <span class="widget-label">카카오톡</span>
-        </a>
+        <!-- 문의하기 -->
+        <button class="widget-btn widget-btn--inquiry" id="widgetInquiryBtn" title="문의하기" aria-label="문의하기">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="widget-label">문의하기</span>
+        </button>
 
         <div class="widget-divider"></div>
 
@@ -237,6 +240,81 @@
                     <p class="menu-notice">* 메뉴는 식자재 수급 상황에 따라 변경될 수 있습니다.</p>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- 채팅 패널 -->
+    <div class="chat-panel" id="chatPanel" aria-hidden="true">
+        <div class="chat-panel-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-weight: 700; font-size: 0.95rem;">총학생회 문의</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8;">답변은 이메일로 발송됩니다</div>
+                </div>
+            </div>
+            <button class="chat-panel-close" id="chatPanelClose" aria-label="닫기">&times;</button>
+        </div>
+
+        <!-- 초기 화면 -->
+        <div class="chat-panel-body" id="chatBodyWelcome">
+            <div class="chat-welcome">
+                <div class="chat-welcome-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; color: #1a1a1a;">무엇이든 물어보세요!</h3>
+                <p style="margin: 0; color: #666; font-size: 0.88rem; line-height: 1.5;">총학생회 관련 문의사항을 남겨주시면<br>이메일로 빠르게 답변 드리겠습니다.</p>
+            </div>
+            <button class="chat-start-btn" id="chatStartBtn">문의 작성하기</button>
+        </div>
+
+        <!-- 문의 폼 -->
+        <div class="chat-panel-body" id="chatBodyForm" style="display:none;">
+            <form id="chatInquiryForm" novalidate>
+                <div class="chat-form-group">
+                    <label class="chat-form-label" for="chatName">이름 <span style="color: var(--ku-crimson);">*</span></label>
+                    <input type="text" id="chatName" name="name" class="chat-form-input" placeholder="홍길동" required autocomplete="name">
+                </div>
+                <div class="chat-form-group">
+                    <label class="chat-form-label" for="chatEmail">이메일 <span style="color: var(--ku-crimson);">*</span></label>
+                    <input type="email" id="chatEmail" name="email" class="chat-form-input" placeholder="example@korea.ac.kr" required autocomplete="email">
+                </div>
+                <div class="chat-form-group">
+                    <label class="chat-form-label" for="chatMessage">문의 내용 <span style="color: var(--ku-crimson);">*</span></label>
+                    <textarea id="chatMessage" name="message" class="chat-form-textarea" placeholder="궁금한 사항이나 의견을 자유롭게 작성해주세요." rows="5" required></textarea>
+                </div>
+                <div id="chatFormError" class="chat-form-error" style="display:none;"></div>
+                <button type="submit" class="chat-submit-btn" id="chatSubmitBtn">
+                    <span id="chatSubmitText">문의 보내기</span>
+                    <span id="chatSubmitSpinner" style="display:none;">
+                        <svg class="chat-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        전송 중...
+                    </span>
+                </button>
+                <button type="button" class="chat-back-btn" id="chatBackBtn">← 돌아가기</button>
+            </form>
+        </div>
+
+        <!-- 완료 화면 -->
+        <div class="chat-panel-body" id="chatBodySuccess" style="display:none;">
+            <div class="chat-welcome" style="padding-top: 32px;">
+                <div class="chat-welcome-icon" style="background: linear-gradient(135deg, #4CD964, #34c759);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; color: #1a1a1a;">문의가 접수되었습니다!</h3>
+                <p style="margin: 0; color: #666; font-size: 0.88rem; line-height: 1.5;">입력하신 이메일로 빠른 시일 내에<br>답변 드리겠습니다. 감사합니다!</p>
+            </div>
+            <button class="chat-start-btn" id="chatAnotherBtn" style="background: white; color: var(--ku-crimson); border: 2px solid var(--ku-crimson);">또 다른 문의 작성</button>
         </div>
     </div>
 </body>
