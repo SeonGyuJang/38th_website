@@ -24,7 +24,7 @@ class Config:
 
     # Allowed file extensions
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'hwp', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'zip'}
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200MB max file size
 
     # Email configuration (SMTP)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
