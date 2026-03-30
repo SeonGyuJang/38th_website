@@ -224,6 +224,21 @@ def init_default_files():
     print('  - 업로드 파일: Supabase Storage에 저장')
 
 # ============================================
+# 회의실 이름 매핑
+# ============================================
+
+ROOM_DISPLAY_NAMES = {
+    1: '316호',
+    2: '219호',
+    3: '220호',
+    4: '221호',
+}
+
+def get_room_display_name(room_number):
+    """room_number(1~4)를 실제 호실 이름으로 변환"""
+    return ROOM_DISPLAY_NAMES.get(int(room_number), f'{room_number}호')
+
+# ============================================
 # 이메일 발송 함수
 # ============================================
 
@@ -273,7 +288,8 @@ def send_email_async(to_email, subject, html):
 
 def send_booking_submitted_user_email(booking):
     """대관 신청 완료 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 {room_name} 대관 신청이 승인되었습니다'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
       <div style="background: #1A7F37; padding: 32px 40px;">
@@ -288,7 +304,7 @@ def send_booking_submitted_user_email(booking):
         <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 일정에 회의실을 이용하실 수 있습니다.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {room_name}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">시간</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">사용 목적</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking['purpose']}</td></tr>
@@ -308,8 +324,9 @@ def send_booking_admin_notification_email(booking):
     admin_emails = app.config.get('ADMIN_EMAILS', [])
     if not admin_emails:
         return False
-    
-    subject = f'[총학생회] 새로운 회의실 대관 신청 - {booking["applicant_name"]} (회의실 {booking["room_number"]}호)'
+
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 새로운 회의실 대관 신청 - {booking["applicant_name"]} (회의실 {room_name})'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
       <div style="background: #1a1a1a; padding: 32px 40px;">
@@ -323,7 +340,7 @@ def send_booking_admin_notification_email(booking):
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">이메일</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_email']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">연락처</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('applicant_phone') or '-'}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">소속</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('organization') or '-'}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {booking['room_number']}호</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {room_name}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['booking_date']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">시간</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['start_time']} ~ {booking['end_time']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">인원</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('attendees', 1)}명</td></tr>
@@ -350,7 +367,8 @@ def send_booking_admin_notification_email(booking):
 
 def send_booking_approved_email(booking):
     """대관 신청 승인 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 {room_name} 대관 신청이 승인되었습니다'
     admin_note = booking.get('admin_note')
     note_html = f'<p style="color: #444; font-size: 14px; margin: 16px 0 0 0;"><strong>관리자 메모:</strong> {admin_note}</p>' if admin_note else ''
     html = f"""
@@ -367,7 +385,7 @@ def send_booking_approved_email(booking):
         <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 일정에 회의실을 이용하실 수 있습니다.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {room_name}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">시간</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">사용 목적</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking['purpose']}</td></tr>
@@ -385,7 +403,8 @@ def send_booking_approved_email(booking):
 
 def send_booking_rejected_email(booking):
     """대관 신청 거절 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 신청 결과 안내'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 {room_name} 대관 신청 결과 안내'
     admin_note = booking.get('admin_note')
     note_html = f'<p style="color: #444; font-size: 14px; margin: 16px 0 0 0;"><strong>거절 사유:</strong> {admin_note}</p>' if admin_note else ''
     html = f"""
@@ -398,7 +417,7 @@ def send_booking_rejected_email(booking):
         <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">대관 신청이 거절되었습니다</h2>
         <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">신청하신 내용이 이번에는 승인되지 못했습니다.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {booking['room_number']}호</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {room_name}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['booking_date']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking['start_time']} ~ {booking['end_time']}</td></tr>
         </table>
@@ -415,7 +434,8 @@ def send_booking_rejected_email(booking):
 
 def send_booking_cancelled_by_admin_email(booking, cancel_reason=None):
     """관리자 취소 알림 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관이 취소되었습니다'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 {room_name} 대관이 취소되었습니다'
     reason_html = ''
     if cancel_reason:
         reason_html = f"""
@@ -437,7 +457,7 @@ def send_booking_cancelled_by_admin_email(booking, cancel_reason=None):
         <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 예약이 취소 처리되었습니다. 문의사항이 있으시면 연락주세요.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {room_name}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
         </table>
@@ -454,7 +474,8 @@ def send_booking_cancelled_by_admin_email(booking, cancel_reason=None):
 
 def send_booking_user_cancelled_email(booking):
     """사용자 본인 취소 알림 이메일 (신청자에게)"""
-    subject = f'[총학생회] 회의실 {booking["room_number"]}호 대관 취소 확인'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 {room_name} 대관 취소 확인'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
       <div style="background: #444; padding: 32px 40px;">
@@ -469,7 +490,7 @@ def send_booking_user_cancelled_email(booking):
         <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">신청하신 예약이 정상적으로 취소되었습니다.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {booking['room_number']}호</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>회의실 {room_name}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{booking['booking_date']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking['start_time']} ~ {booking['end_time']}</strong></td></tr>
         </table>
@@ -489,7 +510,8 @@ def send_cancellation_admin_notification_email(booking):
     if not admin_emails:
         return False
 
-    subject = f'[총학생회] 회의실 대관 취소 알림 - {booking["applicant_name"]} (회의실 {booking["room_number"]}호)'
+    room_name = get_room_display_name(booking['room_number'])
+    subject = f'[총학생회] 회의실 대관 취소 알림 - {booking["applicant_name"]} (회의실 {room_name})'
     html = f"""
     <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
       <div style="background: #374151; padding: 32px 40px;">
@@ -502,7 +524,7 @@ def send_cancellation_admin_notification_email(booking):
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">신청자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_name']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">이메일</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['applicant_email']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">연락처</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('applicant_phone') or '-'}</td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {booking['room_number']}호</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">회의실</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">회의실 {room_name}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking['booking_date']}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">시간</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking['start_time']} ~ {booking['end_time']}</td></tr>
         </table>
@@ -1920,10 +1942,11 @@ def admin_meeting_room_approve(booking_id):
     if updated:
         email_data = {**booking, 'status': 'approved', 'admin_note': admin_note}
         email_sent = send_booking_approved_email(email_data)
+        room_name = get_room_display_name(booking['room_number'])
         if email_sent:
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+            flash(f'회의실 {room_name} 대관 신청이 승인되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
         else:
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 승인되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
+            flash(f'회의실 {room_name} 대관 신청이 승인되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
     else:
         flash('승인 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
@@ -1947,10 +1970,11 @@ def admin_meeting_room_reject(booking_id):
     if updated:
         email_data = {**booking, 'status': 'rejected', 'admin_note': admin_note}
         email_sent = send_booking_rejected_email(email_data)
+        room_name = get_room_display_name(booking['room_number'])
         if email_sent:
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 거절되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
+            flash(f'회의실 {room_name} 대관 신청이 거절되었습니다. 신청자에게 이메일이 발송되었습니다.', 'success')
         else:
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 거절되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
+            flash(f'회의실 {room_name} 대관 신청이 거절되었습니다. (이메일 발송 실패 — 서버 로그를 확인하세요)', 'warning')
     else:
         flash('거절 처리 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_meeting_rooms'))
@@ -1972,7 +1996,7 @@ def admin_meeting_room_delete(booking_id):
         print(f'[DELETE ROUTE] delete 결과: ok={ok}')
         if ok:
             threading.Thread(target=send_booking_cancelled_by_admin_email, args=(dict(booking), cancel_reason or None), daemon=True).start()
-            flash(f'회의실 {booking["room_number"]}호 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송됩니다.', 'success')
+            flash(f'회의실 {get_room_display_name(booking["room_number"])} 대관 신청이 취소되었습니다. 신청자에게 취소 안내 이메일이 발송됩니다.', 'success')
         else:
             flash('삭제 처리 중 오류가 발생했습니다. 서버 로그를 확인하세요.', 'error')
     except Exception as e:
@@ -2022,7 +2046,7 @@ def meeting_room_cancel():
                     b_snap = dict(booking)
                     threading.Thread(target=send_booking_user_cancelled_email, args=(b_snap,), daemon=True).start()
                     threading.Thread(target=send_cancellation_admin_notification_email, args=(b_snap,), daemon=True).start()
-                    flash(f'회의실 {booking["room_number"]}호 ({booking["booking_date"]} {booking["start_time"]}~{booking["end_time"]}) 예약이 취소되었습니다. 취소 확인 이메일이 곧 발송됩니다.', 'success')
+                    flash(f'회의실 {get_room_display_name(booking["room_number"])} ({booking["booking_date"]} {booking["start_time"]}~{booking["end_time"]}) 예약이 취소되었습니다. 취소 확인 이메일이 곧 발송됩니다.', 'success')
                     return redirect(url_for('meeting_room_cancel'))
                 else:
                     flash('취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
@@ -2155,6 +2179,35 @@ def admin_inquiry_delete(inquiry_id):
     db_helper.delete_inquiry(inquiry_id)
     flash('문의사항이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_inquiries'))
+
+
+# ============================================
+# 파일 업로드 & 다운로드 링크 생성 (관리자 전용)
+# ============================================
+
+@app.route('/admin/file-links', methods=['GET', 'POST'])
+@login_required
+def admin_file_links():
+    """파일을 업로드하고 바로 다운로드 가능한 링크를 생성하는 관리자 기능"""
+    upload_result = None
+
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file or file.filename == '':
+            flash('파일을 선택해주세요.', 'error')
+        elif not allowed_file(file.filename):
+            flash(f'허용되지 않는 파일 형식입니다. 허용 형식: {", ".join(sorted(Config.ALLOWED_EXTENSIONS))}', 'error')
+        else:
+            file_url = save_file(file, subfolder='files')
+            if file_url:
+                upload_result = {
+                    'filename': secure_filename(file.filename),
+                    'url': file_url,
+                }
+            else:
+                flash('파일 업로드 중 오류가 발생했습니다.', 'error')
+
+    return render_template('admin/file_links.html', upload_result=upload_result)
 
 
 # ============================================
