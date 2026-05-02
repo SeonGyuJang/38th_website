@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE SIGNAL 2026 — 방명록 | 고려대학교 세종캠퍼스 대동제</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/the_signal/css/style.css">
+</head>
+<body>
+
+<!-- GLOBAL MARQUEE BAR -->
+<div class="global-marquee">
+  <span class="gm-txt">★ THE SIGNAL 2026 ★ 고려대학교 세종캠퍼스 대동제 ★ 2026년 5월 12일 — 13일 ★ THE SIGNAL 2026 ★ 고려대학교 세종캠퍼스 대동제 ★ 2026년 5월 12일 — 13일 ★</span>
+</div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+  <div class="taskbar-left">
+    <button class="start-btn">
+      <span class="icon">📟</span>
+      <span>THE SIGNAL</span>
+    </button>
+    <div class="tb-divider"></div>
+    <div class="tb-item on">📋 GUESTBOOK.exe</div>
+    <div class="tb-item on">📨 MESSAGE.exe</div>
+  </div>
+  <div class="taskbar-right">
+    <div class="clock-box">
+      <span class="clock-time" id="clock">00:00:00</span>
+      <span class="clock-date" id="cal">2025.05.12</span>
+    </div>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div class="desktop">
+
+  <!-- ────────────────────────────────────
+       LEFT — GUESTBOOK WINDOW
+  ──────────────────────────────────────── -->
+  <div class="win win-gb">
+
+    <div class="tbar">
+      <div class="tbar-l">
+        <span class="tbar-icon">📋</span>
+        <span class="tbar-name">GUESTBOOK.exe</span><span class="tbar-sub"> — THE SIGNAL 2026 방명록</span>
+      </div>
+      <div class="tbar-btns">
+        <button class="tbar-btn">─</button>
+        <button class="tbar-btn">□</button>
+        <button class="tbar-btn">✕</button>
+      </div>
+    </div>
+
+    <div class="mbar">
+      <span class="mitem">File</span>
+      <span class="mitem">Edit</span>
+      <span class="mitem">View</span>
+      <span class="mitem">Help</span>
+    </div>
+
+    <!-- 오늘의 주제 — 한 줄 스트립 -->
+    <div class="topic-strip">
+      <span class="ts-live">● LIVE</span>
+      <span class="ts-label">오늘의 주제</span>
+      <span class="ts-sep">|</span>
+      <span class="ts-topic" id="topic-text">"THE SIGNAL에 오신 것을 환영합니다!"</span>
+      <div class="ts-dots">
+        <span class="ts-dot" id="tsd-0" title="11:00 첫사랑이었던 그 사람에게">💌</span>
+        <span class="ts-dot" id="tsd-1" title="13:00 X에게 연락이 온다면?">📱</span>
+        <span class="ts-dot" id="tsd-2" title="15:00 딱 한 번의 호출 기회">📟</span>
+      </div>
+    </div>
+
+    <!-- 오늘의 주제 서브텍스트 -->
+    <div class="topic-sub">오늘의 주제에 맞게, 혹은 자유롭게 방명록을 남겨보세요 ✍️ 좋아요와 답글도 달 수 있어요!</div>
+
+    <!-- 작성 폼 -->
+    <div class="write-panel">
+      <div class="wp-top">
+        <input type="text" id="name" class="inp wp-name"
+               placeholder="이름 (Name)" maxlength="20" autocomplete="off">
+        <button class="btn btn-send" id="sendbtn" onclick="submitComment()">전송 ▶</button>
+      </div>
+      <div class="wp-bottom">
+        <textarea id="msg" class="txta wp-msg"
+                  placeholder="오늘의 주제에 맞게, 혹은 자유롭게 방명록을 남겨보세요 ✍️  (Ctrl+Enter 빠른 전송)"
+                  maxlength="300"></textarea>
+        <span class="wp-cnt"><span id="msgcnt">0</span>/300</span>
+      </div>
+    </div>
+
+    <!-- 피드 헤더 -->
+    <div class="feed-hd">
+      <span class="feed-title">▶ 방명록 피드</span>
+      <span class="feed-live">● LIVE</span>
+      <span class="cnt-badge" id="cntbadge"></span>
+    </div>
+
+    <!-- 피드 -->
+    <div class="feed" id="feed">
+      <div class="loading-msg">Loading...</div>
+    </div>
+
+    <div class="wstatus">
+      <span id="gb-status">준비됨</span>
+      <span>THE SIGNAL &nbsp;|&nbsp; 고려대학교 세종캠퍼스</span>
+    </div>
+
+  </div><!-- /win-gb -->
+
+
+  <!-- ────────────────────────────────────
+       RIGHT COLUMN
+  ──────────────────────────────────────── -->
+  <div class="right-col">
+
+    <!-- ── PAGER WINDOW: 삐삐 디바이스(좌) + 코드 선택(우) ── -->
+    <div class="win win-msg">
+
+      <div class="tbar">
+        <div class="tbar-l">
+          <span class="tbar-icon">📨</span>
+          <span class="tbar-name">MESSAGE.exe</span><span class="tbar-sub"> — 삐삐 발송</span>
+        </div>
+        <div class="tbar-btns">
+          <button class="tbar-btn">─</button>
+          <button class="tbar-btn">□</button>
+          <button class="tbar-btn">✕</button>
+        </div>
+      </div>
+
+      <div class="mbar">
+        <span class="mitem">Compose</span>
+        <span class="mitem">Send</span>
+        <span class="mitem">Help</span>
+      </div>
+
+      <div class="pager-wbody">
+
+        <!-- 가로 안내 배너 (한 줄) -->
+        <div class="pager-guide-h">
+          <span class="pgh-desc">📟 <strong>삐삐</strong>: 1990년대 숫자 코드로 마음을 전하는 방식</span>
+          <div class="pgh-flow">
+            <span class="pgh-s">① 코드 선택</span>
+            <span class="pgh-a">→</span>
+            <span class="pgh-s">② 이메일</span>
+            <span class="pgh-a">→</span>
+            <span class="pgh-s">③ 이름</span>
+            <span class="pgh-a">→</span>
+            <span class="pgh-s">④ SEND!</span>
+          </div>
+        </div>
+
+        <!-- 2분할: 삐삐 디바이스(좌) + 코드 선택기(우) -->
+        <div class="pager-split">
+
+          <!-- 좌: 삐삐 디바이스 -->
+          <div class="pager-left">
+            <div class="pager-device">
+              <div class="pager-brand-label">◀ KU SEJONG CAMPUS ▶</div>
+
+              <div class="device-lcd">
+                <div class="lcd-bar">
+                  <span class="lcd-brand-sm">📟 THE SIGNAL</span>
+                  <span class="lcd-sig">●●●</span>
+                </div>
+                <div class="lcd-preview dim" id="lcd-body">코드를 입력하면 미리보기 표시</div>
+              </div>
+
+              <div class="device-form">
+                <div class="device-field">
+                  <label class="dev-lbl">① CODE / 삐삐 코드</label>
+                  <input type="text" id="bcode" class="dev-inp dev-code"
+                         placeholder="1004" maxlength="10"
+                         oninput="updatePreview()" autocomplete="off">
+                </div>
+                <div class="device-field">
+                  <label class="dev-lbl">② TO / 받는 이메일</label>
+                  <input type="email" id="bemail" class="dev-inp"
+                         placeholder="email@address.com" autocomplete="off">
+                </div>
+                <div class="device-field">
+                  <label class="dev-lbl">③ FROM / 이름</label>
+                  <input type="text" id="bsender" class="dev-inp"
+                         placeholder="보낸 사람" maxlength="15" autocomplete="off">
+                </div>
+                <div class="device-field">
+                  <label class="dev-lbl">MSG / 한마디 (선택)</label>
+                  <input type="text" id="bcomment" class="dev-inp"
+                         placeholder="짧은 메시지" maxlength="60" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="device-btns">
+                <div class="dev-side-btn">◄</div>
+                <button class="dev-send-btn" id="beepbtn" onclick="sendBeep()">SEND BEEP ▶</button>
+                <div class="dev-side-btn">►</div>
+              </div>
+
+            </div><!-- /pager-device -->
+          </div><!-- /pager-left -->
+
+          <!-- 우: 코드 선택기 (LCD 테마) — JS로 동적 렌더링 -->
+          <div class="pager-right" id="cs-body">
+            <div class="cs-hd">📟 삐삐 코드 선택</div>
+            <div style="color:rgba(74,238,74,.4);font-size:13px;font-family:'Do Hyeon',sans-serif;padding:8px 0;">Loading...</div>
+          </div><!-- /pager-right -->
+
+        </div><!-- /pager-split -->
+
+      </div><!-- /pager-wbody -->
+
+      <div class="wstatus">
+        <span id="beep-status">삐삐 발송 준비됨</span>
+        <span>📟 PAGER v1.1</span>
+      </div>
+
+    </div><!-- /win-msg -->
+
+
+    <!-- ── CODE GUIDE: 사용 방법(좌) + 공지사항(우) ── -->
+    <div class="win win-cod">
+
+      <div class="tbar">
+        <div class="tbar-l">
+          <span class="tbar-icon">🔢</span>
+          <span class="tbar-name">CODE.exe</span><span class="tbar-sub"> — 안내 &amp; 공지사항</span>
+        </div>
+        <div class="tbar-btns">
+          <button class="tbar-btn">─</button>
+          <button class="tbar-btn">□</button>
+          <button class="tbar-btn">✕</button>
+        </div>
+      </div>
+
+      <div class="cod-wbody">
+
+        <div class="cod-panel-hd">📢 공지사항</div>
+        <div class="notice-box">
+          <p class="notice-ttl">🎉 THE SIGNAL 2026</p>
+          <p>고려대학교 세종캠퍼스 대동제</p>
+          <p class="notice-dt">📅 2026. 05. 12 — 13</p>
+          <p>부스 방문을 환영합니다!</p>
+        </div>
+        <div class="notice-schedule">
+          <div class="ns-item">
+            <span class="ns-time">11:00–13:00</span>
+            <span class="ns-txt">💌 첫사랑이었던 그 사람에게</span>
+          </div>
+          <div class="ns-item">
+            <span class="ns-time">13:00–15:00</span>
+            <span class="ns-txt">📱 X에게 연락이 온다면?</span>
+          </div>
+          <div class="ns-item">
+            <span class="ns-time">15:00–17:00</span>
+            <span class="ns-txt">📟 딱 한 번의 호출 기회</span>
+          </div>
+        </div>
+
+      </div><!-- /cod-wbody -->
+
+    </div><!-- /win-cod -->
+
+  </div><!-- /right-col -->
+
+</div><!-- /desktop -->
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- DIALOG -->
+<div class="dlg-overlay hidden" id="dlg-overlay">
+  <div class="dlg">
+    <div class="tbar">
+      <div class="tbar-l">
+        <span class="tbar-icon" id="dlg-icon-tb">⚠️</span>
+        <span class="tbar-txt" id="dlg-title">알림</span>
+      </div>
+      <div class="tbar-btns">
+        <button class="tbar-btn" onclick="closeDlg()">✕</button>
+      </div>
+    </div>
+    <div class="dlg-body">
+      <span class="dlg-icon" id="dlg-icon">ℹ️</span>
+      <p class="dlg-msg" id="dlg-msg"></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" onclick="closeDlg()">확인 (OK)</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/the_signal/js/main.js"></script>
+</body>
+</html>

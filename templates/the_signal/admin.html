@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — THE SIGNAL 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#a0a6c2; --win:#f6f0f4; --win-lt:#ffffff; --panel:#e8d8e4;
+      --hi:#ffffff; --lo:#582038; --mid:#bea0b4;
+      --btn:#d8c0cc; --btn-hov:#ccb0c0; --inp:#ffffff;
+      --text:#180810; --text2:#3a1828; --muted:#6a4858;
+      --accent:#a82850; --accent-dk:#701430; --accent-lt:#f4c8d8;
+      --tb-from:#5c1e3e; --tb-to:#aa5070;
+      --ok:#1a7a1a; --err:#aa1010;
+    }
+    html, body { min-height:100vh; background:var(--bg); font-family:'Do Hyeon', sans-serif; color:var(--text); font-size:15px; }
+    .admin-wrap { max-width:1100px; margin:0 auto; padding:16px 12px 40px; display:flex; flex-direction:column; gap:14px; }
+    .admin-topbar {
+      background:linear-gradient(90deg, var(--tb-from), var(--tb-to) 55%, #c26e88);
+      padding:7px 14px; display:flex; align-items:center; justify-content:space-between;
+      border-top:2px solid #c87898; border-left:2px solid #c87898;
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    }
+    .admin-topbar h1 { font-size:18px; color:#fff; text-shadow:1px 1px 0 rgba(0,0,0,.4); }
+    .logout-btn {
+      padding:4px 14px; background:var(--btn);
+      border-top:2px solid var(--hi); border-left:2px solid var(--hi);
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      font-family:'Do Hyeon', sans-serif; font-size:14px; color:var(--text); cursor:pointer; text-decoration:none;
+    }
+    .logout-btn:hover { background:var(--btn-hov); }
+    .win {
+      background:var(--win);
+      border-top:2px solid var(--hi); border-left:2px solid var(--hi);
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    }
+    .tbar {
+      background:linear-gradient(90deg, var(--tb-from), var(--tb-to) 55%, #c26e88);
+      padding:4px 8px; display:flex; align-items:center; gap:7px;
+    }
+    .tbar-icon { font-size:14px; }
+    .tbar-txt { font-family:'Do Hyeon', sans-serif; font-size:15px; color:#fff; text-shadow:1px 1px 0 rgba(0,0,0,.4); }
+    .win-body { padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+    .inp {
+      background:var(--inp);
+      border-top:2px solid var(--lo); border-left:2px solid var(--lo);
+      border-right:2px solid var(--hi); border-bottom:2px solid var(--hi);
+      padding:5px 9px; font-family:'Do Hyeon', sans-serif; font-size:15px; color:var(--text); outline:none;
+    }
+    .inp:focus { outline:2px dotted var(--accent); outline-offset:-2px; }
+    .inp.sm { font-size:14px; padding:3px 7px; }
+    .inp.wide { width:100%; }
+    select.inp { cursor:pointer; }
+    .btn {
+      background:var(--btn);
+      border-top:2px solid var(--hi); border-left:2px solid var(--hi);
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      padding:4px 14px; font-family:'Do Hyeon', sans-serif; font-size:14px; color:var(--text); cursor:pointer; white-space:nowrap;
+    }
+    .btn:hover { background:var(--btn-hov); }
+    .btn:active { border-top:2px solid var(--lo); border-left:2px solid var(--lo); border-right:2px solid var(--hi); border-bottom:2px solid var(--hi); }
+    .btn-danger { background:#e8c0c0; }
+    .btn-danger:hover { background:#d8a8a8; }
+    .btn-primary {
+      background:linear-gradient(180deg, var(--tb-to), var(--tb-from));
+      color:#fff; text-shadow:1px 1px 0 rgba(0,0,0,.4);
+      border-top:2px solid #c87898; border-left:2px solid #c87898;
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+    }
+    .btn-primary:hover { background:linear-gradient(180deg, #be6880, #6a2040); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th {
+      background:var(--panel); padding:6px 10px; text-align:left;
+      border-bottom:2px solid var(--lo); font-size:14px; color:var(--accent-dk);
+    }
+    td { padding:5px 10px; border-bottom:1px solid var(--mid); vertical-align:middle; }
+    tr:hover td { background:var(--accent-lt); }
+    .td-actions { display:flex; gap:5px; white-space:nowrap; }
+    .topic-row {
+      display:grid; grid-template-columns:1fr 1fr 1fr 100px;
+      gap:8px; align-items:center;
+      padding:8px 10px; background:var(--panel);
+      border-bottom:1px solid var(--mid);
+    }
+    .topic-row:last-child { border-bottom:none; }
+    .topic-row label { font-size:13px; color:var(--muted); display:block; margin-bottom:2px; }
+    .topic-cell { display:flex; flex-direction:column; }
+    .add-row { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; padding:8px 10px; background:var(--panel); }
+    .add-row .field { display:flex; flex-direction:column; gap:2px; }
+    .add-row .field label { font-size:13px; color:var(--muted); }
+    .notice {
+      padding:7px 14px; font-size:14px; text-align:center;
+      border:2px solid; display:none;
+    }
+    .notice.ok  { background:#d8f4d8; border-color:var(--ok);  color:var(--ok); }
+    .notice.err { background:#f4d8d8; border-color:var(--err); color:var(--err); }
+    .tbl-wrap { max-height:360px; overflow-y:auto; }
+    .tbl-wrap::-webkit-scrollbar { width:14px; }
+    .tbl-wrap::-webkit-scrollbar-track { background:var(--panel); border-left:1px solid var(--mid); }
+    .tbl-wrap::-webkit-scrollbar-thumb {
+      background:var(--btn);
+      border-top:2px solid var(--hi); border-left:2px solid var(--hi);
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+    }
+    .wstatus {
+      background:var(--panel); border-top:2px solid var(--lo);
+      padding:3px 9px; font-size:12px; color:var(--muted); display:flex; justify-content:space-between;
+    }
+    .edit-inp { width:100%; background:var(--inp); border:1px solid var(--mid); padding:2px 5px; font-family:'Do Hyeon', sans-serif; font-size:14px; color:var(--text); }
+  </style>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <div class="admin-topbar">
+    <h1>📟 THE SIGNAL 2026 — 관리자 페이지</h1>
+    <a class="logout-btn" href="/the_signal/admin/logout">로그아웃 ✕</a>
+  </div>
+
+  <!-- ── Section 1: Topics ── -->
+  <div class="win" id="win-topics">
+    <div class="tbar">
+      <span class="tbar-icon">📌</span>
+      <span class="tbar-txt">오늘의 주제 관리</span>
+    </div>
+    <div class="win-body">
+      <div class="notice" id="topic-notice"></div>
+      <div id="topics-list">불러오는 중...</div>
+    </div>
+    <div class="wstatus"><span id="topic-status">로딩 중...</span><span>TOPICS.db</span></div>
+  </div>
+
+  <!-- ── Section 2: Guestbook ── -->
+  <div class="win" id="win-gb">
+    <div class="tbar">
+      <span class="tbar-icon">📋</span>
+      <span class="tbar-txt">방명록 관리</span>
+    </div>
+    <div class="win-body">
+      <div class="notice" id="gb-notice"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:14px;color:var(--muted)">검색:</span>
+        <input class="inp sm" id="gb-search" placeholder="이름 또는 내용으로 검색" style="width:240px" oninput="filterGb()">
+        <button class="btn" onclick="loadGb()">새로고침 ↺</button>
+        <span class="btn" style="margin-left:auto;font-size:13px;color:var(--muted);background:none;border:none;" id="gb-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px">ID</th>
+              <th style="width:80px">이름</th>
+              <th>내용</th>
+              <th style="width:50px">답글</th>
+              <th style="width:44px">♥</th>
+              <th style="width:120px">시간</th>
+              <th style="width:120px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="gb-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:16px;color:var(--muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wstatus"><span id="gb-status-admin">로딩 중...</span><span>ENTRIES.db</span></div>
+  </div>
+
+  <!-- ── Section 3: Pager Codes ── -->
+  <div class="win" id="win-codes">
+    <div class="tbar">
+      <span class="tbar-icon">📟</span>
+      <span class="tbar-txt">삐삐 코드 관리</span>
+    </div>
+    <div class="win-body">
+      <div class="notice" id="code-notice"></div>
+      <div class="add-row">
+        <div class="field">
+          <label>코드</label>
+          <input class="inp sm" id="new-code" placeholder="예: 1004" style="width:90px">
+        </div>
+        <div class="field">
+          <label>한국어</label>
+          <input class="inp sm" id="new-korean" placeholder="천사" style="width:100px">
+        </div>
+        <div class="field">
+          <label>영어</label>
+          <input class="inp sm" id="new-english" placeholder="Angel ♡" style="width:120px">
+        </div>
+        <div class="field">
+          <label>카테고리</label>
+          <select class="inp sm" id="new-cat" style="width:110px">
+            <option>사랑/감정</option>
+            <option>안부/일상</option>
+            <option>우정/재미</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="addCode()" style="align-self:flex-end">+ 추가</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:80px">코드</th>
+              <th style="width:110px">한국어</th>
+              <th style="width:140px">영어</th>
+              <th style="width:110px">카테고리</th>
+              <th style="width:130px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="codes-tbody">
+            <tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wstatus"><span id="code-status">로딩 중...</span><span>PAGER_CODES.db</span></div>
+  </div>
+
+  <!-- ── Section 4: Beep Log ── -->
+  <div class="win" id="win-beep">
+    <div class="tbar">
+      <span class="tbar-icon">📨</span>
+      <span class="tbar-txt">삐삐 발송 내역</span>
+    </div>
+    <div class="win-body">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="inp sm" id="beep-search" placeholder="이메일 또는 코드로 검색" style="width:240px" oninput="filterBeep()">
+        <button class="btn" onclick="loadBeepLog()">새로고침 ↺</button>
+        <span style="margin-left:auto;font-size:13px;color:var(--muted)" id="beep-count"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:44px">ID</th>
+              <th style="width:150px">수신자 이메일</th>
+              <th style="width:64px">코드</th>
+              <th style="width:90px">보낸 사람</th>
+              <th>메시지</th>
+              <th style="width:56px">결과</th>
+              <th style="width:90px">IP</th>
+              <th style="width:118px">시간</th>
+            </tr>
+          </thead>
+          <tbody id="beep-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wstatus"><span id="beep-status">로딩 중...</span><span>BEEP_LOG.db</span></div>
+  </div>
+
+</div>
+
+<div id="confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9999;align-items:center;justify-content:center;">
+  <div class="win" style="min-width:300px">
+    <div class="tbar"><span class="tbar-icon">⚠️</span><span class="tbar-txt">확인</span></div>
+    <div style="padding:18px 20px;font-size:16px;" id="confirm-msg"></div>
+    <div style="padding:8px 14px;border-top:2px solid var(--mid);display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-danger" id="confirm-ok">삭제</button>
+      <button class="btn" onclick="closeConfirm()">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = '/the_signal';
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function showNotice(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `notice ${type}`;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+let confirmCb = null;
+function openConfirm(msg, cb) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-overlay').style.display = 'flex';
+  confirmCb = cb;
+  document.getElementById('confirm-ok').onclick = () => { closeConfirm(); cb(); };
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').style.display = 'none';
+  confirmCb = null;
+}
+
+let topicsData = [];
+async function loadTopics() {
+  const res  = await fetch(`${BASE}/admin/api/topics`);
+  topicsData = await res.json();
+  renderTopics();
+  document.getElementById('topic-status').textContent = `총 ${topicsData.length}개 주제`;
+}
+
+function renderTopics() {
+  const el = document.getElementById('topics-list');
+  el.innerHTML = topicsData.map(t => `
+    <div class="topic-row" id="topic-row-${t.id}">
+      <div class="topic-cell">
+        <label>주제 텍스트</label>
+        <input class="inp wide" id="tt-text-${t.id}" value="${esc(t.topic_text)}">
+      </div>
+      <div class="topic-cell">
+        <label>힌트 (placeholder)</label>
+        <input class="inp wide" id="tt-hint-${t.id}" value="${esc(t.hint||'')}">
+      </div>
+      <div class="topic-cell">
+        <label>시간 레이블</label>
+        <input class="inp wide" id="tt-label-${t.id}" value="${esc(t.label)}">
+      </div>
+      <div class="topic-cell" style="align-items:center;justify-content:flex-end;flex-direction:row;gap:6px;">
+        <span style="font-size:20px">${esc(t.emoji||'')}</span>
+        <button class="btn btn-primary" onclick="saveTopic(${t.id})">저장</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function saveTopic(id) {
+  const t = topicsData.find(x => x.id === id);
+  if (!t) return;
+  const body = {
+    time_start: t.time_start, time_end: t.time_end,
+    label:      document.getElementById(`tt-label-${id}`).value,
+    topic_text: document.getElementById(`tt-text-${id}`).value,
+    hint:       document.getElementById(`tt-hint-${id}`).value,
+    emoji:      t.emoji,
+  };
+  const res = await fetch(`${BASE}/admin/api/topics/${id}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.success) showNotice('topic-notice', '저장되었습니다 ✓', 'ok');
+  else showNotice('topic-notice', data.error || '오류 발생', 'err');
+  loadTopics();
+}
+
+let gbData = [];
+async function loadGb() {
+  const res = await fetch(`${BASE}/admin/api/comments`);
+  gbData    = await res.json();
+  renderGb(gbData);
+  document.getElementById('gb-status-admin').textContent = `총 ${gbData.length}개`;
+  document.getElementById('gb-count').textContent = `${gbData.length}개`;
+}
+
+function filterGb() {
+  const q = document.getElementById('gb-search').value.toLowerCase();
+  renderGb(gbData.filter(c => c.name.toLowerCase().includes(q) || c.message.toLowerCase().includes(q)));
+}
+
+function renderGb(rows) {
+  const tbody = document.getElementById('gb-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--muted)">항목 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(c => `
+    <tr id="gbr-${c.id}">
+      <td style="color:var(--muted)">${c.id}</td>
+      <td><input class="edit-inp" id="gn-${c.id}" value="${esc(c.name)}"></td>
+      <td><input class="edit-inp" id="gm-${c.id}" value="${esc(c.message)}"></td>
+      <td style="text-align:center;color:var(--muted)">${c.parent_id ? '↩' : ''}</td>
+      <td style="text-align:center">${c.likes}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(c.created_at||'').replace('T',' ').substring(0,16)}</td>
+      <td class="td-actions">
+        <button class="btn" onclick="saveComment(${c.id})" style="font-size:12px;padding:3px 8px">저장</button>
+        <button class="btn btn-danger" onclick="deleteComment(${c.id})" style="font-size:12px;padding:3px 8px">삭제</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function saveComment(id) {
+  const body = { name: document.getElementById(`gn-${id}`).value, message: document.getElementById(`gm-${id}`).value };
+  const res  = await fetch(`${BASE}/admin/api/comments/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  const data = await res.json();
+  if (data.success) showNotice('gb-notice', '수정되었습니다 ✓', 'ok');
+  else showNotice('gb-notice', data.error || '오류 발생', 'err');
+  loadGb();
+}
+
+function deleteComment(id) {
+  openConfirm(`ID ${id} 항목을 삭제하시겠습니까? (답글 포함)`, async () => {
+    const res  = await fetch(`${BASE}/admin/api/comments/${id}`, { method:'DELETE' });
+    const data = await res.json();
+    if (data.success) { showNotice('gb-notice', '삭제되었습니다 ✓', 'ok'); loadGb(); }
+    else showNotice('gb-notice', data.error || '오류 발생', 'err');
+  });
+}
+
+let codesData = [];
+async function loadCodes() {
+  const res  = await fetch(`${BASE}/admin/api/codes`);
+  codesData  = await res.json();
+  renderCodes();
+  document.getElementById('code-status').textContent = `총 ${codesData.length}개 코드`;
+}
+
+function renderCodes() {
+  const tbody = document.getElementById('codes-tbody');
+  if (!codesData.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">코드 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = codesData.map(c => `
+    <tr id="cr-${encodeURIComponent(c.code)}">
+      <td style="font-weight:bold;color:var(--accent-dk)">${esc(c.code)}</td>
+      <td><input class="edit-inp" id="ck-${encodeURIComponent(c.code)}" value="${esc(c.korean)}"></td>
+      <td><input class="edit-inp" id="ce-${encodeURIComponent(c.code)}" value="${esc(c.english)}"></td>
+      <td>
+        <select class="inp sm" id="cc-${encodeURIComponent(c.code)}" style="width:100%">
+          ${['사랑/감정','안부/일상','우정/재미','기타'].map(cat =>
+            `<option${cat===c.category?' selected':''}>${cat}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td class="td-actions">
+        <button class="btn" onclick="saveCode('${esc(c.code)}')" style="font-size:12px;padding:3px 8px">저장</button>
+        <button class="btn btn-danger" onclick="deleteCode('${esc(c.code)}')" style="font-size:12px;padding:3px 8px">삭제</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function saveCode(code) {
+  const enc  = encodeURIComponent(code);
+  const body = {
+    korean:   document.getElementById(`ck-${enc}`).value,
+    english:  document.getElementById(`ce-${enc}`).value,
+    category: document.getElementById(`cc-${enc}`).value,
+  };
+  const res  = await fetch(`${BASE}/admin/api/codes/${encodeURIComponent(code)}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.success) showNotice('code-notice', '수정되었습니다 ✓', 'ok');
+  else showNotice('code-notice', data.error || '오류 발생', 'err');
+  loadCodes();
+}
+
+function deleteCode(code) {
+  openConfirm(`코드 [${code}]를 삭제하시겠습니까?`, async () => {
+    const res  = await fetch(`${BASE}/admin/api/codes/${encodeURIComponent(code)}`, { method:'DELETE' });
+    const data = await res.json();
+    if (data.success) { showNotice('code-notice', '삭제되었습니다 ✓', 'ok'); loadCodes(); }
+    else showNotice('code-notice', data.error || '오류 발생', 'err');
+  });
+}
+
+async function addCode() {
+  const code    = document.getElementById('new-code').value.trim();
+  const korean  = document.getElementById('new-korean').value.trim();
+  const english = document.getElementById('new-english').value.trim();
+  const cat     = document.getElementById('new-cat').value;
+  if (!code || !korean) { showNotice('code-notice', '코드와 한국어를 입력해주세요', 'err'); return; }
+
+  const res  = await fetch(`${BASE}/admin/api/codes`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ code, korean, english, category: cat })
+  });
+  const data = await res.json();
+  if (data.success) {
+    showNotice('code-notice', '추가되었습니다 ✓', 'ok');
+    ['new-code','new-korean','new-english'].forEach(id => document.getElementById(id).value = '');
+    loadCodes();
+  } else showNotice('code-notice', data.error || '오류 발생', 'err');
+}
+
+let beepData = [];
+async function loadBeepLog() {
+  const res  = await fetch(`${BASE}/admin/api/beep-log`);
+  beepData   = await res.json();
+  renderBeep(beepData);
+  document.getElementById('beep-status').textContent = `총 ${beepData.length}건 (성공 ${beepData.filter(r=>r.success).length}건)`;
+  document.getElementById('beep-count').textContent  = `${beepData.length}건`;
+}
+
+function filterBeep() {
+  const q = document.getElementById('beep-search').value.toLowerCase();
+  renderBeep(beepData.filter(r =>
+    r.to_email.toLowerCase().includes(q) ||
+    r.code.toLowerCase().includes(q) ||
+    (r.sender_name||'').toLowerCase().includes(q)
+  ));
+}
+
+function renderBeep(rows) {
+  const tbody = document.getElementById('beep-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--muted)">내역 없음</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="color:var(--muted)">${r.id}</td>
+      <td style="word-break:break-all;font-size:13px">${esc(r.to_email)}</td>
+      <td style="font-weight:bold;color:var(--accent-dk)">${esc(r.code)}</td>
+      <td>${esc(r.sender_name||'')}</td>
+      <td style="font-size:13px;color:var(--muted)">${esc(r.comment||'')}</td>
+      <td style="text-align:center">
+        ${r.success
+          ? '<span style="color:var(--ok);font-size:16px" title="성공">✓</span>'
+          : `<span style="color:var(--err);font-size:14px" title="${esc(r.error_msg||'')}">✗</span>`}
+      </td>
+      <td style="font-size:12px;color:var(--muted)">${esc(r.ip||'')}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc((r.created_at||'').replace('T',' ').substring(0,16))}</td>
+    </tr>
+  `).join('');
+}
+
+loadTopics();
+loadGb();
+loadCodes();
+loadBeepLog();
+</script>
+</body>
+</html>
