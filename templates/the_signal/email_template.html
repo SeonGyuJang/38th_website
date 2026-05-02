@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE SIGNAL — 삐삐</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0f1321;font-family:'Courier New', Courier, monospace, sans-serif;" bgcolor="#0f1321">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f1321;min-height:100vh;" bgcolor="#0f1321">
+  <tr>
+    <td align="center" valign="middle" style="padding:30px 15px;">
+      <table width="380" cellpadding="0" cellspacing="0" style="background:#1c2333;border:6px solid #2f3959;border-radius:26px;max-width:100%;" bgcolor="#1c2333">
+        <tr>
+          <td style="padding:24px 20px;">
+            <div style="text-align:center;margin-bottom:16px;color:#4a516f;letter-spacing:8px;font-size:9px;">◆ ◆ ◆ ◆ ◆ ◆</div>
+            <div style="text-align:center;margin-bottom:16px;">
+              <span style="font-size:10px;color:#9b89d1;letter-spacing:4px;text-transform:uppercase;">KU SEJONG CAMPUS</span>
+            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0c1a0c;border:5px solid #081208;border-radius:10px;margin-bottom:18px;" bgcolor="#0c1a0c">
+              <tr>
+                <td style="padding:22px 18px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #1f4a1f;padding-bottom:9px;margin-bottom:12px;">
+                    <tr>
+                      <td><span style="font-size:10.5px;color:#e0c04a;letter-spacing:2.5px;">THE SIGNAL</span></td>
+                      <td align="right"><span style="font-size:10.5px;color:#5be05b;">■ FULL</span></td>
+                    </tr>
+                  </table>
+                  <div style="margin-bottom:8px;">
+                    <span style="font-size:12px;color:#8ed98e;letter-spacing:1px;">FROM: {{ sender_name | upper }}</span>
+                  </div>
+                  <div style="text-align:center;padding:16px 0 14px;background:#132613;border:1px solid #1f3d1f;border-radius:6px;margin-bottom:14px;" bgcolor="#132613">
+                    <span style="font-size:56px;font-weight:bold;color:#ffdd4d;letter-spacing:9px;line-height:1;">{{ code }}</span>
+                  </div>
+                  <div style="text-align:center;margin:12px 0 8px;">
+                    <span style="font-size:24px;color:#4fff4f;letter-spacing:1.5px;font-weight:bold;">{{ korean_meaning }}</span>
+                  </div>
+                  <div style="text-align:center;">
+                    <span style="font-size:14px;color:#9be89b;letter-spacing:0.5px;">{{ english_meaning }}</span>
+                  </div>
+                  {% if comment %}
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;padding-top:14px;border-top:2px solid #1f4a1f;">
+                    <tr>
+                      <td>
+                        <div style="font-size:10px;color:#7ac37a;letter-spacing:2px;margin-bottom:5px;">MSG</div>
+                        <div style="font-size:19.5px;color:#5be05b;line-height:1.4;">{{ comment }}</div>
+                      </td>
+                    </tr>
+                  </table>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+              <tr>
+                <td align="center">
+                  <table cellpadding="0" cellspacing="6">
+                    <tr>
+                      <td><div style="width:38px;height:18px;background:#252b45;border:2px solid #40476b;border-radius:4px;"></div></td>
+                      <td><div style="width:38px;height:18px;background:#252b45;border:2px solid #40476b;border-radius:4px;"></div></td>
+                      <td><div style="width:38px;height:18px;background:#b22e2e;border:2px solid #8a1f1f;border-radius:4px;"></div></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <div style="border-top:2px solid #2f3959;padding-top:16px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:13px;color:#b8a3e0;letter-spacing:3px;">★ 고려대학교 세종캠퍼스 대동제 ★</p>
+              <p style="margin:0 0 4px;font-size:14.5px;color:#ff9eb8;font-weight:bold;letter-spacing:1px;">THE SIGNAL 2026</p>
+              <p style="margin:0;font-size:12px;color:#8a7ab8;">2026. 05. 12 (MON) — 05. 13 (TUE)</p>
+            </div>
+            <div style="text-align:center;margin-top:18px;color:#4a516f;letter-spacing:8px;font-size:9px;">◆ ◆ ◆ ◆ ◆ ◆</div>
+          </td>
+        </tr>
+      </table>
+      <p style="color:#55607f;font-size:11.5px;margin-top:24px;text-align:center;line-height:1.45;">
+        This beep was sent from THE SIGNAL booth.<br>
+        고려대학교 세종캠퍼스 대동제 THE SIGNAL 2026
+      </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

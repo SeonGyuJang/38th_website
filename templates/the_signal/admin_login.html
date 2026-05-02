@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — THE SIGNAL 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#a0a6c2; --win:#f6f0f4; --hi:#ffffff; --lo:#582038;
+      --btn:#d8c0cc; --btn-hov:#ccb0c0; --inp:#ffffff;
+      --text:#180810; --muted:#6a4858; --accent:#a82850; --accent-dk:#701430;
+      --tb-from:#5c1e3e; --tb-to:#aa5070; --mid:#bea0b4;
+    }
+    body {
+      background:var(--bg); min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Do Hyeon', sans-serif; color:var(--text);
+    }
+    .win {
+      background:var(--win); width:340px;
+      border-top:2px solid var(--hi); border-left:2px solid var(--hi);
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      box-shadow:6px 6px 0 rgba(0,0,0,.25);
+    }
+    .tbar {
+      background:linear-gradient(90deg, var(--tb-from) 0%, var(--tb-to) 55%, #c26e88 100%);
+      padding:5px 8px; display:flex; align-items:center; gap:7px;
+    }
+    .tbar-icon { font-size:15px; }
+    .tbar-txt { font-family:'Do Hyeon', sans-serif; font-size:15px; color:#fff; text-shadow:1px 1px 0 rgba(0,0,0,.4); }
+    .body { padding:20px 22px 18px; display:flex; flex-direction:column; gap:14px; }
+    .logo { text-align:center; }
+    .logo-main { font-family:'VT323', monospace; font-size:26px; color:var(--accent-dk); letter-spacing:2px; }
+    .logo-sub  { font-size:13px; color:var(--muted); margin-top:2px; }
+    label { font-size:15px; color:var(--muted); display:block; margin-bottom:4px; }
+    .inp {
+      width:100%; background:var(--inp);
+      border-top:2px solid var(--lo); border-left:2px solid var(--lo);
+      border-right:2px solid var(--hi); border-bottom:2px solid var(--hi);
+      padding:6px 10px; font-family:'Do Hyeon', sans-serif; font-size:16px; color:var(--text);
+      outline:none;
+    }
+    .inp:focus { outline:2px dotted var(--accent); outline-offset:-2px; }
+    .btn {
+      width:100%; padding:8px; background:linear-gradient(180deg, var(--tb-to), var(--tb-from));
+      border-top:2px solid #c87898; border-left:2px solid #c87898;
+      border-right:2px solid var(--lo); border-bottom:2px solid var(--lo);
+      color:#fff; font-family:'Do Hyeon', sans-serif; font-size:17px; cursor:pointer;
+      text-shadow:1px 1px 0 rgba(0,0,0,.4);
+    }
+    .btn:hover { background:linear-gradient(180deg, #be6880, #6a2040); }
+    .error {
+      background:#fff0f0; border:2px solid #c03030; padding:8px 12px;
+      font-size:15px; color:#901010; text-align:center;
+    }
+    .wstatus {
+      background:#e8d8e4; border-top:2px solid var(--lo);
+      padding:3px 9px; font-size:12px; color:var(--muted); text-align:right;
+    }
+  </style>
+</head>
+<body>
+  <div class="win">
+    <div class="tbar">
+      <span class="tbar-icon">🔐</span>
+      <span class="tbar-txt">ADMIN LOGIN — THE SIGNAL 2026</span>
+    </div>
+    <div class="body">
+      <div class="logo">
+        <div class="logo-main">📟 THE SIGNAL</div>
+        <div class="logo-sub">관리자 로그인</div>
+      </div>
+      {% if error %}
+      <div class="error">⚠️ {{ error }}</div>
+      {% endif %}
+      <form method="POST">
+        <label for="pw">비밀번호</label>
+        <input class="inp" type="password" id="pw" name="password"
+               placeholder="Admin password" autofocus>
+        <br><br>
+        <button class="btn" type="submit">로그인 ▶</button>
+      </form>
+    </div>
+    <div class="wstatus">THE SIGNAL 2026 관리자 시스템</div>
+  </div>
+</body>
+</html>
