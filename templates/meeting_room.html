@@ -406,13 +406,14 @@
             {% if room_bookings %}
             <div style="display:flex;flex-direction:column;gap:5px;">
                 {% for booking in room_bookings | sort(attribute='start_time') %}
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:{{ '#fef3c7' if booking.status == 'pending' else '#fee2e2' }};">
-                    <span style="font-size:0.82rem;font-weight:700;color:{{ '#92400e' if booking.status == 'pending' else '#991b1b' }};">{{ booking.start_time }} ~ {{ booking.end_time }}</span>
+                {% set is_admin_booking = booking.organization == '__ADMIN__' %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:{{ '#e0e7ff' if is_admin_booking else ('#fef3c7' if booking.status == 'pending' else '#fee2e2') }};">
+                    <span style="font-size:0.82rem;font-weight:700;color:{{ '#3730a3' if is_admin_booking else ('#92400e' if booking.status == 'pending' else '#991b1b') }};">{{ booking.start_time }} ~ {{ booking.end_time }}</span>
                     <span style="font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:20px;
-                                 background:{{ 'rgba(254,243,199,0.8)' if booking.status == 'pending' else 'rgba(254,226,226,0.8)' }};
-                                 color:{{ '#92400e' if booking.status == 'pending' else '#991b1b' }};
-                                 border:1px solid {{ 'rgba(146,64,14,0.2)' if booking.status == 'pending' else 'rgba(153,27,27,0.2)' }};">
-                        {{ '검토 중' if booking.status == 'pending' else '예약됨' }}
+                                 background:{{ 'rgba(224,231,255,0.8)' if is_admin_booking else ('rgba(254,243,199,0.8)' if booking.status == 'pending' else 'rgba(254,226,226,0.8)') }};
+                                 color:{{ '#3730a3' if is_admin_booking else ('#92400e' if booking.status == 'pending' else '#991b1b') }};
+                                 border:1px solid {{ 'rgba(55,48,163,0.2)' if is_admin_booking else ('rgba(146,64,14,0.2)' if booking.status == 'pending' else 'rgba(153,27,27,0.2)') }};">
+                        {{ '관리자 예약' if is_admin_booking else ('검토 중' if booking.status == 'pending' else '예약됨') }}
                     </span>
                 </div>
                 {% endfor %}
@@ -439,6 +440,7 @@
         <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:0.9rem;line-height:2;">
             <li>회의실은 총 4개이며, 학생회관 Room 219·220·221·316에 위치합니다.</li>
             <li>대관 가능 시간 : <strong>24시간 연중무휴</strong> / 1회 최대 <strong>3시간</strong></li>
+            <li>316호(Room 316) 이용 제한 : <strong>매주 일요일 19:00~24:00</strong>, <strong>매주 화요일 21:00~24:00</strong> 이용 불가</li>
             <li>대관 신청 가능 기간 : <strong>오늘부터 2주까지 대관 예약 가능</strong> ({{ today.strftime('%Y.%m.%d') }} ~ {{ max_date.strftime('%Y.%m.%d') }})</li>
             <li>30분 단위로 시간 블록을 클릭해 시작·종료 시간을 선택하세요.</li>
             <li><strong>소속 단체명은 정확하게 기입해주세요.</strong> 단체명을 제대로 입력하지 않은 경우 관리자가 예약을 취소할 수 있습니다.</li>
@@ -615,38 +617,42 @@ function getSlotStatuses(roomNum, bookingDate) {
     const st = Array(TOTAL_SLOTS).fill('available');
     const bd = new Date(bookingDate + 'T00:00:00');
 
-    // 회의실 1번: 격주 월요일 19:00~24:00 블로킹 (3월 9일부터 3주 격주)
+    // 회의실 1번: 3주 격주 월요일 19:00~24:00 블로킹 (2026-03-09부터)
     if (roomNum === 1) {
         const restrictedStart = new Date('2026-03-09T00:00:00');
         if (bd.getDay() === 1) { // 월요일
             const daysDiff = (bd - restrictedStart) / (1000 * 60 * 60 * 24);
             const weeksDiff = Math.floor(daysDiff / 7);
-            if (daysDiff >= 0 && weeksDiff % 3 === 0) { // 3주 격주
+            if (daysDiff >= 0 && weeksDiff % 3 === 0) {
                 // 19:00 ~ 24:00 = slot 38 ~ 47
                 for (let i = 38; i < TOTAL_SLOTS; i++) st[i] = 'unavailable';
             }
         }
     }
 
-    // 회의실 1번: 격주 일요일 20:00~24:00 블로킹 (2026-03-08부터 2주 격주)
-    if (roomNum === 1) {
-        const sundayStart = new Date('2026-03-08T00:00:00');
-        if (bd.getDay() === 0) { // 일요일
-            const daysDiff = (bd - sundayStart) / (1000 * 60 * 60 * 24);
-            const weeksDiff = Math.floor(daysDiff / 7);
-            if (daysDiff >= 0 && weeksDiff % 2 === 0) { // 2주 격주
-                // 20:00 ~ 24:00 = slot 40 ~ 47
-                for (let i = 40; i < TOTAL_SLOTS; i++) st[i] = 'unavailable';
-            }
-        }
+    // 회의실 1번: 매주 일요일 19:00~24:00 블로킹
+    if (roomNum === 1 && bd.getDay() === 0) {
+        // 19:00 ~ 24:00 = slot 38 ~ 47
+        for (let i = 38; i < TOTAL_SLOTS; i++) st[i] = 'unavailable';
+    }
+
+    // 회의실 1번: 매주 화요일 21:00~24:00 블로킹
+    if (roomNum === 1 && bd.getDay() === 2) {
+        // 21:00 ~ 24:00 = slot 42 ~ 47
+        for (let i = 42; i < TOTAL_SLOTS; i++) st[i] = 'unavailable';
     }
 
     bookings.forEach(b => {
         const s = timeToSlot(b.start_time);
         const e = timeToSlot(b.end_time);
         for (let i = s; i < e && i < TOTAL_SLOTS; i++) {
-            if (st[i] !== 'unavailable') { // unavailable 상태는 유지
-                st[i] = b.status === 'approved' ? 'approved' : 'pending';
+            if (st[i] !== 'unavailable') {
+                // 관리자 예약은 'unavailable'로 표시
+                if (b.organization === '__ADMIN__') {
+                    st[i] = 'admin';
+                } else {
+                    st[i] = b.status === 'approved' ? 'approved' : 'pending';
+                }
             }
         }
     });
@@ -680,6 +686,7 @@ function makeSlotHTML(idx) {
     if      (status === 'approved')   { cls += 'booked';       text = '예약됨'; }
     else if (status === 'pending')    { cls += 'pending-slot'; text = '검토중'; }
     else if (status === 'unavailable'){ cls += 'unavailable';  text = '이용불가'; }
+    else if (status === 'admin')      { cls += 'booked';       text = '관리자예약'; }
     else                              { cls += 'available'; }
     return `<div class="${cls}" data-idx="${idx}">${text}</div>`;
 }
@@ -707,8 +714,10 @@ function onGridClick(e) {
         for (let i = a; i <= b; i++) {
             if (slotStatuses[i] !== 'available') {
                 const status = slotStatuses[i];
-                const msg = status === 'unavailable' 
+                const msg = (status === 'unavailable')
                     ? '선택 범위에 이용 불가 시간이 포함되어 있습니다.'
+                    : (status === 'admin')
+                    ? '선택 범위에 관리자 예약 시간이 포함되어 있습니다.'
                     : '선택 범위에 이미 예약된 시간이 포함되어 있습니다.';
                 flashInfo(msg, 'error');
                 return;
@@ -742,7 +751,8 @@ function redrawSlots(hoverIdx) {
         el.className = 'tg-slot ' + (
             st === 'approved'   ? 'booked' :
             st === 'pending'    ? 'pending-slot' :
-            st === 'unavailable'? 'unavailable' : 'available'
+            st === 'unavailable'? 'unavailable' :
+            st === 'admin'      ? 'booked' : 'available'
         );
 
         if (st !== 'available') return;

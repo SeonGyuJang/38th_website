@@ -352,11 +352,19 @@
                     <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; margin: 0 0 6px 0; color: #1a1a1a; letter-spacing: -0.02em;">회의실 대관 관리</h1>
                     <p style="color: #888; font-size: 0.9rem; margin: 0;">날짜별·방별 타임라인으로 예약 현황을 한눈에 확인하세요.</p>
                 </div>
-                <a href="{{ url_for('admin_dashboard') }}" style="padding: 9px 18px; background: white; border: 1px solid #e5e5e5; border-radius: 10px; color: #555; text-decoration: none; font-weight: 600; font-size: 0.88rem; transition: all 0.2s;"
-                   onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.color='var(--ku-crimson)';"
-                   onmouseout="this.style.borderColor='#e5e5e5'; this.style.color='#555';">
-                    ← 대시보드
-                </a>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="openAdminBookModal()"
+                            style="padding: 9px 18px; background: var(--ku-crimson); border: none; border-radius: 10px; color: white; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#7a1528';"
+                            onmouseout="this.style.background='var(--ku-crimson)';">
+                        + 관리자 예약 등록
+                    </button>
+                    <a href="{{ url_for('admin_dashboard') }}" style="padding: 9px 18px; background: white; border: 1px solid #e5e5e5; border-radius: 10px; color: #555; text-decoration: none; font-weight: 600; font-size: 0.88rem; transition: all 0.2s;"
+                       onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.color='var(--ku-crimson)';"
+                       onmouseout="this.style.borderColor='#e5e5e5'; this.style.color='#555';">
+                        ← 대시보드
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -513,10 +521,14 @@
                                     <div style="font-size: 0.7rem; color: #bbb; margin-top: 1px;">{{ booking.attendees }}명</div>
                                 </td>
                                 <td style="padding: 14px 16px;">
+                                    {% if booking.organization == '__ADMIN__' %}
+                                    <div style="display: inline-block; padding: 2px 10px; background: #e0e7ff; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #3730a3; margin-bottom: 2px;">관리자 예약</div>
+                                    {% else %}
                                     <div style="font-size: 0.88rem; font-weight: 700; color: #1a1a1a;">{{ booking.applicant_name }}</div>
                                     <div style="font-size: 0.78rem; color: #888; margin-top: 2px;">{{ booking.applicant_email }}</div>
                                     {% if booking.organization %}
                                     <div style="font-size: 0.7rem; color: #bbb; margin-top: 1px;">{{ booking.organization }}</div>
+                                    {% endif %}
                                     {% endif %}
                                 </td>
                                 <td class="desktop-only" style="padding: 14px 16px; max-width: 200px;">
@@ -568,6 +580,68 @@
 
 <!-- 툴팁 -->
 <div class="tooltip-card" id="bookingTooltip"></div>
+
+<!-- 관리자 직접 예약 모달 -->
+<div class="modal-overlay" id="adminBookModal" onclick="closeModal('adminBookModal', event)">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #1a1a1a;">관리자 예약 등록</h3>
+            <button onclick="closeModal('adminBookModal')" style="width: 32px; height: 32px; border-radius: 50%; background: #f5f5f7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <p style="color: #555; font-size: 0.88rem; margin: 0 0 20px 0;">
+            관리자가 직접 회의실을 예약합니다. 이 예약은 <strong>관리자 예약</strong>으로 표시되며 즉시 승인 처리됩니다.
+        </p>
+        <form method="POST" action="{{ url_for('admin_meeting_room_book') }}">
+            <div style="display: grid; gap: 14px;">
+
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">회의실 <span style="color: var(--ku-crimson);">*</span></label>
+                    <select name="room_number" class="form-input" required style="background: white;">
+                        <option value="">회의실 선택</option>
+                        <option value="1">316호</option>
+                        <option value="2">219호</option>
+                        <option value="3">220호</option>
+                        <option value="4">221호</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">날짜 <span style="color: var(--ku-crimson);">*</span></label>
+                    <input type="date" name="booking_date" id="adminBookDate" class="form-input" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">시작 시간 <span style="color: var(--ku-crimson);">*</span></label>
+                        <input type="time" name="start_time" class="form-input" step="1800" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">종료 시간 <span style="color: var(--ku-crimson);">*</span></label>
+                        <input type="time" name="end_time" class="form-input" step="1800" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px;">예약 사유 <span style="font-weight: 500; color: #aaa;">(선택)</span></label>
+                    <input type="text" name="purpose" class="form-input" placeholder="예) 총학생회 임원 회의">
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px;">
+                    <button type="button" onclick="closeModal('adminBookModal')"
+                            style="padding: 9px 18px; background: #f3f4f6; color: #555; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                        닫기
+                    </button>
+                    <button type="submit"
+                            style="padding: 9px 18px; background: var(--ku-crimson); color: white; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                        예약 등록
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- 취소 사유 모달 -->
 <div class="modal-overlay" id="cancelModal" onclick="closeModal('cancelModal', event)">
@@ -802,12 +876,17 @@
                         const pos = getBlockPos(b.startTime, b.endTime);
                         if (!pos) return;
                         const durationMin = timeToMin(b.endTime) - timeToMin(b.startTime);
+                        const isAdmin = b.org === '__ADMIN__';
+                        const displayName = isAdmin ? '관리자 예약' : b.name;
                         const shortLabel = durationMin >= 60
-                            ? `${b.name} · ${b.startTime}~${b.endTime}`
+                            ? `${displayName} · ${b.startTime}~${b.endTime}`
                             : `${b.startTime}~${b.endTime}`;
                         const idx = bookingsData.findIndex(x => x.id === b.id);
+                        const blockStyle = isAdmin
+                            ? 'background:#e0e7ff;color:#3730a3;border:1.5px solid #a5b4fc;'
+                            : '';
                         html += `<div class="booking-block status-${b.status}"
-                                    style="left:${pos.left};width:${pos.width};"
+                                    style="left:${pos.left};width:${pos.width};${blockStyle}"
                                     onclick="showDetail(${idx})"
                                     onmouseenter="showTooltip(event,${idx})"
                                     onmouseleave="hideTooltip()">
@@ -902,12 +981,15 @@
                     roomBookings.sort((a, b) => a.startTime.localeCompare(b.startTime));
                     roomBookings.forEach(b => {
                         const idx = bookingsData.findIndex(x => x.id === b.id);
-                        html += `<span class="grid-booking-pill status-${b.status}"
+                        const isAdmin = b.org === '__ADMIN__';
+                        const displayName = isAdmin ? '관리자 예약' : b.name;
+                        const pillStyle = isAdmin ? 'style="background:#e0e7ff;color:#3730a3;"' : '';
+                        html += `<span class="grid-booking-pill status-${b.status}" ${pillStyle}
                                     onclick="showDetail(${idx})"
                                     onmouseenter="showTooltip(event,${idx})"
                                     onmouseleave="hideTooltip()"
-                                    title="${b.name} · ${b.startTime}~${b.endTime}">
-                                    ${b.startTime}~${b.endTime} ${b.name}
+                                    title="${displayName} · ${b.startTime}~${b.endTime}">
+                                    ${b.startTime}~${b.endTime} ${displayName}
                                 </span>`;
                     });
                     html += `</td>`;
@@ -939,7 +1021,9 @@
     const tooltip = document.getElementById('bookingTooltip');
     function showTooltip(e, idx) {
         const b = bookingsData[idx];
-        tooltip.innerHTML = `<strong>${ROOM_NAMES[b.room]}</strong><br>${b.date}<br>${b.startTime} ~ ${b.endTime}<br>${b.name}${b.org ? ' · '+b.org : ''}<br><span style="opacity:0.7;">${STATUS_LABEL[b.status] || b.status}</span>`;
+        const isAdmin = b.org === '__ADMIN__';
+        const nameInfo = isAdmin ? '관리자 예약' : (b.name + (b.org ? ' · ' + b.org : ''));
+        tooltip.innerHTML = `<strong>${ROOM_NAMES[b.room]}</strong><br>${b.date}<br>${b.startTime} ~ ${b.endTime}<br>${nameInfo}<br><span style="opacity:0.7;">${STATUS_LABEL[b.status] || b.status}</span>`;
         tooltip.style.display = 'block';
         moveTooltip(e);
     }
@@ -964,29 +1048,31 @@
                 <span style="font-weight:700;color:#1a1a1a;font-size:0.88rem;">${value}</span>
             </div>`;
 
+        const isAdminBooking = b.org === '__ADMIN__';
         document.getElementById('detailContent').innerHTML = `
             <div style="display:flex;flex-direction:column;gap:8px;">
+                ${isAdminBooking ? `<div style="padding:8px 14px;background:#e0e7ff;border-radius:9px;border-left:3px solid #3730a3;"><div style="font-weight:700;color:#3730a3;font-size:0.85rem;">관리자가 직접 등록한 예약입니다.</div></div>` : ''}
                 ${row('회의실', ROOM_FULL_NAMES[b.room], true)}
                 ${row('날짜', b.date, true)}
                 ${row('시간', `${b.startTime} ~ ${b.endTime}`, true)}
-                ${row('신청자', b.name, b.name)}
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f5f5f7;border-radius:9px;">
+                ${isAdminBooking ? '' : row('신청자', b.name, b.name)}
+                ${isAdminBooking ? '' : `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f5f5f7;border-radius:9px;">
                     <span style="font-weight:700;color:#666;font-size:0.85rem;">이메일</span>
                     <a href="mailto:${b.email}" style="color:var(--ku-crimson);font-weight:700;font-size:0.88rem;text-decoration:none;">${b.email}</a>
-                </div>
-                ${b.phone ? row('연락처', b.phone, true) : ''}
-                ${b.org   ? row('소속',   b.org,   true) : ''}
-                ${row('인원', b.attendees + '명', true)}
-                <div style="padding:10px 14px;background:#f5f5f7;border-radius:9px;">
-                    <div style="font-weight:700;color:#666;font-size:0.85rem;margin-bottom:5px;">사용 목적</div>
+                </div>`}
+                ${(!isAdminBooking && b.phone) ? row('연락처', b.phone, true) : ''}
+                ${(!isAdminBooking && b.org) ? row('소속', b.org, true) : ''}
+                ${!isAdminBooking ? row('인원', b.attendees + '명', true) : ''}
+                ${b.purpose && b.purpose !== '관리자 예약' ? `<div style="padding:10px 14px;background:#f5f5f7;border-radius:9px;">
+                    <div style="font-weight:700;color:#666;font-size:0.85rem;margin-bottom:5px;">${isAdminBooking ? '예약 사유' : '사용 목적'}</div>
                     <div style="color:#1a1a1a;font-size:0.88rem;line-height:1.6;">${b.purpose}</div>
-                </div>
+                </div>` : ''}
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f5f5f7;border-radius:9px;">
                     <span style="font-weight:700;color:#666;font-size:0.85rem;">상태</span>
                     <span style="padding:3px 12px;background:${statusBg[b.status]};color:${statusColor[b.status]};border-radius:20px;font-size:0.78rem;font-weight:700;">${STATUS_LABEL[b.status]||b.status}</span>
                 </div>
                 ${b.adminNote ? `<div style="padding:10px 14px;background:#fff3cd;border-radius:9px;border-left:3px solid #92400e;"><div style="font-weight:700;color:#92400e;font-size:0.8rem;margin-bottom:3px;">관리자 메모</div><div style="color:#92400e;font-size:0.85rem;">${b.adminNote}</div></div>` : ''}
-                ${b.createdAt ? `<div style="font-size:0.7rem;color:#bbb;text-align:right;padding-top:2px;">신청일: ${b.createdAt}</div>` : ''}
+                ${b.createdAt ? `<div style="font-size:0.7rem;color:#bbb;text-align:right;padding-top:2px;">등록일: ${b.createdAt}</div>` : ''}
             </div>`;
 
         document.getElementById('detailActions').innerHTML = `
@@ -1020,12 +1106,21 @@
     }
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
-            ['detailModal','cancelModal'].forEach(id => {
+            ['detailModal','cancelModal','adminBookModal'].forEach(id => {
                 document.getElementById(id).classList.remove('active');
             });
             document.body.style.overflow = '';
         }
     });
+
+    /* ── 관리자 예약 모달 ──────────────────────────── */
+    function openAdminBookModal() {
+        // 날짜 기본값: 오늘
+        const today = toDateStr(new Date());
+        document.getElementById('adminBookDate').value = today;
+        document.getElementById('adminBookModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 
     /* ── 초기 렌더 ───────────────────────────────────── */
     renderTimeline();
