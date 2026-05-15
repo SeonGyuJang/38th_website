@@ -92,12 +92,17 @@ def _is_menu_stale():
     except Exception:
         return True
 
+def _maybe_crawl():
+    """만료됐을 때만 크롤링 (스케줄러용 래퍼)"""
+    if _is_menu_stale() and not _is_crawling:
+        _perform_crawling()
+
 def _init_menu_scheduler():
-    """메뉴 자동 갱신 스케줄러 설정 (매주 월요일)"""
+    """메뉴 자동 갱신 스케줄러 설정 (매일 오전 5시)"""
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         scheduler = BackgroundScheduler()
-        scheduler.add_job(_perform_crawling, trigger='cron', day_of_week='mon', hour='5-6', minute='0,30')
+        scheduler.add_job(_maybe_crawl, trigger='cron', hour='5', minute='0')
         scheduler.start()
     except Exception as e:
         print(f'스케줄러 설정 오류: {e}')
@@ -914,14 +919,8 @@ def meeting_room():
         if rn in rooms:
             rooms[rn].append(b)
 
-    # 격주 일요일 제한 알림 계산 (2026-03-08부터 2주 격주)
-    restricted_sunday_start = date(2026, 3, 8)
-    sun_days_diff = (selected_date - restricted_sunday_start).days
-    is_restricted_sunday = (
-        selected_date.weekday() == 6
-        and sun_days_diff >= 0
-        and (sun_days_diff // 7) % 2 == 0
-    )
+    is_restricted_sunday = selected_date.weekday() == 6
+    is_restricted_tuesday = selected_date.weekday() == 1
 
     return render_template('meeting_room.html',
                            rooms=rooms,
@@ -931,7 +930,8 @@ def meeting_room():
                            week_dates=week_dates,
                            prev_week=prev_week,
                            next_week=next_week,
-                           is_restricted_sunday=is_restricted_sunday)
+                           is_restricted_sunday=is_restricted_sunday,
+                           is_restricted_tuesday=is_restricted_tuesday)
 
 
 @app.route('/meeting-room/book', methods=['POST'])
@@ -988,18 +988,25 @@ def meeting_room_book():
                     flash('회의실 1호는 해당 날짜 19:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
                     return redirect(url_for('meeting_room', date=booking_date))
 
-    # 회의실 1번: 2주 격주 일요일 20:00~24:00 불가 (2026-03-08부터)
+    # 회의실 1번: 매주 일요일 19:00~24:00 불가
     if room_number == 1:
-        restricted_sunday_start = datetime.strptime('2026-03-08', '%Y-%m-%d').date()
         if bd.weekday() == 6:  # 일요일
-            weeks_since_start = (bd - restricted_sunday_start).days // 7
-            if weeks_since_start >= 0 and weeks_since_start % 2 == 0:
-                st_hour = int(start_time.split(':')[0])
-                et_hour = int(end_time.split(':')[0])
-                et_min = int(end_time.split(':')[1])
-                if st_hour >= 20 or et_hour > 20 or (et_hour == 20 and et_min > 0):
-                    flash('회의실 1호는 해당 날짜 20:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
-                    return redirect(url_for('meeting_room', date=booking_date))
+            st_hour = int(start_time.split(':')[0])
+            et_hour = int(end_time.split(':')[0])
+            et_min = int(end_time.split(':')[1])
+            if st_hour >= 19 or et_hour > 19 or (et_hour == 19 and et_min > 0):
+                flash('316호는 매주 일요일 19:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
+                return redirect(url_for('meeting_room', date=booking_date))
+
+    # 회의실 1번: 매주 화요일 21:00~24:00 불가
+    if room_number == 1:
+        if bd.weekday() == 1:  # 화요일
+            st_hour = int(start_time.split(':')[0])
+            et_hour = int(end_time.split(':')[0])
+            et_min = int(end_time.split(':')[1])
+            if st_hour >= 21 or et_hour > 21 or (et_hour == 21 and et_min > 0):
+                flash('316호는 매주 화요일 21:00 ~ 24:00에는 대관할 수 없습니다.', 'error')
+                return redirect(url_for('meeting_room', date=booking_date))
 
     # 시간 중복 확인 (같은 날짜 같은 회의실)
     existing_bookings = db_helper.get_bookings_by_date(booking_date)
@@ -2005,6 +2012,62 @@ def admin_meeting_room_delete(booking_id):
     return redirect(url_for('admin_meeting_rooms'))
 
 
+@app.route('/admin/meeting-rooms/book', methods=['POST'])
+@login_required
+def admin_meeting_room_book():
+    """관리자 직접 대관 예약"""
+    room_number = request.form.get('room_number', type=int)
+    booking_date = request.form.get('booking_date', '').strip()
+    start_time = request.form.get('start_time', '').strip()
+    end_time = request.form.get('end_time', '').strip()
+    purpose = request.form.get('purpose', '').strip()
+
+    if not all([room_number, booking_date, start_time, end_time]):
+        flash('회의실, 날짜, 시간은 필수 항목입니다.', 'error')
+        return redirect(url_for('admin_meeting_rooms'))
+
+    if room_number not in [1, 2, 3, 4]:
+        flash('올바른 회의실을 선택해주세요.', 'error')
+        return redirect(url_for('admin_meeting_rooms'))
+
+    if start_time >= end_time:
+        flash('종료 시간은 시작 시간보다 늦어야 합니다.', 'error')
+        return redirect(url_for('admin_meeting_rooms'))
+
+    # 시간 중복 확인
+    existing_bookings = db_helper.get_bookings_by_date(booking_date)
+    for eb in existing_bookings:
+        if eb.get('room_number') == room_number and eb.get('status') in ['pending', 'approved']:
+            es = eb.get('start_time', '')
+            ee = eb.get('end_time', '')
+            if not (end_time <= es or start_time >= ee):
+                flash(f'선택하신 시간대({start_time}~{end_time})에 이미 대관이 있습니다.', 'error')
+                return redirect(url_for('admin_meeting_rooms'))
+
+    data = {
+        'room_number': room_number,
+        'applicant_name': '관리자',
+        'applicant_email': 'admin@kuadmin.internal',
+        'applicant_phone': None,
+        'organization': '__ADMIN__',
+        'purpose': purpose or '관리자 예약',
+        'booking_date': booking_date,
+        'start_time': start_time,
+        'end_time': end_time,
+        'attendees': 0,
+        'status': 'approved',
+        'admin_note': f'관리자({current_user.username}) 직접 예약',
+    }
+    booking = db_helper.create_meeting_room_booking(data)
+    if booking:
+        room_name = get_room_display_name(room_number)
+        flash(f'{room_name} {booking_date} {start_time}~{end_time} 관리자 예약이 등록되었습니다.', 'success')
+    else:
+        flash('예약 등록 중 오류가 발생했습니다.', 'error')
+
+    return redirect(url_for('admin_meeting_rooms'))
+
+
 @app.route('/meeting-room/cancel', methods=['GET', 'POST'])
 def meeting_room_cancel():
     """사용자 예약 취소 페이지"""
@@ -2248,10 +2311,14 @@ def api_menu():
     global _menu_data
     if _menu_data is None:
         _load_menu_from_file()
+    # 만료됐으면 파일을 먼저 재로드 (다른 프로세스/워커가 이미 갱신했을 수 있음)
+    if _is_menu_stale():
+        _load_menu_from_file()
     if _menu_data is None or not _menu_data.get('success'):
-        threading.Thread(target=_perform_crawling, daemon=True).start()
+        if not _is_crawling:
+            threading.Thread(target=_perform_crawling, daemon=True).start()
         return jsonify({'success': False, 'message': '식단표를 불러오는 중입니다. 잠시 후 다시 시도해주세요.'})
-    # 메뉴 기간이 만료됐으면 백그라운드에서 재크롤링 후 현재 데이터 반환
+    # 파일 재로드 후에도 여전히 만료됐으면 백그라운드 재크롤링
     if _is_menu_stale() and not _is_crawling:
         threading.Thread(target=_perform_crawling, daemon=True).start()
     return jsonify(_menu_data)
