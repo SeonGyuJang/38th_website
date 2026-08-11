@@ -1600,13 +1600,20 @@ def bus_cancel():
 @app.route('/api/payaction/webhook', methods=['POST'])
 def api_payaction_webhook():
     """PayAction 입금 자동확인 웹훅 수신 (매칭완료 이벤트)"""
-    webhook_key = app.config.get('PAYACTION_WEBHOOK_KEY')
-    mall_id = app.config.get('PAYACTION_MALL_ID')
+    raw_body = request.get_data(as_text=True)
+    print(f'[PayAction Webhook] 수신 — headers: x-mall-id={request.headers.get("x-mall-id")!r}, '
+          f'x-webhook-key={"***" if request.headers.get("x-webhook-key") else None}, '
+          f'x-trace-id={request.headers.get("x-trace-id")!r} / body: {raw_body}')
+
+    webhook_key = (app.config.get('PAYACTION_WEBHOOK_KEY') or '').strip()
+    mall_id = (app.config.get('PAYACTION_MALL_ID') or '').strip()
 
     if webhook_key:
-        if request.headers.get('x-webhook-key') != webhook_key:
+        if (request.headers.get('x-webhook-key') or '').strip() != webhook_key:
+            print('[PayAction Webhook] 거부됨 — x-webhook-key가 PAYACTION_WEBHOOK_KEY 설정값과 일치하지 않습니다.')
             return jsonify({'status': 'error', 'message': 'invalid webhook key'}), 401
-        if mall_id and request.headers.get('x-mall-id') != mall_id:
+        if mall_id and (request.headers.get('x-mall-id') or '').strip() != mall_id:
+            print('[PayAction Webhook] 거부됨 — x-mall-id가 PAYACTION_MALL_ID 설정값과 일치하지 않습니다.')
             return jsonify({'status': 'error', 'message': 'invalid mall id'}), 401
 
     data = request.get_json(silent=True) or {}
@@ -1627,6 +1634,9 @@ def api_payaction_webhook():
         email_booking = {**booking, 'payment_status': 'paid'}
         threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
         print(f'[PayAction Webhook] 입금 확인 처리 완료: order_number={order_number}')
+    else:
+        print(f'[PayAction Webhook] 처리 생략 — order_number={order_number}, order_status={order_status!r}, '
+              f'payment_status={booking["payment_status"]!r}, booking_status={booking["booking_status"]!r}')
 
     return jsonify({'status': 'success'}), 200
 
