@@ -40,6 +40,18 @@ class Config:
     ]
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'dsng3419@korea.ac.kr')
 
+    # PayAction (무통장입금 자동확인) 설정
+    # https://payaction.app/developer 의 대시보드 > API 메뉴에서 발급받은 값을 사용합니다.
+    PAYACTION_API_KEY = os.environ.get('PAYACTION_API_KEY')
+    PAYACTION_MALL_ID = os.environ.get('PAYACTION_MALL_ID')
+    PAYACTION_WEBHOOK_KEY = os.environ.get('PAYACTION_WEBHOOK_KEY')
+    PAYACTION_BASE_URL = os.environ.get('PAYACTION_BASE_URL', 'https://api.payaction.app')
+
+    # 버스 예약 무통장입금 계좌 정보 (결제 안내 화면에 표시)
+    BUS_BANK_NAME = os.environ.get('BUS_BANK_NAME', '은행명 미설정')
+    BUS_BANK_ACCOUNT_NUMBER = os.environ.get('BUS_BANK_ACCOUNT_NUMBER', '계좌번호 미설정')
+    BUS_BANK_ACCOUNT_HOLDER = os.environ.get('BUS_BANK_ACCOUNT_HOLDER', '예금주 미설정')
+
     # Ensure upload directories exist
     @staticmethod
     def init_app(app):

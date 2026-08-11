@@ -287,6 +287,27 @@
                     </div>
                 </a>
 
+                <a href="{{ url_for('admin_bus') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: {% if stats.pending_bus_payments > 0 %}2px solid rgba(146,64,14,0.4){% else %}1px solid #E5E5E5{% endif %}; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='{% if stats.pending_bus_payments > 0 %}rgba(146,64,14,0.4){% else %}#E5E5E5{% endif %}'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: {% if stats.pending_bus_payments > 0 %}#92400e{% else %}var(--ku-crimson){% endif %}; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/>
+                                <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+                                <circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>
+                            </svg>
+                            {% if stats.pending_bus_payments > 0 %}
+                            <div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: #dc2626; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: white; font-weight: 800;">{{ stats.pending_bus_payments if stats.pending_bus_payments < 10 else '9+' }}</div>
+                            {% endif %}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 1rem; font-weight: 700; color: #1a1a1a;">버스 예약 관리</div>
+                            <div style="font-size: 0.85rem; color: {% if stats.pending_bus_payments > 0 %}#92400e{% else %}#999{% endif %}; margin-top: 2px; font-weight: {% if stats.pending_bus_payments > 0 %}700{% else %}400{% endif %};">
+                                {% if stats.pending_bus_payments > 0 %}입금 확인 대기 {{ stats.pending_bus_payments }}건{% else %}회차 등록 및 입금·운행 확정 관리{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
                 <a href="{{ url_for('admin_inquiries') }}" class="admin-card" style="background: white; border-radius: 12px; padding: 24px; text-decoration: none; border: {% if stats.pending_inquiries > 0 %}2px solid rgba(150,26,50,0.35){% else %}1px solid #E5E5E5{% endif %}; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; gap: 12px;" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='{% if stats.pending_inquiries > 0 %}rgba(150,26,50,0.35){% else %}#E5E5E5{% endif %}'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="width: 40px; height: 40px; background: var(--ku-crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;">

@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}버스 예약 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .trip-card {
+        animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) backwards;
+        transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .trip-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.1) !important;
+    }
+
+    .date-pill {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 18px;
+        border-radius: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    .date-pill:hover { transform: translateY(-2px); }
+    .date-scroll-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: flex;
+        gap: 8px;
+        padding: 4px 4px 8px;
+    }
+    .date-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+    .date-scroll-wrapper::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(6px);
+        display: none;
+        justify-content: center;
+        z-index: 9999;
+        padding: 76px 20px 20px;
+        overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+    .modal-content {
+        background: white;
+        border-radius: 24px;
+        max-width: 520px;
+        width: 100%;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1);
+        position: relative;
+        margin: auto;
+        height: fit-content;
+    }
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e5e5;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+        color: #1a1a1a;
+    }
+    .form-input:focus {
+        border-color: var(--ku-crimson);
+        box-shadow: 0 0 0 3px rgba(150,26,50,0.1);
+    }
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 6px;
+    }
+    .form-label .required { color: var(--ku-crimson); margin-left: 2px; }
+
+    @media (max-width: 768px) {
+        .trips-grid { grid-template-columns: 1fr !important; }
+        .modal-content { padding: 24px 16px; border-radius: 16px; }
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px;">
+
+    <!-- 헤더 -->
+    <div style="margin-bottom: 48px; text-align: center; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1);">
+        <div style="display: inline-block; padding: 10px 24px; background: rgba(150,26,50,0.08); border-radius: 100px; margin-bottom: 24px; border: 1px solid rgba(150,26,50,0.15);">
+            <span style="color: var(--ku-crimson); font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; font-size: clamp(0.7rem,1.5vw,0.8rem);">Bus Reservation</span>
+        </div>
+        <h1 style="font-size: clamp(2.2rem,5vw,3rem); font-weight: 800; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1.1;">버스 예약</h1>
+        <p style="font-size: clamp(1rem,2vw,1.1rem); color: var(--text-secondary); max-width: 560px; margin: 0 auto 24px; line-height: 1.7;">
+            날짜를 선택하고 버스 시간을 골라 예약하세요.<br>무통장 입금 후 자동으로 입금 확인 안내를 받으실 수 있습니다.
+        </p>
+        <a href="{{ url_for('bus_cancel') }}"
+           style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:white;border:1.5px solid #e5e5e5;border-radius:100px;color:#555;font-size:0.9rem;font-weight:700;text-decoration:none;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.06);"
+           onmouseover="this.style.borderColor='var(--ku-crimson)';this.style.color='var(--ku-crimson)';this.style.transform='translateY(-1px)';"
+           onmouseout="this.style.borderColor='#e5e5e5';this.style.color='#555';this.style.transform='translateY(0)';">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            예약 취소하기
+        </a>
+    </div>
+
+    {% if not available_dates %}
+    <!-- 예약 가능한 날짜 없음 -->
+    <div style="background:white;border-radius:20px;padding:60px 28px;text-align:center;border:1px solid #e8e8ed;animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;">
+        <div style="width:70px;height:70px;background:#f5f5f7;border-radius:18px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg>
+        </div>
+        <p style="color:#999;font-size:1rem;font-weight:700;margin:0 0 6px 0;">아직 예약 가능한 버스가 없습니다.</p>
+        <p style="color:#bbb;font-size:0.88rem;margin:0;">버스 운행 일정이 열리면 다시 안내해드립니다.</p>
+    </div>
+    {% else %}
+
+    <!-- 날짜 선택 -->
+    <div style="margin-bottom: 40px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.05s backwards;">
+        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06);">
+            <h3 style="margin: 0 0 14px 0; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">날짜 선택</h3>
+            {% set day_names = ['월','화','수','목','금','토','일'] %}
+            <div class="date-scroll-wrapper">
+                {% for d_str in available_dates %}
+                {% set d = d_str.split('-') %}
+                {% set is_selected = d_str == selected_date_str %}
+                <a href="{{ url_for('bus', date=d_str) }}" class="date-pill"
+                   style="background:{{ 'var(--ku-crimson)' if is_selected else '#f5f5f7' }};
+                          border:2px solid {{ 'var(--ku-crimson)' if is_selected else 'transparent' }};">
+                    <span style="font-size:0.68rem;font-weight:700;color:{{ 'rgba(255,255,255,0.8)' if is_selected else '#999' }};">{{ d[0] }}년 {{ d[1]|int }}월</span>
+                    <span style="font-size:1.05rem;font-weight:800;color:{{ 'white' if is_selected else '#1a1a1a' }};">{{ d[2]|int }}일</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 선택 날짜 -->
+    <div style="margin-bottom: 28px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;">
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: #1a1a1a; margin: 0;">
+            <span style="color: var(--ku-crimson);">{{ selected_date_str }}</span> 버스 시간표
+        </h2>
+    </div>
+
+    {% if not trips_today %}
+    <div style="background:white;border-radius:20px;padding:48px 28px;text-align:center;border:1px solid #e8e8ed;">
+        <p style="color:#999;font-size:0.95rem;font-weight:600;margin:0;">이 날짜에는 예약 가능한 버스가 없습니다.</p>
+    </div>
+    {% else %}
+    <div class="trips-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:48px;">
+        {% for trip in trips_today %}
+        <div class="trip-card" style="background:white;border-radius:20px;overflow:hidden;border:1.5px solid #e8e8ed;box-shadow:0 2px 12px rgba(0,0,0,0.04);animation-delay:{{ loop.index0 * 0.08 }}s;">
+            <div style="padding:24px 28px;background:{{ 'linear-gradient(135deg,#961A32 0%,#7a1528 100%)' if trip.direction == 'sejong_to_seoul' else 'linear-gradient(135deg,#1a1a1a 0%,#3a3a3a 100%)' }};">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="color:white;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85;">{{ trip.direction_info.short }}</span>
+                    {% if trip.status == 'confirmed' %}
+                    <span style="padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;background:rgba(255,255,255,0.2);color:white;">운행 확정</span>
+                    {% endif %}
+                </div>
+                <div style="color:white;font-size:1.3rem;font-weight:800;margin-top:6px;">{{ trip.direction_info.label }}</div>
+                <div style="color:rgba(255,255,255,0.85);font-size:1.05rem;font-weight:700;margin-top:4px;">{{ trip.direction_info.time }} 출발</div>
+            </div>
+            <div style="padding:24px 28px 28px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                    <div>
+                        <div style="font-size:0.75rem;color:#999;font-weight:700;">편도 요금</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:#1a1a1a;">{{ '{:,}'.format(trip.price) }}원</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.75rem;color:#999;font-weight:700;">잔여 좌석</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:{{ '#991b1b' if trip.remaining_seats == 0 else '#1A7F37' }};">{{ trip.remaining_seats }}석</div>
+                    </div>
+                </div>
+                {% if trip.remaining_seats > 0 and trip.status != 'cancelled' %}
+                <button onclick="openBookingModal({{ trip.id }}, '{{ trip.direction_info.label }}', '{{ trip.direction_info.time }}', {{ trip.price }}, {{ trip.remaining_seats }})"
+                        style="width:100%;padding:13px;background:var(--ku-crimson);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                        onmouseover="this.style.background='#7a1528';" onmouseout="this.style.background='var(--ku-crimson)';">
+                    예약하기
+                </button>
+                {% elif trip.status == 'cancelled' %}
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">운행 취소됨</div>
+                {% else %}
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">예약 마감</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- 안내 사항 -->
+    <div style="background:white;border-radius:20px;padding:28px;border:1px solid #e8e8ed;animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.25s backwards;">
+        <h3 style="margin:0 0 16px 0;font-size:1rem;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ku-crimson)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            예약 안내
+        </h3>
+        <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:0.9rem;line-height:2;">
+            <li>예약 후 안내되는 계좌로 <strong>무통장 입금</strong>을 하시면 자동으로 입금 확인 안내 메일을 받으실 수 있습니다.</li>
+            <li>입금자명은 예약 시 입력하신 <strong>입금자명과 반드시 동일</strong>해야 자동으로 확인됩니다.</li>
+            <li>탑승 인원이 충분히 모이면 <strong>운행이 확정</strong>되며, 확정 안내 메일을 발송해드립니다.</li>
+            <li>예약 취소는 <a href="{{ url_for('bus_cancel') }}" style="color:var(--ku-crimson);font-weight:700;">예약 취소 페이지</a>에서 이메일과 비밀번호로 직접 가능합니다.</li>
+            <li>문의 : <a href="mailto:dsng3419@korea.ac.kr" style="color:var(--dark);font-weight:700;">부총학생회장 장선규(010-6598-6414)</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- ───────────────────────────────────────────
+     예약 모달
+──────────────────────────────────────────── -->
+<div class="modal-overlay" id="bookingModalOverlay" onclick="closeBookingModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button onclick="closeBookingModal()" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:#f5f5f7;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                onmouseover="this.style.background='#e8e8ed';" onmouseout="this.style.background='#f5f5f7';">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+
+        <div style="margin-bottom:24px;">
+            <div style="display:inline-block;padding:5px 14px;background:rgba(150,26,50,0.08);border-radius:100px;margin-bottom:10px;">
+                <span style="color:var(--ku-crimson);font-weight:700;font-size:0.78rem;">Bus Reservation</span>
+            </div>
+            <h2 style="font-size:1.45rem;font-weight:800;color:#1a1a1a;margin:0 0 3px 0;" id="modalTitle">버스 예약</h2>
+            <p style="color:#888;font-size:0.88rem;margin:0;" id="modalSubtitle"></p>
+        </div>
+
+        <form method="POST" action="{{ url_for('bus_book') }}" id="bookingForm">
+            <input type="hidden" name="trip_id" id="formTripId">
+
+            <div style="display:grid;gap:14px;">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div>
+                        <label class="form-label">이름 <span class="required">*</span></label>
+                        <input type="text" name="passenger_name" class="form-input" placeholder="탑승자 이름" required>
+                    </div>
+                    <div>
+                        <label class="form-label">좌석 수 <span class="required">*</span></label>
+                        <input type="number" name="seat_count" id="formSeatCount" class="form-input" min="1" value="1" required oninput="updateAmount()">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">이메일 <span class="required">*</span></label>
+                    <input type="email" name="passenger_email" class="form-input" placeholder="입금 확인 안내를 받을 이메일" required>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div>
+                        <label class="form-label">연락처 <span class="required">*</span></label>
+                        <input type="tel" name="passenger_phone" class="form-input" placeholder="010-0000-0000" required>
+                    </div>
+                    <div>
+                        <label class="form-label">학번 <span style="font-weight:500;color:#aaa;">(선택)</span></label>
+                        <input type="text" name="student_id" class="form-input" placeholder="예) 2024123456">
+                    </div>
+                </div>
+
+                <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
+                    <label class="form-label">입금자명 <span class="required">*</span></label>
+                    <input type="text" name="depositor_name" class="form-input" placeholder="실제 입금하실 분의 성함" required>
+                    <p style="font-size:0.78rem;color:#888;margin:5px 0 0 2px;">입금 시 반드시 이 이름으로 입금해야 자동으로 확인됩니다.</p>
+                </div>
+
+                <div style="padding:14px 16px;background:#f5f5f7;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:0.88rem;font-weight:700;color:#555;">결제 금액</span>
+                    <span style="font-size:1.15rem;font-weight:800;color:var(--ku-crimson);" id="amountDisplay">0원</span>
+                </div>
+
+                <div style="border-top:1px solid #f0f0f0;padding-top:12px;">
+                    <label class="form-label">
+                        취소 비밀번호 <span class="required">*</span>
+                        <span style="font-weight:500;color:#aaa;margin-left:4px;font-size:0.8rem;">(나중에 예약 취소 시 사용)</span>
+                    </label>
+                    <input type="password" name="booking_password" class="form-input" placeholder="비밀번호를 설정해주세요" autocomplete="new-password" required>
+                </div>
+
+                <button type="submit"
+                        style="width:100%;padding:15px;background:var(--ku-crimson);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:4px;"
+                        onmouseover="this.style.background='#7a1528';this.style.transform='translateY(-1px)';"
+                        onmouseout="this.style.background='var(--ku-crimson)';this.style.transform='translateY(0)';">
+                    예약하고 입금 안내 받기
+                </button>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentTripPrice = 0;
+let currentMaxSeats = 1;
+
+function openBookingModal(tripId, label, time, price, remainingSeats) {
+    document.getElementById('formTripId').value = tripId;
+    document.getElementById('modalTitle').textContent = label + ' 버스 예약';
+    document.getElementById('modalSubtitle').textContent = time + ' 출발 · 편도 ' + price.toLocaleString() + '원';
+    currentTripPrice = price;
+    currentMaxSeats = remainingSeats;
+    const seatInput = document.getElementById('formSeatCount');
+    seatInput.value = 1;
+    seatInput.max = remainingSeats;
+    updateAmount();
+    document.getElementById('bookingModalOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBookingModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('bookingModalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function updateAmount() {
+    let seats = parseInt(document.getElementById('formSeatCount').value) || 1;
+    if (seats < 1) seats = 1;
+    if (seats > currentMaxSeats) seats = currentMaxSeats;
+    document.getElementById('formSeatCount').value = seats;
+    document.getElementById('amountDisplay').textContent = (currentTripPrice * seats).toLocaleString() + '원';
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeBookingModal();
+});
+</script>
+{% endblock %}

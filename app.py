@@ -15,6 +15,9 @@ import shutil
 import threading
 import smtplib
 import json
+import random
+import string
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -244,6 +247,48 @@ def get_room_display_name(room_number):
     return ROOM_DISPLAY_NAMES.get(int(room_number), f'{room_number}호')
 
 # ============================================
+# 버스 예약 - 방향/노선 매핑
+# ============================================
+
+BUS_DIRECTIONS = {
+    'sejong_to_seoul': {'label': '세종 → 서울', 'time': '09:00', 'short': '가는 버스'},
+    'seoul_to_sejong': {'label': '서울 → 세종', 'time': '19:00', 'short': '오는 버스'},
+}
+
+BUS_PAYMENT_STATUS_LABELS = {
+    'pending': '입금 대기',
+    'paid': '입금 완료',
+    'cancelled': '취소됨',
+    'expired': '만료됨',
+}
+
+BUS_BOOKING_STATUS_LABELS = {
+    'reserved': '예약됨 (운행 확정 대기)',
+    'confirmed': '운행 확정',
+    'cancelled': '취소됨',
+}
+
+
+def get_bus_direction_info(direction):
+    """direction 코드에 대한 표시 정보 반환"""
+    return BUS_DIRECTIONS.get(direction, {'label': direction, 'time': '', 'short': direction})
+
+
+def generate_bus_order_number():
+    """PayAction 주문번호 생성 (22자 이하, 영문/숫자)"""
+    ts = datetime.now().strftime('%Y%m%d%H%M%S')
+    suffix = ''.join(random.choices(string.digits, k=4))
+    return f'BUS{ts}{suffix}'
+
+
+BUS_BOOKING_OPEN_SETTING_KEY = 'bus_booking_open'
+
+
+def is_bus_booking_open():
+    """버스 예약 페이지 공개 여부. 관리자가 명시적으로 열기 전까지는 기본적으로 닫혀 있다."""
+    return db_helper.get_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'false') == 'true'
+
+# ============================================
 # 이메일 발송 함수
 # ============================================
 
@@ -267,7 +312,11 @@ def send_email(to_email, subject, html_body):
         msg['To'] = to_email
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
-        with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
+        # local_hostname을 명시하지 않으면 smtplib가 socket.getfqdn()으로 로컬 PC의
+        # 호스트명을 자동으로 사용해 EHLO를 보내는데, 한글이 포함된 컴퓨터 이름(흔히
+        # 한국어 Windows 환경)일 경우 ASCII 인코딩에 실패해 UnicodeEncodeError가 발생한다.
+        # 메일 발송과 무관한 값이므로 고정된 ASCII 값을 명시해 우회한다.
+        with smtplib.SMTP(mail_server, mail_port, timeout=10, local_hostname='localhost') as server:
             if mail_use_tls:
                 server.starttls()
             server.login(mail_username, mail_password)
@@ -289,6 +338,89 @@ def send_email_async(to_email, subject, html):
     """이메일을 백그라운드 스레드에서 발송 (응답 블로킹 방지)"""
     thread = threading.Thread(target=send_email, args=(to_email, subject, html), daemon=True)
     thread.start()
+
+
+# ============================================
+# PayAction (무통장입금 자동확인) 연동 함수
+# https://payaction.app/developer
+# ============================================
+
+def payaction_create_order(order_number, amount, orderer_name, orderer_phone, orderer_email, billing_name, auto_cancel_at=None):
+    """PayAction에 주문을 등록해 무통장입금 자동확인을 요청합니다.
+
+    PAYACTION_API_KEY / PAYACTION_MALL_ID가 설정되어 있지 않으면 조용히 False를 반환합니다.
+    이 경우에도 예약 자체는 '입금 대기' 상태로 생성되며, 관리자가 관리자 페이지에서
+    입금을 수동으로 확인 처리할 수 있습니다.
+    """
+    api_key = app.config.get('PAYACTION_API_KEY')
+    mall_id = app.config.get('PAYACTION_MALL_ID')
+    if not api_key or not mall_id:
+        print(f'[PayAction 미설정] 주문 등록 생략. order_number={order_number}')
+        return False
+
+    base_url = app.config.get('PAYACTION_BASE_URL', 'https://api.payaction.app')
+    payload = {
+        'order_number': order_number,
+        'order_amount': amount,
+        'order_date': datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00'),
+        'billing_name': billing_name,
+        'orderer_name': orderer_name,
+    }
+    if orderer_phone:
+        payload['orderer_phone_number'] = orderer_phone
+    if orderer_email:
+        payload['orderer_email'] = orderer_email
+    if auto_cancel_at:
+        payload['auto_cancel_date'] = auto_cancel_at.strftime('%Y-%m-%dT%H:%M:%S+09:00')
+
+    try:
+        resp = requests.post(
+            f'{base_url}/order',
+            json=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'x-api-key': api_key,
+                'x-mall-id': mall_id,
+            },
+            timeout=10,
+        )
+        data = resp.json() if resp.content else {}
+        if resp.status_code == 200 and data.get('status') == 'success':
+            print(f'[PayAction 주문 등록 성공] order_number={order_number}')
+            return True
+        print(f'[PayAction 주문 등록 실패] order_number={order_number}, status={resp.status_code}, body={data}')
+        return False
+    except Exception as e:
+        print(f'[PayAction 주문 등록 오류] order_number={order_number}: {type(e).__name__}: {e}')
+        return False
+
+
+def payaction_cancel_order(order_number):
+    """PayAction에 등록된 주문을 취소합니다."""
+    api_key = app.config.get('PAYACTION_API_KEY')
+    mall_id = app.config.get('PAYACTION_MALL_ID')
+    if not api_key or not mall_id:
+        return False
+
+    base_url = app.config.get('PAYACTION_BASE_URL', 'https://api.payaction.app')
+    try:
+        resp = requests.post(
+            f'{base_url}/orders/{order_number}/cancel',
+            headers={
+                'x-api-key': api_key,
+                'x-mall-id': mall_id,
+            },
+            timeout=10,
+        )
+        data = resp.json() if resp.content else {}
+        if resp.status_code == 200 and data.get('status') == 'success':
+            print(f'[PayAction 주문 취소 성공] order_number={order_number}')
+            return True
+        print(f'[PayAction 주문 취소 실패] order_number={order_number}, status={resp.status_code}, body={data}')
+        return False
+    except Exception as e:
+        print(f'[PayAction 주문 취소 오류] order_number={order_number}: {type(e).__name__}: {e}')
+        return False
 
 
 def send_booking_submitted_user_email(booking):
@@ -623,6 +755,186 @@ def send_inquiry_reply_email(inquiry, reply_text):
     </div>
     """
     return send_email(inquiry['email'], subject, html)
+
+
+# ============================================
+# 버스 예약 이메일 함수
+# ============================================
+
+def _bus_trip_rows(booking):
+    """버스 예약 이메일 공통 정보 테이블 행 HTML 생성"""
+    trip = booking.get('trip') or {}
+    direction_info = get_bus_direction_info(trip.get('direction'))
+    trip_date = trip.get('trip_date', '')
+    return f"""
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">노선</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{direction_info['label']}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{trip_date}</strong></td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('passenger_name', '')}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">좌석 수</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('seat_count', 1)}석</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">결제 금액</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking.get('amount', 0):,}원</strong></td></tr>
+    """
+
+
+def send_bus_booking_admin_notification_email(booking):
+    """새 버스 예약 알림 이메일 (관리자에게)"""
+    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    if not admin_emails:
+        return False
+    subject = f'[총학생회] 새로운 버스 예약 - {booking.get("passenger_name", "")}'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #1a1a1a; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">관리자 알림</h1>
+        <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 14px;">새로운 버스 예약이 접수되었습니다</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          {_bus_trip_rows(booking)}
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-top: 1px solid #eee;">연락처</td><td style="padding: 12px 16px; color: #1a1a1a; border-top: 1px solid #eee;">{booking.get('passenger_phone', '')}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">입금자명</td><td style="padding: 12px 16px; color: #1a1a1a;">{booking.get('depositor_name', '')}</td></tr>
+        </table>
+        <div style="margin-top: 24px; padding: 16px; background: #fef3c7; border-radius: 8px;">
+          <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 600;">입금 확인 전입니다. 관리자 페이지에서 예약 및 입금 현황을 확인하세요.</p>
+        </div>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    result = True
+    for email in admin_emails:
+        if not send_email(email, subject, html):
+            result = False
+    return result
+
+
+def send_bus_payment_confirmed_email(booking):
+    """입금 확인 완료 이메일 (신청자에게)"""
+    subject = '[총학생회] 버스 예약 입금이 확인되었습니다'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #1A7F37; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">입금 확인 안내</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #d4edda; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #155724; font-weight: 700; font-size: 15px;">✓ 입금 확인 완료</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">입금이 확인되었습니다!</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">버스 운행 인원이 모두 확정되면 운행 확정 안내 메일을 다시 보내드립니다.</p>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          {_bus_trip_rows(booking)}
+        </table>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['passenger_email'], subject, html)
+
+
+def send_bus_trip_confirmed_email(booking):
+    """버스 운행 확정 이메일 (신청자에게)"""
+    subject = '[총학생회] 예약하신 버스 운행이 확정되었습니다'
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #1A7F37; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">버스 운행 확정 안내</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #d4edda; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #155724; font-weight: 700; font-size: 15px;">🚌 운행 확정</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 운행이 확정되었습니다!</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 일정으로 버스가 운행됩니다. 출발 시각에 늦지 않게 탑승 장소로 와주세요.</p>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          {_bus_trip_rows(booking)}
+        </table>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['passenger_email'], subject, html)
+
+
+def send_bus_trip_cancelled_email(booking, reason=None):
+    """버스 운행 취소 이메일 (신청자에게, 관리자가 회차 전체를 취소한 경우)"""
+    subject = '[총학생회] 예약하신 버스 운행이 취소되었습니다'
+    reason_html = ''
+    if reason:
+        reason_html = f"""
+        <div style="margin-top: 24px; padding: 16px 20px; background: #fff3cd; border-left: 4px solid #92400e; border-radius: 6px;">
+          <p style="margin: 0 0 4px 0; font-weight: 700; color: #92400e; font-size: 14px;">취소 사유</p>
+          <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">{reason}</p>
+        </div>"""
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #961A32; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">버스 운행 취소 안내</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #fee2e2; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #991b1b; font-weight: 700; font-size: 15px;">✕ 운행 취소</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 운행이 취소되었습니다</h2>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">입금하신 금액은 환불 절차가 진행됩니다. 문의사항이 있으시면 연락주세요.</p>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          {_bus_trip_rows(booking)}
+        </table>
+        {reason_html}
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr 또는 010-6598-6414로 연락주세요.</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['passenger_email'], subject, html)
+
+
+def send_bus_booking_cancelled_email(booking, reason=None):
+    """개별 버스 예약 취소 확인 이메일 (신청자에게)"""
+    subject = '[총학생회] 버스 예약 취소 확인'
+    reason_html = ''
+    if reason:
+        reason_html = f"""
+        <div style="margin-top: 24px; padding: 16px 20px; background: #fff3cd; border-left: 4px solid #92400e; border-radius: 6px;">
+          <p style="margin: 0 0 4px 0; font-weight: 700; color: #92400e; font-size: 14px;">취소 사유</p>
+          <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">{reason}</p>
+        </div>"""
+    html = f"""
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
+      <div style="background: #444; padding: 32px 40px;">
+        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">버스 예약 취소 확인</p>
+      </div>
+      <div style="background: white; padding: 40px;">
+        <div style="display: inline-block; padding: 8px 20px; background: #f3f4f6; border-radius: 20px; margin-bottom: 20px;">
+          <span style="color: #374151; font-weight: 700; font-size: 15px;">✓ 취소 완료</span>
+        </div>
+        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 예약이 취소되었습니다</h2>
+        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+          {_bus_trip_rows(booking)}
+        </table>
+        {reason_html}
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">이미 입금하신 경우 환불 절차는 별도로 안내드립니다. 문의: dsng3419@korea.ac.kr</p>
+      </div>
+      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
+        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+      </div>
+    </div>
+    """
+    return send_email(booking['passenger_email'], subject, html)
 
 
 # ============================================
@@ -1064,6 +1376,281 @@ def api_meeting_room_availability():
 
 
 # ============================================
+# 버스 예약 (세종 ↔ 서울)
+# ============================================
+
+def get_bus_trip_remaining_seats(trip):
+    """회차의 남은 좌석 수 계산"""
+    reserved = db_helper.get_reserved_seat_count(trip['id'])
+    return max(0, (trip.get('capacity') or 0) - reserved)
+
+
+@app.route('/bus')
+def bus():
+    if not is_bus_booking_open() and not current_user.is_authenticated:
+        return render_template('bus_not_open.html')
+
+    today = date.today()
+    today_str = today.strftime('%Y-%m-%d')
+
+    all_trips = db_helper.get_upcoming_bus_trips(today_str)
+
+    # 회차가 존재하는 날짜 목록 (오름차순, 중복 제거)
+    available_dates = sorted({t['trip_date'] for t in all_trips})
+
+    selected_date_str = request.args.get('date', '')
+    if selected_date_str not in available_dates:
+        selected_date_str = available_dates[0] if available_dates else today_str
+
+    trips_today = [t for t in all_trips if t['trip_date'] == selected_date_str]
+    for t in trips_today:
+        t['remaining_seats'] = get_bus_trip_remaining_seats(t)
+        t['direction_info'] = get_bus_direction_info(t['direction'])
+
+    # 방향 순서 고정 (세종→서울, 서울→세종)
+    trips_today.sort(key=lambda t: 0 if t['direction'] == 'sejong_to_seoul' else 1)
+
+    return render_template('bus.html',
+                           today=today,
+                           available_dates=available_dates,
+                           selected_date_str=selected_date_str,
+                           trips_today=trips_today,
+                           bus_directions=BUS_DIRECTIONS)
+
+
+@app.route('/bus/book', methods=['POST'])
+def bus_book():
+    if not is_bus_booking_open() and not current_user.is_authenticated:
+        flash('버스 예약 페이지는 아직 오픈되지 않았습니다.', 'error')
+        return redirect(url_for('bus'))
+
+    trip_id = request.form.get('trip_id', type=int)
+    passenger_name = request.form.get('passenger_name', '').strip()
+    passenger_phone = request.form.get('passenger_phone', '').strip()
+    passenger_email = request.form.get('passenger_email', '').strip()
+    student_id = request.form.get('student_id', '').strip()
+    depositor_name = request.form.get('depositor_name', '').strip()
+    seat_count = request.form.get('seat_count', 1, type=int)
+    booking_password = request.form.get('booking_password', '').strip()
+
+    if not all([trip_id, passenger_name, passenger_phone, passenger_email, depositor_name, booking_password]):
+        flash('필수 항목을 모두 입력해주세요.', 'error')
+        return redirect(url_for('bus'))
+
+    if not seat_count or seat_count < 1:
+        seat_count = 1
+
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip or trip['status'] == 'cancelled':
+        flash('선택하신 버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('bus'))
+
+    if trip['trip_date'] < date.today().strftime('%Y-%m-%d'):
+        flash('지난 날짜의 버스는 예약할 수 없습니다.', 'error')
+        return redirect(url_for('bus', date=trip['trip_date']))
+
+    remaining = get_bus_trip_remaining_seats(trip)
+    if seat_count > remaining:
+        flash(f'남은 좌석이 {remaining}석 뿐입니다. 좌석 수를 줄여주세요.', 'error')
+        return redirect(url_for('bus', date=trip['trip_date']))
+
+    amount = (trip.get('price') or 0) * seat_count
+    order_number = generate_bus_order_number()
+
+    data = {
+        'trip_id': trip_id,
+        'passenger_name': passenger_name,
+        'passenger_phone': passenger_phone,
+        'passenger_email': passenger_email,
+        'student_id': student_id or None,
+        'depositor_name': depositor_name,
+        'seat_count': seat_count,
+        'amount': amount,
+        'order_number': order_number,
+        'payment_status': 'pending',
+        'booking_status': 'reserved',
+        'booking_password_hash': generate_password_hash(booking_password),
+    }
+    booking = db_helper.create_bus_booking(data)
+
+    if not booking:
+        flash('예약 처리 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
+        return redirect(url_for('bus', date=trip['trip_date']))
+
+    # PayAction 주문 등록 (설정되어 있지 않으면 조용히 생략됨)
+    auto_cancel_at = datetime.now() + timedelta(hours=24)
+    payaction_create_order(
+        order_number=order_number,
+        amount=amount,
+        orderer_name=passenger_name,
+        orderer_phone=passenger_phone,
+        orderer_email=passenger_email,
+        billing_name=depositor_name,
+        auto_cancel_at=auto_cancel_at,
+    )
+
+    email_booking = {**booking, 'trip': trip}
+    threading.Thread(target=send_bus_booking_admin_notification_email, args=(email_booking,), daemon=True).start()
+
+    flash('예약이 접수되었습니다. 안내드린 계좌로 입금해주세요.', 'success')
+    return redirect(url_for('bus_payment', order_number=order_number))
+
+
+@app.route('/bus/payment/<order_number>')
+def bus_payment(order_number):
+    booking = db_helper.get_bus_booking_by_order_number(order_number)
+    if not booking:
+        flash('예약 정보를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('bus'))
+
+    return render_template('bus_payment.html',
+                           booking=booking,
+                           direction_info=get_bus_direction_info(booking['trip']['direction']) if booking.get('trip') else None,
+                           bank_name=app.config.get('BUS_BANK_NAME'),
+                           bank_account=app.config.get('BUS_BANK_ACCOUNT_NUMBER'),
+                           bank_holder=app.config.get('BUS_BANK_ACCOUNT_HOLDER'))
+
+
+@app.route('/bus/cancel', methods=['GET', 'POST'])
+def bus_cancel():
+    """사용자 버스 예약 취소 페이지"""
+    bookings = None
+    searched_email = None
+
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+
+        if action == 'lookup':
+            email = request.form.get('email', '').strip().lower()
+            if not email:
+                flash('이메일을 입력해주세요.', 'error')
+            else:
+                searched_email = email
+                bookings = db_helper.get_bus_bookings_by_email(email)
+                if not bookings:
+                    flash('해당 이메일로 등록된 예약이 없습니다.', 'info')
+
+        elif action == 'cancel':
+            booking_id = request.form.get('booking_id', type=int)
+            password = request.form.get('booking_password', '').strip()
+            email = request.form.get('email', '').strip().lower()
+
+            booking = db_helper.get_bus_booking_by_id(booking_id) if booking_id else None
+            if not booking:
+                flash('예약을 찾을 수 없습니다. 문의해주세요.', 'error')
+            elif booking.get('passenger_email', '').lower() != email:
+                flash('이메일이 일치하지 않습니다. 문의해주세요.', 'error')
+            elif not booking.get('booking_password_hash') or not check_password_hash(booking['booking_password_hash'], password):
+                flash('비밀번호가 올바르지 않습니다. 다시 시도하거나 문의해주세요.', 'error')
+            else:
+                update_data = {'booking_status': 'cancelled'}
+                if booking['payment_status'] == 'pending':
+                    update_data['payment_status'] = 'cancelled'
+                updated = db_helper.update_bus_booking(booking_id, update_data)
+                if updated:
+                    if booking['payment_status'] == 'paid':
+                        threading.Thread(target=payaction_cancel_order, args=(booking['order_number'],), daemon=True).start()
+                    b_snap = {**booking, **update_data}
+                    threading.Thread(target=send_bus_booking_cancelled_email, args=(b_snap,), daemon=True).start()
+                    flash('버스 예약이 취소되었습니다. 취소 확인 이메일이 곧 발송됩니다.', 'success')
+                    return redirect(url_for('bus_cancel'))
+                else:
+                    flash('취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'error')
+
+    return render_template('bus_cancel.html', bookings=bookings, searched_email=searched_email,
+                           bus_directions=BUS_DIRECTIONS)
+
+
+def mark_bus_booking_paid(booking, source='webhook'):
+    """버스 예약을 입금완료로 변경하고 안내 메일을 정확히 한 번만 발송한다.
+
+    조건부(원자적) UPDATE를 사용해, 웹훅이 중복 수신되거나 관리자 수동확인과
+    웹훅이 거의 동시에 들어와도 실제로 상태를 'pending -> paid'로 바꾼
+    호출 하나만 이메일을 보내도록 보장한다. 반환값은 처리 성공 여부.
+    """
+    if booking['booking_status'] == 'cancelled':
+        print(f'[버스 입금확인] 처리 생략 (취소된 예약) — booking_id={booking["id"]}, source={source}')
+        return False
+
+    updated = db_helper.mark_bus_booking_paid_if_pending(booking['id'])
+    if not updated:
+        print(f'[버스 입금확인] 처리 생략 (이미 처리됨) — booking_id={booking["id"]}, source={source}')
+        return False
+
+    email_booking = {**booking, 'payment_status': 'paid'}
+    threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
+    print(f'[버스 입금확인] 처리 완료 — booking_id={booking["id"]}, order_number={booking.get("order_number")}, source={source}')
+    return True
+
+
+@app.route('/api/payaction/webhook', methods=['POST'])
+def api_payaction_webhook():
+    """PayAction 웹훅 수신.
+
+    PayAction은 연동 방식에 따라 서로 다른 두 가지 payload를 같은 웹훅 URL로 보낼 수 있다.
+    1) 입금 자동확인(주문 매칭) 웹훅: {"order_number", "order_status": "매칭완료", ...}
+    2) 입출금 데이터수신 웹훅: {"transaction_type": "deposited", "transaction_name", "amount", ...} (주문번호 없음)
+    실제로 어느 쪽이 오는지 대시보드 설정에 따라 달라질 수 있으므로 둘 다 처리한다.
+    """
+    raw_body = request.get_data(as_text=True)
+    received_webhook_key = request.headers.get('x-webhook-key') or ''
+    received_mall_id = request.headers.get('x-mall-id') or ''
+    print(f'[PayAction Webhook] 수신 — headers: x-mall-id={received_mall_id!r}, '
+          f'x-webhook-key(received)={received_webhook_key!r}, '
+          f'x-trace-id={request.headers.get("x-trace-id")!r} / body: {raw_body}')
+
+    webhook_key = (app.config.get('PAYACTION_WEBHOOK_KEY') or '').strip()
+    mall_id = (app.config.get('PAYACTION_MALL_ID') or '').strip()
+
+    if webhook_key:
+        if received_webhook_key.strip() != webhook_key:
+            print(f'[PayAction Webhook] 거부됨 — x-webhook-key가 PAYACTION_WEBHOOK_KEY 설정값과 일치하지 않습니다. '
+                  f'(수신값={received_webhook_key!r}) 대시보드 > API 의 웹훅키와 .env의 PAYACTION_WEBHOOK_KEY를 다시 대조해보세요.')
+            return jsonify({'status': 'error', 'message': 'invalid webhook key'}), 401
+        if mall_id and received_mall_id.strip() != mall_id:
+            print(f'[PayAction Webhook] 거부됨 — x-mall-id가 PAYACTION_MALL_ID 설정값과 일치하지 않습니다. '
+                  f'(수신값={received_mall_id!r})')
+            return jsonify({'status': 'error', 'message': 'invalid mall id'}), 401
+
+    data = request.get_json(silent=True) or {}
+
+    # ── 방식 1: 입금 자동확인(주문 매칭) 웹훅 ──────────────────────────
+    order_number = data.get('order_number')
+    if order_number:
+        order_status = data.get('order_status')
+        booking = db_helper.get_bus_booking_by_order_number(order_number)
+        if not booking:
+            print(f'[PayAction Webhook] 알 수 없는 order_number: {order_number}')
+            return jsonify({'status': 'success'}), 200
+
+        if order_status == '매칭완료':
+            mark_bus_booking_paid(booking, source='payaction_order')
+        else:
+            print(f'[PayAction Webhook] 처리 생략 — order_number={order_number}, order_status={order_status!r}')
+        return jsonify({'status': 'success'}), 200
+
+    # ── 방식 2: 입출금 데이터수신 웹훅 (주문번호 없이 입금자명+금액으로 매칭) ──
+    transaction_type = data.get('transaction_type')
+    if transaction_type == 'deposited':
+        transaction_name = (data.get('transaction_name') or '').strip()
+        amount = data.get('amount')
+        candidates = db_helper.get_pending_bus_bookings_by_deposit(transaction_name, amount)
+        if len(candidates) == 1:
+            mark_bus_booking_paid(candidates[0], source='payaction_deposit')
+        elif len(candidates) == 0:
+            print(f'[PayAction Webhook] 입출금 이벤트 — 일치하는 대기중 예약 없음: '
+                  f'입금자명={transaction_name!r}, 금액={amount}')
+        else:
+            print(f'[PayAction Webhook] 입출금 이벤트 — 입금자명={transaction_name!r}, 금액={amount} 조건에 '
+                  f'예약이 {len(candidates)}건 있어 자동 매칭을 보류합니다. 관리자가 수동으로 확인해주세요. '
+                  f'booking_ids={[c["id"] for c in candidates]}')
+        return jsonify({'status': 'success'}), 200
+
+    print(f'[PayAction Webhook] 처리할 수 없는 payload 형식입니다: {data}')
+    return jsonify({'status': 'success'}), 200
+
+
+# ============================================
 # 관리자 인증
 # ============================================
 
@@ -1101,7 +1688,8 @@ def admin_dashboard():
         'minutes': db_helper.count_minutes(),
         'programs': db_helper.count_active_programs(),
         'pending_bookings': db_helper.count_pending_bookings(),
-        'pending_inquiries': db_helper.count_pending_inquiries()
+        'pending_inquiries': db_helper.count_pending_inquiries(),
+        'pending_bus_payments': db_helper.count_pending_bus_payments()
     }
     maintenance_mode = is_maintenance_mode()
     return render_template('admin/dashboard.html', stats=stats, maintenance_mode=maintenance_mode)
@@ -2242,6 +2830,213 @@ def admin_inquiry_delete(inquiry_id):
     db_helper.delete_inquiry(inquiry_id)
     flash('문의사항이 삭제되었습니다.', 'success')
     return redirect(url_for('admin_inquiries'))
+
+
+# ============================================
+# 버스 예약 관리 (관리자)
+# ============================================
+
+@app.route('/admin/bus')
+@login_required
+def admin_bus():
+    trips = db_helper.get_all_bus_trips(order_by='trip_date', ascending=False)
+    for t in trips:
+        t['remaining_seats'] = get_bus_trip_remaining_seats(t)
+        t['direction_info'] = get_bus_direction_info(t['direction'])
+
+    bookings = db_helper.get_all_bus_bookings()
+
+    return render_template('admin/bus.html',
+                           trips=trips,
+                           bookings=bookings,
+                           bus_directions=BUS_DIRECTIONS,
+                           payment_status_labels=BUS_PAYMENT_STATUS_LABELS,
+                           booking_status_labels=BUS_BOOKING_STATUS_LABELS,
+                           today=date.today(),
+                           is_bus_booking_open=is_bus_booking_open())
+
+
+@app.route('/admin/bus/toggle-open', methods=['POST'])
+@login_required
+def admin_bus_toggle_open():
+    """버스 예약 페이지 공개/비공개 전환"""
+    new_value = not is_bus_booking_open()
+    db_helper.set_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'true' if new_value else 'false')
+    if new_value:
+        flash('버스 예약 페이지가 공개되었습니다. 이제 누구나 접속할 수 있습니다.', 'success')
+    else:
+        flash('버스 예약 페이지가 비공개로 전환되었습니다. 관리자로 로그인한 경우에만 접속할 수 있습니다.', 'success')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/trips/create', methods=['POST'])
+@login_required
+def admin_bus_trip_create():
+    trip_date = request.form.get('trip_date', '').strip()
+    direction = request.form.get('direction', '').strip()
+    price = request.form.get('price', 0, type=int)
+    capacity = request.form.get('capacity', 0, type=int)
+    note = request.form.get('note', '').strip()
+
+    if not trip_date or direction not in BUS_DIRECTIONS:
+        flash('날짜와 노선을 올바르게 선택해주세요.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    if price < 0 or capacity < 1:
+        flash('요금은 0 이상, 정원은 1석 이상이어야 합니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    existing = db_helper.get_bus_trip_by_date_direction(trip_date, direction)
+    if existing:
+        flash('해당 날짜·노선의 버스 회차가 이미 존재합니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    data = {
+        'trip_date': trip_date,
+        'direction': direction,
+        'departure_time': BUS_DIRECTIONS[direction]['time'],
+        'price': price,
+        'capacity': capacity,
+        'status': 'open',
+        'note': note or None,
+    }
+    trip = db_helper.create_bus_trip(data)
+    if trip:
+        flash(f'{trip_date} {BUS_DIRECTIONS[direction]["label"]} 버스 회차가 등록되었습니다.', 'success')
+    else:
+        flash('버스 회차 등록 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/trips/<int:trip_id>/update', methods=['POST'])
+@login_required
+def admin_bus_trip_update(trip_id):
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip:
+        flash('버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    price = request.form.get('price', type=int)
+    capacity = request.form.get('capacity', type=int)
+    note = request.form.get('note', '').strip()
+
+    data = {}
+    if price is not None and price >= 0:
+        data['price'] = price
+    if capacity is not None and capacity >= 1:
+        data['capacity'] = capacity
+    data['note'] = note or None
+
+    updated = db_helper.update_bus_trip(trip_id, data)
+    if updated:
+        flash('버스 회차 정보가 수정되었습니다.', 'success')
+    else:
+        flash('수정 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/trips/<int:trip_id>/confirm', methods=['POST'])
+@login_required
+def admin_bus_trip_confirm(trip_id):
+    """버스 운행 확정 처리 — 입금 완료된 예약을 확정하고 신청자에게 안내 메일 발송"""
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip:
+        flash('버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    db_helper.update_bus_trip(trip_id, {'status': 'confirmed'})
+
+    bookings = db_helper.get_bus_bookings_by_trip(trip_id)
+    confirmed_count = 0
+    for b in bookings:
+        if b['booking_status'] == 'reserved' and b['payment_status'] == 'paid':
+            # 조건부 UPDATE — 중복 클릭/중복 제출이 있어도 실제로 상태를 바꾼
+            # 요청만 메일을 보내도록 해 안내 메일이 두 번 나가지 않게 한다.
+            if not db_helper.mark_bus_booking_confirmed_if_reserved(b['id']):
+                continue
+            email_booking = {**b, 'booking_status': 'confirmed', 'trip': trip}
+            threading.Thread(target=send_bus_trip_confirmed_email, args=(email_booking,), daemon=True).start()
+            confirmed_count += 1
+
+    direction_label = get_bus_direction_info(trip['direction'])['label']
+    flash(f'{trip["trip_date"]} {direction_label} 버스 운행이 확정되었습니다. 입금 완료된 {confirmed_count}건에 안내 메일이 발송됩니다.', 'success')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/trips/<int:trip_id>/cancel', methods=['POST'])
+@login_required
+def admin_bus_trip_cancel(trip_id):
+    """버스 회차 전체 취소 — 모든 예약을 취소 처리하고 신청자에게 안내 메일 발송"""
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip:
+        flash('버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    reason = request.form.get('cancel_reason', '').strip()
+    db_helper.update_bus_trip(trip_id, {'status': 'cancelled'})
+
+    bookings = db_helper.get_bus_bookings_by_trip(trip_id)
+    cancelled_count = 0
+    for b in bookings:
+        if b['booking_status'] == 'cancelled':
+            continue
+        update_data = {'booking_status': 'cancelled'}
+        db_helper.update_bus_booking(b['id'], update_data)
+        if b['payment_status'] == 'paid':
+            threading.Thread(target=payaction_cancel_order, args=(b['order_number'],), daemon=True).start()
+        email_booking = {**b, **update_data, 'trip': trip}
+        threading.Thread(target=send_bus_trip_cancelled_email, args=(email_booking, reason or None), daemon=True).start()
+        cancelled_count += 1
+
+    direction_label = get_bus_direction_info(trip['direction'])['label']
+    flash(f'{trip["trip_date"]} {direction_label} 버스 운행이 취소되었습니다. {cancelled_count}건의 예약자에게 안내 메일이 발송됩니다.', 'success')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/bookings/<int:booking_id>/mark-paid', methods=['POST'])
+@login_required
+def admin_bus_booking_mark_paid(booking_id):
+    """입금 수동 확인 처리 (PayAction 미연동 시 또는 확인 누락 시 사용)"""
+    booking = db_helper.get_bus_booking_by_id(booking_id)
+    if not booking:
+        flash('예약을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    if booking['payment_status'] == 'paid':
+        flash('이미 입금 확인된 예약입니다.', 'info')
+        return redirect(url_for('admin_bus'))
+
+    if mark_bus_booking_paid(booking, source='admin_manual'):
+        flash(f'{booking["passenger_name"]}님의 입금이 확인 처리되었습니다. 안내 메일이 발송됩니다.', 'success')
+    else:
+        flash('이미 다른 경로(웹훅 등)로 처리되었거나 취소된 예약입니다.', 'info')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/bookings/<int:booking_id>/cancel', methods=['POST'])
+@login_required
+def admin_bus_booking_cancel(booking_id):
+    """개별 버스 예약 취소 (관리자)"""
+    booking = db_helper.get_bus_booking_by_id(booking_id)
+    if not booking:
+        flash('예약을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    reason = request.form.get('cancel_reason', '').strip()
+    update_data = {'booking_status': 'cancelled'}
+    if booking['payment_status'] == 'pending':
+        update_data['payment_status'] = 'cancelled'
+
+    updated = db_helper.update_bus_booking(booking_id, update_data)
+    if updated:
+        if booking['payment_status'] == 'paid':
+            threading.Thread(target=payaction_cancel_order, args=(booking['order_number'],), daemon=True).start()
+        email_booking = {**booking, **update_data}
+        threading.Thread(target=send_bus_booking_cancelled_email, args=(email_booking, reason or None), daemon=True).start()
+        flash(f'{booking["passenger_name"]}님의 버스 예약이 취소되었습니다. 안내 메일이 발송됩니다.', 'success')
+    else:
+        flash('취소 처리 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
 
 
 # ============================================

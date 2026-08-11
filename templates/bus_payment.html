@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}입금 안내 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        border: 1px solid #e8e8ed;
+        animation: fadeInUp 0.45s cubic-bezier(0.16,1,0.3,1) backwards;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .info-row:last-child { border-bottom: none; }
+    @media (max-width: 640px) {
+        .payment-card { padding: 28px 20px; }
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px; max-width: 640px;">
+
+    <div style="margin-bottom: 36px; animation: fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1);">
+        <a href="{{ url_for('bus') }}" style="display:inline-flex;align-items:center;gap:6px;color:#888;font-size:0.88rem;font-weight:600;text-decoration:none;margin-bottom:20px;"
+           onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='#888';">
+            ← 버스 예약 페이지로
+        </a>
+        <div style="text-align:center;margin-bottom:14px;">
+            <div style="display:inline-block;padding:8px 20px;background:rgba(150,26,50,0.08);border-radius:100px;border:1px solid rgba(150,26,50,0.15);">
+                <span style="color:var(--ku-crimson);font-weight:800;letter-spacing:0.12em;text-transform:uppercase;font-size:0.78rem;">Payment</span>
+            </div>
+        </div>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:#1a1a1a;margin:0 0 10px 0;letter-spacing:-0.02em;text-align:center;">입금 안내</h1>
+        <p style="color:#888;font-size:0.95rem;line-height:1.6;margin:0;text-align:center;">아래 계좌로 입금해주세요.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom: 24px;">
+        {% for category, message in messages %}
+        <div style="padding: 14px 18px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+                    background: {{ '#d1fae5' if category == 'success' else ('#fef3c7' if category == 'info' else '#fee2e2') }};
+                    color: {{ '#065f46' if category == 'success' else ('#92400e' if category == 'info' else '#991b1b') }};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="payment-card" style="margin-bottom: 24px; background: #eff6ff; border-color: #bfdbfe;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:1.3rem;line-height:1;">📩</span>
+            <div>
+                <p style="margin:0 0 6px 0;font-weight:800;color:#1e40af;font-size:0.95rem;">입금 확인은 이메일 · 카카오톡으로 안내드립니다</p>
+                <p style="margin:0;color:#1e3a8a;font-size:0.87rem;line-height:1.7;">
+                    입금이 완료되면 예약 시 입력하신 <strong>이메일</strong>과 <strong>카카오톡 알림톡</strong>으로 입금 확인 안내가 자동 발송됩니다.
+                    이 페이지를 계속 확인하지 않으셔도 되며, 입금 후에는 이메일함과 카카오톡을 확인해주세요.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-card" style="margin-bottom: 24px;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 18px 0;">입금 계좌</h2>
+        <div style="padding:20px;background:#fff3cd;border-radius:12px;border-left:4px solid #92400e;margin-bottom:20px;">
+            <div style="font-size:1.15rem;font-weight:800;color:#92400e;margin-bottom:4px;">{{ bank_name }} {{ bank_account }}</div>
+            <div style="font-size:0.9rem;color:#92400e;">예금주 : {{ bank_holder }}</div>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">입금자명</span>
+            <span style="font-weight:800;color:#1a1a1a;font-size:1rem;">{{ booking.depositor_name }}</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">입금액</span>
+            <span style="font-weight:800;color:var(--ku-crimson);font-size:1.15rem;">{{ '{:,}'.format(booking.amount) }}원</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">주문번호</span>
+            <span style="font-weight:700;color:#555;font-size:0.85rem;">{{ booking.order_number }}</span>
+        </div>
+        <p style="font-size:0.8rem;color:#f59e0b;margin:16px 0 0 0;font-weight:600;">⚠ 입금자명이 다르면 자동으로 확인되지 않을 수 있습니다. 문제가 있으면 문의해주세요.</p>
+    </div>
+
+    <div class="payment-card" style="margin-bottom: 24px;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 18px 0;">예약 정보</h2>
+        {% if direction_info %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">노선</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ direction_info.label }} ({{ direction_info.time }} 출발)</span>
+        </div>
+        {% endif %}
+        {% if booking.trip %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">날짜</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.trip_date }}</span>
+        </div>
+        {% endif %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">탑승자</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.passenger_name }}</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">좌석 수</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.seat_count }}석</span>
+        </div>
+    </div>
+
+    <p style="text-align:center;color:#aaa;font-size:0.82rem;margin-top:20px;">문의 : dsng3419@korea.ac.kr</p>
+</div>
+{% endblock %}

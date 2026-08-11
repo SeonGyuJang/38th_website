@@ -662,3 +662,179 @@ class SupabaseHelper:
         """답변 대기 중인 문의사항 수 조회"""
         response = self.admin_client.table('inquiries').select('id', count='exact').eq('status', 'pending').execute()
         return response.count or 0
+
+    # ============ BusTrip 관련 (버스 예약 - 회차) ============
+
+    def convert_bus_trip_dates(self, trip: Dict[str, Any]) -> Dict[str, Any]:
+        """버스 회차 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if trip:
+            if 'created_at' in trip:
+                trip['created_at'] = self.parse_datetime(trip['created_at'])
+            if 'updated_at' in trip:
+                trip['updated_at'] = self.parse_datetime(trip['updated_at'])
+        return trip
+
+    def get_all_bus_trips(self, order_by: str = 'trip_date', ascending: bool = True) -> List[Dict[str, Any]]:
+        """모든 버스 회차 조회 (관리자용)"""
+        response = self.admin_client.table('bus_trips').select('*').order(order_by, desc=not ascending).execute()
+        return [self.convert_bus_trip_dates(t) for t in response.data]
+
+    def get_upcoming_bus_trips(self, from_date: str) -> List[Dict[str, Any]]:
+        """오늘 이후의 취소되지 않은 버스 회차 조회 (공개용)"""
+        response = self.client.table('bus_trips').select('*').gte('trip_date', from_date).neq('status', 'cancelled').order('trip_date', desc=False).execute()
+        return [self.convert_bus_trip_dates(t) for t in response.data]
+
+    def get_bus_trip_by_id(self, trip_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 버스 회차 조회"""
+        response = self.admin_client.table('bus_trips').select('*').eq('id', trip_id).execute()
+        if response.data:
+            return self.convert_bus_trip_dates(response.data[0])
+        return None
+
+    def get_bus_trip_by_date_direction(self, trip_date: str, direction: str) -> Optional[Dict[str, Any]]:
+        """날짜+방향으로 버스 회차 조회"""
+        response = self.client.table('bus_trips').select('*').eq('trip_date', trip_date).eq('direction', direction).execute()
+        if response.data:
+            return self.convert_bus_trip_dates(response.data[0])
+        return None
+
+    def create_bus_trip(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 회차 생성 (관리자용)"""
+        response = self.admin_client.table('bus_trips').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_bus_trip(self, trip_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 회차 수정"""
+        response = self.admin_client.table('bus_trips').update(data).eq('id', trip_id).execute()
+        return response.data[0] if response.data else None
+
+    # ============ BusBooking 관련 (버스 예약 - 개별 신청/결제) ============
+
+    def convert_bus_booking_dates(self, booking: Dict[str, Any]) -> Dict[str, Any]:
+        """버스 예약 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if booking:
+            if 'created_at' in booking:
+                booking['created_at'] = self.parse_datetime(booking['created_at'])
+            if 'updated_at' in booking:
+                booking['updated_at'] = self.parse_datetime(booking['updated_at'])
+        return booking
+
+    def get_bus_bookings_by_trip(self, trip_id: int) -> List[Dict[str, Any]]:
+        """특정 회차의 모든 예약 조회 (취소 포함, 관리자용)"""
+        response = self.admin_client.table('bus_bookings').select('*').eq('trip_id', trip_id).order('created_at', desc=False).execute()
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_all_bus_bookings(self) -> List[Dict[str, Any]]:
+        """모든 버스 예약 조회 (회차 정보 포함, 관리자용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').order('created_at', desc=True).execute()
+        for b in response.data:
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_bus_booking_by_id(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 버스 예약 조회"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('id', booking_id).execute()
+        if response.data:
+            b = response.data[0]
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+            return self.convert_bus_booking_dates(b)
+        return None
+
+    def get_bus_booking_by_order_number(self, order_number: str) -> Optional[Dict[str, Any]]:
+        """주문번호로 버스 예약 조회 (PayAction 웹훅/결제 상태 조회용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('order_number', order_number).execute()
+        if response.data:
+            b = response.data[0]
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+            return self.convert_bus_booking_dates(b)
+        return None
+
+    def get_bus_bookings_by_email(self, email: str) -> List[Dict[str, Any]]:
+        """이메일로 버스 예약 목록 조회 (취소되지 않은 것만, 자기 취소용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('passenger_email', email).neq('booking_status', 'cancelled').order('created_at', desc=True).execute()
+        for b in response.data:
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_pending_bus_bookings_by_deposit(self, depositor_name: str, amount: Any) -> List[Dict[str, Any]]:
+        """입금자명+금액으로 입금대기 중인 버스 예약 조회
+
+        PayAction '입출금 데이터수신' 웹훅은 주문번호 없이 순수 입금 이벤트만 보내주므로,
+        입금자명(공백 무시 비교)과 금액이 모두 일치하는 대기중 예약을 찾아 매칭한다.
+        """
+        if not depositor_name or amount is None:
+            return []
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)') \
+            .eq('payment_status', 'pending').neq('booking_status', 'cancelled').eq('amount', amount).execute()
+        normalized_target = ''.join(depositor_name.split())
+        matches = []
+        for b in response.data:
+            stored_name = ''.join((b.get('depositor_name') or '').split())
+            if stored_name and stored_name == normalized_target:
+                if b.get('trip'):
+                    self.convert_bus_trip_dates(b['trip'])
+                matches.append(self.convert_bus_booking_dates(b))
+        return matches
+
+    def get_reserved_seat_count(self, trip_id: int) -> int:
+        """회차의 예약된(취소/만료 제외) 좌석 수 합계"""
+        response = self.admin_client.table('bus_bookings').select('seat_count').eq('trip_id', trip_id).neq('booking_status', 'cancelled').neq('payment_status', 'cancelled').neq('payment_status', 'expired').execute()
+        return sum((b.get('seat_count') or 0) for b in response.data)
+
+    def create_bus_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 예약 생성 (admin 클라이언트 사용 - RLS 우회)"""
+        response = self.admin_client.table('bus_bookings').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_bus_booking(self, booking_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 예약 수정"""
+        response = self.admin_client.table('bus_bookings').update(data).eq('id', booking_id).execute()
+        return response.data[0] if response.data else None
+
+    def mark_bus_booking_paid_if_pending(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """payment_status가 여전히 'pending'인 경우에만 원자적으로 'paid'로 변경.
+
+        웹훅이 중복 수신되거나 관리자 수동확인과 웹훅이 동시에 들어와도 정확히
+        한 번만 처리되도록, WHERE 절에 현재 상태 조건을 포함한 조건부 UPDATE로
+        경쟁 상태(race condition)를 막는다. 이미 처리된 경우 None을 반환한다.
+        """
+        response = self.admin_client.table('bus_bookings').update({'payment_status': 'paid'}) \
+            .eq('id', booking_id).eq('payment_status', 'pending').execute()
+        return response.data[0] if response.data else None
+
+    def mark_bus_booking_confirmed_if_reserved(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """booking_status가 여전히 'reserved'인 경우에만 원자적으로 'confirmed'로 변경.
+
+        운행확정 버튼이 중복 클릭/중복 제출되어도 안내 메일이 한 번만 나가도록
+        조건부 UPDATE로 처리한다. 이미 처리된 경우 None을 반환한다.
+        """
+        response = self.admin_client.table('bus_bookings').update({'booking_status': 'confirmed'}) \
+            .eq('id', booking_id).eq('booking_status', 'reserved').execute()
+        return response.data[0] if response.data else None
+
+    def count_pending_bus_payments(self) -> int:
+        """입금 대기 중인 버스 예약 수 조회"""
+        response = self.admin_client.table('bus_bookings').select('id', count='exact').eq('payment_status', 'pending').eq('booking_status', 'reserved').execute()
+        return response.count or 0
+
+    # ============ AppSetting 관련 (사이트 전역 설정) ============
+
+    def get_setting(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """설정값 조회 (없으면 default 반환)"""
+        response = self.admin_client.table('app_settings').select('value').eq('key', key).execute()
+        if response.data:
+            return response.data[0].get('value')
+        return default
+
+    def set_setting(self, key: str, value: str) -> Optional[Dict[str, Any]]:
+        """설정값 저장 (없으면 생성, 있으면 갱신)"""
+        existing = self.admin_client.table('app_settings').select('key').eq('key', key).execute()
+        if existing.data:
+            response = self.admin_client.table('app_settings').update({'value': value}).eq('key', key).execute()
+        else:
+            response = self.admin_client.table('app_settings').insert({'key': key, 'value': value}).execute()
+        return response.data[0] if response.data else None
