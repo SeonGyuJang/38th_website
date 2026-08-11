@@ -304,7 +304,11 @@ def send_email(to_email, subject, html_body):
         msg['To'] = to_email
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
-        with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
+        # local_hostname을 명시하지 않으면 smtplib가 socket.getfqdn()으로 로컬 PC의
+        # 호스트명을 자동으로 사용해 EHLO를 보내는데, 한글이 포함된 컴퓨터 이름(흔히
+        # 한국어 Windows 환경)일 경우 ASCII 인코딩에 실패해 UnicodeEncodeError가 발생한다.
+        # 메일 발송과 무관한 값이므로 고정된 ASCII 값을 명시해 우회한다.
+        with smtplib.SMTP(mail_server, mail_port, timeout=10, local_hostname='localhost') as server:
             if mail_use_tls:
                 server.starttls()
             server.login(mail_username, mail_password)
