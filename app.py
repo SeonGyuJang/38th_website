@@ -785,7 +785,7 @@ def send_bus_booking_created_email(booking):
           <span style="color: #92400e; font-weight: 700; font-size: 15px;">⏳ 입금 대기 중</span>
         </div>
         <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 예약이 접수되었습니다</h2>
-        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 계좌로 입금해주시면 자동으로 확인 후 안내드립니다.</p>
+        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 계좌로 입금해주세요.</p>
         <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
           {_bus_trip_rows(booking)}
         </table>
@@ -798,7 +798,10 @@ def send_bus_booking_created_email(booking):
             주문번호 : {booking.get('order_number', '')}
           </p>
         </div>
-        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">입금 완료 확인, 운행 확정 안내는 이메일로 순차 발송됩니다. 문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+        <div style="margin-top: 16px; padding: 16px 20px; background: #eff6ff; border-radius: 8px;">
+          <p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.7;">📩 입금이 확인되면 <strong>이메일</strong>과 <strong>카카오톡 알림톡</strong>으로 입금 확인 안내를 보내드립니다. 입금 후에는 카카오톡과 이메일을 확인해주세요.</p>
+        </div>
+        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
       </div>
       <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
         <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
@@ -1601,9 +1604,27 @@ def bus_cancel():
                            bus_directions=BUS_DIRECTIONS)
 
 
+def _mark_bus_booking_paid(booking):
+    """버스 예약을 입금완료로 변경하고 안내 메일 발송 (이미 처리된 경우 무시)"""
+    if booking['payment_status'] == 'paid' or booking['booking_status'] == 'cancelled':
+        print(f'[PayAction Webhook] 처리 생략 (이미 완료/취소됨) — booking_id={booking["id"]}, '
+              f'payment_status={booking["payment_status"]!r}, booking_status={booking["booking_status"]!r}')
+        return
+    db_helper.update_bus_booking(booking['id'], {'payment_status': 'paid'})
+    email_booking = {**booking, 'payment_status': 'paid'}
+    threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
+    print(f'[PayAction Webhook] 입금 확인 처리 완료: booking_id={booking["id"]}, order_number={booking.get("order_number")}')
+
+
 @app.route('/api/payaction/webhook', methods=['POST'])
 def api_payaction_webhook():
-    """PayAction 입금 자동확인 웹훅 수신 (매칭완료 이벤트)"""
+    """PayAction 웹훅 수신.
+
+    PayAction은 연동 방식에 따라 서로 다른 두 가지 payload를 같은 웹훅 URL로 보낼 수 있다.
+    1) 입금 자동확인(주문 매칭) 웹훅: {"order_number", "order_status": "매칭완료", ...}
+    2) 입출금 데이터수신 웹훅: {"transaction_type": "deposited", "transaction_name", "amount", ...} (주문번호 없음)
+    실제로 어느 쪽이 오는지 대시보드 설정에 따라 달라질 수 있으므로 둘 다 처리한다.
+    """
     raw_body = request.get_data(as_text=True)
     print(f'[PayAction Webhook] 수신 — headers: x-mall-id={request.headers.get("x-mall-id")!r}, '
           f'x-webhook-key={"***" if request.headers.get("x-webhook-key") else None}, '
@@ -1621,27 +1642,40 @@ def api_payaction_webhook():
             return jsonify({'status': 'error', 'message': 'invalid mall id'}), 401
 
     data = request.get_json(silent=True) or {}
+
+    # ── 방식 1: 입금 자동확인(주문 매칭) 웹훅 ──────────────────────────
     order_number = data.get('order_number')
-    order_status = data.get('order_status')
+    if order_number:
+        order_status = data.get('order_status')
+        booking = db_helper.get_bus_booking_by_order_number(order_number)
+        if not booking:
+            print(f'[PayAction Webhook] 알 수 없는 order_number: {order_number}')
+            return jsonify({'status': 'success'}), 200
 
-    if not order_number:
-        return jsonify({'status': 'error', 'message': 'order_number is required'}), 400
-
-    booking = db_helper.get_bus_booking_by_order_number(order_number)
-    if not booking:
-        # 버스 예약이 아닌 다른 주문일 수 있으므로 성공으로 응답해 재전송을 막습니다.
-        print(f'[PayAction Webhook] 알 수 없는 order_number: {order_number}')
+        if order_status == '매칭완료':
+            _mark_bus_booking_paid(booking)
+        else:
+            print(f'[PayAction Webhook] 처리 생략 — order_number={order_number}, order_status={order_status!r}')
         return jsonify({'status': 'success'}), 200
 
-    if order_status == '매칭완료' and booking['payment_status'] != 'paid' and booking['booking_status'] != 'cancelled':
-        db_helper.update_bus_booking(booking['id'], {'payment_status': 'paid'})
-        email_booking = {**booking, 'payment_status': 'paid'}
-        threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
-        print(f'[PayAction Webhook] 입금 확인 처리 완료: order_number={order_number}')
-    else:
-        print(f'[PayAction Webhook] 처리 생략 — order_number={order_number}, order_status={order_status!r}, '
-              f'payment_status={booking["payment_status"]!r}, booking_status={booking["booking_status"]!r}')
+    # ── 방식 2: 입출금 데이터수신 웹훅 (주문번호 없이 입금자명+금액으로 매칭) ──
+    transaction_type = data.get('transaction_type')
+    if transaction_type == 'deposited':
+        transaction_name = (data.get('transaction_name') or '').strip()
+        amount = data.get('amount')
+        candidates = db_helper.get_pending_bus_bookings_by_deposit(transaction_name, amount)
+        if len(candidates) == 1:
+            _mark_bus_booking_paid(candidates[0])
+        elif len(candidates) == 0:
+            print(f'[PayAction Webhook] 입출금 이벤트 — 일치하는 대기중 예약 없음: '
+                  f'입금자명={transaction_name!r}, 금액={amount}')
+        else:
+            print(f'[PayAction Webhook] 입출금 이벤트 — 입금자명={transaction_name!r}, 금액={amount} 조건에 '
+                  f'예약이 {len(candidates)}건 있어 자동 매칭을 보류합니다. 관리자가 수동으로 확인해주세요. '
+                  f'booking_ids={[c["id"] for c in candidates]}')
+        return jsonify({'status': 'success'}), 200
 
+    print(f'[PayAction Webhook] 처리할 수 없는 payload 형식입니다: {data}')
     return jsonify({'status': 'success'}), 200
 
 

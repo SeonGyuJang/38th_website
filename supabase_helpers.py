@@ -760,6 +760,26 @@ class SupabaseHelper:
                 self.convert_bus_trip_dates(b['trip'])
         return [self.convert_bus_booking_dates(b) for b in response.data]
 
+    def get_pending_bus_bookings_by_deposit(self, depositor_name: str, amount: Any) -> List[Dict[str, Any]]:
+        """입금자명+금액으로 입금대기 중인 버스 예약 조회
+
+        PayAction '입출금 데이터수신' 웹훅은 주문번호 없이 순수 입금 이벤트만 보내주므로,
+        입금자명(공백 무시 비교)과 금액이 모두 일치하는 대기중 예약을 찾아 매칭한다.
+        """
+        if not depositor_name or amount is None:
+            return []
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)') \
+            .eq('payment_status', 'pending').neq('booking_status', 'cancelled').eq('amount', amount).execute()
+        normalized_target = ''.join(depositor_name.split())
+        matches = []
+        for b in response.data:
+            stored_name = ''.join((b.get('depositor_name') or '').split())
+            if stored_name and stored_name == normalized_target:
+                if b.get('trip'):
+                    self.convert_bus_trip_dates(b['trip'])
+                matches.append(self.convert_bus_booking_dates(b))
+        return matches
+
     def get_reserved_seat_count(self, trip_id: int) -> int:
         """회차의 예약된(취소/만료 제외) 좌석 수 합계"""
         response = self.admin_client.table('bus_bookings').select('seat_count').eq('trip_id', trip_id).neq('booking_status', 'cancelled').neq('payment_status', 'cancelled').neq('payment_status', 'expired').execute()
