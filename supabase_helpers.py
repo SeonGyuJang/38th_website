@@ -820,3 +820,21 @@ class SupabaseHelper:
         """입금 대기 중인 버스 예약 수 조회"""
         response = self.admin_client.table('bus_bookings').select('id', count='exact').eq('payment_status', 'pending').eq('booking_status', 'reserved').execute()
         return response.count or 0
+
+    # ============ AppSetting 관련 (사이트 전역 설정) ============
+
+    def get_setting(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """설정값 조회 (없으면 default 반환)"""
+        response = self.admin_client.table('app_settings').select('value').eq('key', key).execute()
+        if response.data:
+            return response.data[0].get('value')
+        return default
+
+    def set_setting(self, key: str, value: str) -> Optional[Dict[str, Any]]:
+        """설정값 저장 (없으면 생성, 있으면 갱신)"""
+        existing = self.admin_client.table('app_settings').select('key').eq('key', key).execute()
+        if existing.data:
+            response = self.admin_client.table('app_settings').update({'value': value}).eq('key', key).execute()
+        else:
+            response = self.admin_client.table('app_settings').insert({'key': key, 'value': value}).execute()
+        return response.data[0] if response.data else None

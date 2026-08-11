@@ -109,6 +109,32 @@
             </div>
         </div>
 
+        <!-- 공개 여부 토글 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;background:{{ 'white' if is_bus_booking_open else '#fff3cd' }};border:1.5px solid {{ '#e5e5e5' if is_bus_booking_open else '#f5c542' }};border-radius:14px;padding:18px 22px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="width:10px;height:10px;border-radius:50%;background:{{ '#1A7F37' if is_bus_booking_open else '#92400e' }};flex-shrink:0;"></span>
+                <div>
+                    <div style="font-weight:800;color:#1a1a1a;font-size:0.95rem;">
+                        버스 예약 페이지가 현재 {{ '공개' if is_bus_booking_open else '비공개' }} 상태입니다
+                    </div>
+                    <div style="font-size:0.82rem;color:#888;margin-top:2px;">
+                        {% if is_bus_booking_open %}
+                        관리자가 아닌 방문자도 /bus 페이지에서 예약할 수 있습니다.
+                        {% else %}
+                        관리자로 로그인하지 않은 방문자에게는 "아직 오픈되지 않았습니다" 안내만 보입니다.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('admin_bus_toggle_open') }}">
+                <button type="submit" style="padding:10px 22px;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;
+                        background:{{ '#fee2e2' if is_bus_booking_open else 'var(--ku-crimson)' }};
+                        color:{{ '#991b1b' if is_bus_booking_open else 'white' }};">
+                    {{ '비공개로 전환' if is_bus_booking_open else '지금 공개하기' }}
+                </button>
+            </form>
+        </div>
+
         <!-- 플래시 메시지 -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

@@ -280,6 +280,14 @@ def generate_bus_order_number():
     suffix = ''.join(random.choices(string.digits, k=4))
     return f'BUS{ts}{suffix}'
 
+
+BUS_BOOKING_OPEN_SETTING_KEY = 'bus_booking_open'
+
+
+def is_bus_booking_open():
+    """버스 예약 페이지 공개 여부. 관리자가 명시적으로 열기 전까지는 기본적으로 닫혀 있다."""
+    return db_helper.get_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'false') == 'true'
+
 # ============================================
 # 이메일 발송 함수
 # ============================================
@@ -1379,6 +1387,9 @@ def get_bus_trip_remaining_seats(trip):
 
 @app.route('/bus')
 def bus():
+    if not is_bus_booking_open() and not current_user.is_authenticated:
+        return render_template('bus_not_open.html')
+
     today = date.today()
     today_str = today.strftime('%Y-%m-%d')
 
@@ -1409,6 +1420,10 @@ def bus():
 
 @app.route('/bus/book', methods=['POST'])
 def bus_book():
+    if not is_bus_booking_open() and not current_user.is_authenticated:
+        flash('버스 예약 페이지는 아직 오픈되지 않았습니다.', 'error')
+        return redirect(url_for('bus'))
+
     trip_id = request.form.get('trip_id', type=int)
     passenger_name = request.form.get('passenger_name', '').strip()
     passenger_phone = request.form.get('passenger_phone', '').strip()
@@ -2837,7 +2852,21 @@ def admin_bus():
                            bus_directions=BUS_DIRECTIONS,
                            payment_status_labels=BUS_PAYMENT_STATUS_LABELS,
                            booking_status_labels=BUS_BOOKING_STATUS_LABELS,
-                           today=date.today())
+                           today=date.today(),
+                           is_bus_booking_open=is_bus_booking_open())
+
+
+@app.route('/admin/bus/toggle-open', methods=['POST'])
+@login_required
+def admin_bus_toggle_open():
+    """버스 예약 페이지 공개/비공개 전환"""
+    new_value = not is_bus_booking_open()
+    db_helper.set_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'true' if new_value else 'false')
+    if new_value:
+        flash('버스 예약 페이지가 공개되었습니다. 이제 누구나 접속할 수 있습니다.', 'success')
+    else:
+        flash('버스 예약 페이지가 비공개로 전환되었습니다. 관리자로 로그인한 경우에만 접속할 수 있습니다.', 'success')
+    return redirect(url_for('admin_bus'))
 
 
 @app.route('/admin/bus/trips/create', methods=['POST'])

@@ -231,6 +231,13 @@ CREATE TABLE IF NOT EXISTS bus_bookings (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 17. AppSetting 테이블 (사이트 전역 설정 - key/value)
+CREATE TABLE IF NOT EXISTS app_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- 인덱스 생성
 -- ============================================
@@ -310,6 +317,7 @@ ALTER TABLE meeting_room_bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bus_trips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bus_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
 
 -- 모든 테이블에 대한 공개 읽기 정책 (SELECT)
 CREATE POLICY "Public read access" ON schedules FOR SELECT USING (true);
@@ -356,6 +364,10 @@ CREATE POLICY "Public insert access" ON bus_bookings FOR INSERT WITH CHECK (true
 DROP POLICY IF EXISTS "Authenticated write access" ON bus_bookings;
 CREATE POLICY "Authenticated write access" ON bus_bookings FOR ALL USING (auth.role() = 'service_role');
 
+-- 사이트 설정 정책 (서버 코드에서 service_role 키로만 접근, 공개 정책 없음)
+DROP POLICY IF EXISTS "Admin full access" ON app_settings;
+CREATE POLICY "Admin full access" ON app_settings FOR ALL USING (auth.role() = 'service_role');
+
 -- ============================================
 -- 트리거: updated_at 자동 업데이트
 -- ============================================
@@ -381,3 +393,5 @@ DROP TRIGGER IF EXISTS update_bus_trips_updated_at ON bus_trips;
 CREATE TRIGGER update_bus_trips_updated_at BEFORE UPDATE ON bus_trips FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_bus_bookings_updated_at ON bus_bookings;
 CREATE TRIGGER update_bus_bookings_updated_at BEFORE UPDATE ON bus_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_app_settings_updated_at ON app_settings;
+CREATE TRIGGER update_app_settings_updated_at BEFORE UPDATE ON app_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
