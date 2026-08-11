@@ -768,49 +768,6 @@ def _bus_trip_rows(booking):
     """
 
 
-def send_bus_booking_created_email(booking):
-    """버스 예약 접수 + 입금 안내 이메일 (신청자에게)"""
-    subject = '[총학생회] 버스 예약 접수 — 무통장 입금 안내'
-    bank_name = app.config.get('BUS_BANK_NAME')
-    bank_account = app.config.get('BUS_BANK_ACCOUNT_NUMBER')
-    bank_holder = app.config.get('BUS_BANK_ACCOUNT_HOLDER')
-    html = f"""
-    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
-      <div style="background: #961A32; padding: 32px 40px;">
-        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
-        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">버스 예약 접수 안내</p>
-      </div>
-      <div style="background: white; padding: 40px;">
-        <div style="display: inline-block; padding: 8px 20px; background: #fef3c7; border-radius: 20px; margin-bottom: 20px;">
-          <span style="color: #92400e; font-weight: 700; font-size: 15px;">⏳ 입금 대기 중</span>
-        </div>
-        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 예약이 접수되었습니다</h2>
-        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 계좌로 입금해주세요.</p>
-        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
-          {_bus_trip_rows(booking)}
-        </table>
-        <div style="margin-top: 24px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #92400e;">
-          <p style="margin: 0 0 10px 0; color: #92400e; font-weight: 700; font-size: 14px;">입금 계좌 안내</p>
-          <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.8;">
-            {bank_name} {bank_account} ({bank_holder})<br>
-            입금자명 : <strong>{booking.get('depositor_name', '')}</strong> (반드시 동일하게 입금해주세요)<br>
-            입금액 : <strong>{booking.get('amount', 0):,}원</strong><br>
-            주문번호 : {booking.get('order_number', '')}
-          </p>
-        </div>
-        <div style="margin-top: 16px; padding: 16px 20px; background: #eff6ff; border-radius: 8px;">
-          <p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.7;">📩 입금이 확인되면 <strong>이메일</strong>과 <strong>카카오톡 알림톡</strong>으로 입금 확인 안내를 보내드립니다. 입금 후에는 카카오톡과 이메일을 확인해주세요.</p>
-        </div>
-        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
-      </div>
-      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
-        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
-      </div>
-    </div>
-    """
-    return send_email(booking['passenger_email'], subject, html)
-
-
 def send_bus_booking_admin_notification_email(booking):
     """새 버스 예약 알림 이메일 (관리자에게)"""
     admin_emails = app.config.get('ADMIN_EMAILS', [])
@@ -1518,7 +1475,6 @@ def bus_book():
     )
 
     email_booking = {**booking, 'trip': trip}
-    threading.Thread(target=send_bus_booking_created_email, args=(email_booking,), daemon=True).start()
     threading.Thread(target=send_bus_booking_admin_notification_email, args=(email_booking,), daemon=True).start()
 
     flash('예약이 접수되었습니다. 안내드린 계좌로 입금해주세요.', 'success')
@@ -1537,21 +1493,7 @@ def bus_payment(order_number):
                            direction_info=get_bus_direction_info(booking['trip']['direction']) if booking.get('trip') else None,
                            bank_name=app.config.get('BUS_BANK_NAME'),
                            bank_account=app.config.get('BUS_BANK_ACCOUNT_NUMBER'),
-                           bank_holder=app.config.get('BUS_BANK_ACCOUNT_HOLDER'),
-                           payment_status_labels=BUS_PAYMENT_STATUS_LABELS,
-                           booking_status_labels=BUS_BOOKING_STATUS_LABELS)
-
-
-@app.route('/api/bus/payment-status/<order_number>')
-def api_bus_payment_status(order_number):
-    booking = db_helper.get_bus_booking_by_order_number(order_number)
-    if not booking:
-        return jsonify({'success': False, 'message': '예약을 찾을 수 없습니다.'}), 404
-    return jsonify({
-        'success': True,
-        'payment_status': booking['payment_status'],
-        'booking_status': booking['booking_status'],
-    })
+                           bank_holder=app.config.get('BUS_BANK_ACCOUNT_HOLDER'))
 
 
 @app.route('/bus/cancel', methods=['GET', 'POST'])
@@ -1604,16 +1546,26 @@ def bus_cancel():
                            bus_directions=BUS_DIRECTIONS)
 
 
-def _mark_bus_booking_paid(booking):
-    """버스 예약을 입금완료로 변경하고 안내 메일 발송 (이미 처리된 경우 무시)"""
-    if booking['payment_status'] == 'paid' or booking['booking_status'] == 'cancelled':
-        print(f'[PayAction Webhook] 처리 생략 (이미 완료/취소됨) — booking_id={booking["id"]}, '
-              f'payment_status={booking["payment_status"]!r}, booking_status={booking["booking_status"]!r}')
-        return
-    db_helper.update_bus_booking(booking['id'], {'payment_status': 'paid'})
+def mark_bus_booking_paid(booking, source='webhook'):
+    """버스 예약을 입금완료로 변경하고 안내 메일을 정확히 한 번만 발송한다.
+
+    조건부(원자적) UPDATE를 사용해, 웹훅이 중복 수신되거나 관리자 수동확인과
+    웹훅이 거의 동시에 들어와도 실제로 상태를 'pending -> paid'로 바꾼
+    호출 하나만 이메일을 보내도록 보장한다. 반환값은 처리 성공 여부.
+    """
+    if booking['booking_status'] == 'cancelled':
+        print(f'[버스 입금확인] 처리 생략 (취소된 예약) — booking_id={booking["id"]}, source={source}')
+        return False
+
+    updated = db_helper.mark_bus_booking_paid_if_pending(booking['id'])
+    if not updated:
+        print(f'[버스 입금확인] 처리 생략 (이미 처리됨) — booking_id={booking["id"]}, source={source}')
+        return False
+
     email_booking = {**booking, 'payment_status': 'paid'}
     threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
-    print(f'[PayAction Webhook] 입금 확인 처리 완료: booking_id={booking["id"]}, order_number={booking.get("order_number")}')
+    print(f'[버스 입금확인] 처리 완료 — booking_id={booking["id"]}, order_number={booking.get("order_number")}, source={source}')
+    return True
 
 
 @app.route('/api/payaction/webhook', methods=['POST'])
@@ -1626,19 +1578,23 @@ def api_payaction_webhook():
     실제로 어느 쪽이 오는지 대시보드 설정에 따라 달라질 수 있으므로 둘 다 처리한다.
     """
     raw_body = request.get_data(as_text=True)
-    print(f'[PayAction Webhook] 수신 — headers: x-mall-id={request.headers.get("x-mall-id")!r}, '
-          f'x-webhook-key={"***" if request.headers.get("x-webhook-key") else None}, '
+    received_webhook_key = request.headers.get('x-webhook-key') or ''
+    received_mall_id = request.headers.get('x-mall-id') or ''
+    print(f'[PayAction Webhook] 수신 — headers: x-mall-id={received_mall_id!r}, '
+          f'x-webhook-key(received)={received_webhook_key!r}, '
           f'x-trace-id={request.headers.get("x-trace-id")!r} / body: {raw_body}')
 
     webhook_key = (app.config.get('PAYACTION_WEBHOOK_KEY') or '').strip()
     mall_id = (app.config.get('PAYACTION_MALL_ID') or '').strip()
 
     if webhook_key:
-        if (request.headers.get('x-webhook-key') or '').strip() != webhook_key:
-            print('[PayAction Webhook] 거부됨 — x-webhook-key가 PAYACTION_WEBHOOK_KEY 설정값과 일치하지 않습니다.')
+        if received_webhook_key.strip() != webhook_key:
+            print(f'[PayAction Webhook] 거부됨 — x-webhook-key가 PAYACTION_WEBHOOK_KEY 설정값과 일치하지 않습니다. '
+                  f'(수신값={received_webhook_key!r}) 대시보드 > API 의 웹훅키와 .env의 PAYACTION_WEBHOOK_KEY를 다시 대조해보세요.')
             return jsonify({'status': 'error', 'message': 'invalid webhook key'}), 401
-        if mall_id and (request.headers.get('x-mall-id') or '').strip() != mall_id:
-            print('[PayAction Webhook] 거부됨 — x-mall-id가 PAYACTION_MALL_ID 설정값과 일치하지 않습니다.')
+        if mall_id and received_mall_id.strip() != mall_id:
+            print(f'[PayAction Webhook] 거부됨 — x-mall-id가 PAYACTION_MALL_ID 설정값과 일치하지 않습니다. '
+                  f'(수신값={received_mall_id!r})')
             return jsonify({'status': 'error', 'message': 'invalid mall id'}), 401
 
     data = request.get_json(silent=True) or {}
@@ -1653,7 +1609,7 @@ def api_payaction_webhook():
             return jsonify({'status': 'success'}), 200
 
         if order_status == '매칭완료':
-            _mark_bus_booking_paid(booking)
+            mark_bus_booking_paid(booking, source='payaction_order')
         else:
             print(f'[PayAction Webhook] 처리 생략 — order_number={order_number}, order_status={order_status!r}')
         return jsonify({'status': 'success'}), 200
@@ -1665,7 +1621,7 @@ def api_payaction_webhook():
         amount = data.get('amount')
         candidates = db_helper.get_pending_bus_bookings_by_deposit(transaction_name, amount)
         if len(candidates) == 1:
-            _mark_bus_booking_paid(candidates[0])
+            mark_bus_booking_paid(candidates[0], source='payaction_deposit')
         elif len(candidates) == 0:
             print(f'[PayAction Webhook] 입출금 이벤트 — 일치하는 대기중 예약 없음: '
                   f'입금자명={transaction_name!r}, 금액={amount}')
@@ -2965,7 +2921,10 @@ def admin_bus_trip_confirm(trip_id):
     confirmed_count = 0
     for b in bookings:
         if b['booking_status'] == 'reserved' and b['payment_status'] == 'paid':
-            db_helper.update_bus_booking(b['id'], {'booking_status': 'confirmed'})
+            # 조건부 UPDATE — 중복 클릭/중복 제출이 있어도 실제로 상태를 바꾼
+            # 요청만 메일을 보내도록 해 안내 메일이 두 번 나가지 않게 한다.
+            if not db_helper.mark_bus_booking_confirmed_if_reserved(b['id']):
+                continue
             email_booking = {**b, 'booking_status': 'confirmed', 'trip': trip}
             threading.Thread(target=send_bus_trip_confirmed_email, args=(email_booking,), daemon=True).start()
             confirmed_count += 1
@@ -3018,13 +2977,10 @@ def admin_bus_booking_mark_paid(booking_id):
         flash('이미 입금 확인된 예약입니다.', 'info')
         return redirect(url_for('admin_bus'))
 
-    updated = db_helper.update_bus_booking(booking_id, {'payment_status': 'paid'})
-    if updated:
-        email_booking = {**booking, 'payment_status': 'paid'}
-        threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
+    if mark_bus_booking_paid(booking, source='admin_manual'):
         flash(f'{booking["passenger_name"]}님의 입금이 확인 처리되었습니다. 안내 메일이 발송됩니다.', 'success')
     else:
-        flash('처리 중 오류가 발생했습니다.', 'error')
+        flash('이미 다른 경로(웹훅 등)로 처리되었거나 취소된 예약입니다.', 'info')
     return redirect(url_for('admin_bus'))
 
 

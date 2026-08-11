@@ -795,6 +795,27 @@ class SupabaseHelper:
         response = self.admin_client.table('bus_bookings').update(data).eq('id', booking_id).execute()
         return response.data[0] if response.data else None
 
+    def mark_bus_booking_paid_if_pending(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """payment_status가 여전히 'pending'인 경우에만 원자적으로 'paid'로 변경.
+
+        웹훅이 중복 수신되거나 관리자 수동확인과 웹훅이 동시에 들어와도 정확히
+        한 번만 처리되도록, WHERE 절에 현재 상태 조건을 포함한 조건부 UPDATE로
+        경쟁 상태(race condition)를 막는다. 이미 처리된 경우 None을 반환한다.
+        """
+        response = self.admin_client.table('bus_bookings').update({'payment_status': 'paid'}) \
+            .eq('id', booking_id).eq('payment_status', 'pending').execute()
+        return response.data[0] if response.data else None
+
+    def mark_bus_booking_confirmed_if_reserved(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """booking_status가 여전히 'reserved'인 경우에만 원자적으로 'confirmed'로 변경.
+
+        운행확정 버튼이 중복 클릭/중복 제출되어도 안내 메일이 한 번만 나가도록
+        조건부 UPDATE로 처리한다. 이미 처리된 경우 None을 반환한다.
+        """
+        response = self.admin_client.table('bus_bookings').update({'booking_status': 'confirmed'}) \
+            .eq('id', booking_id).eq('booking_status', 'reserved').execute()
+        return response.data[0] if response.data else None
+
     def count_pending_bus_payments(self) -> int:
         """입금 대기 중인 버스 예약 수 조회"""
         response = self.admin_client.table('bus_bookings').select('id', count='exact').eq('payment_status', 'pending').eq('booking_status', 'reserved').execute()
