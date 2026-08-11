@@ -346,10 +346,14 @@ CREATE POLICY "Public insert access" ON meeting_room_bookings FOR INSERT WITH CH
 CREATE POLICY "Public insert access" ON inquiries FOR INSERT WITH CHECK (true);
 CREATE POLICY "Authenticated write access" ON inquiries FOR ALL USING (auth.role() = 'service_role');
 
--- 버스 예약 정책
+-- 버스 예약 정책 (재실행 가능하도록 DROP POLICY IF EXISTS 후 재생성)
+DROP POLICY IF EXISTS "Public read access" ON bus_trips;
 CREATE POLICY "Public read access" ON bus_trips FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Authenticated write access" ON bus_trips;
 CREATE POLICY "Authenticated write access" ON bus_trips FOR ALL USING (auth.role() = 'service_role');
+DROP POLICY IF EXISTS "Public insert access" ON bus_bookings;
 CREATE POLICY "Public insert access" ON bus_bookings FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated write access" ON bus_bookings;
 CREATE POLICY "Authenticated write access" ON bus_bookings FOR ALL USING (auth.role() = 'service_role');
 
 -- ============================================
@@ -373,5 +377,7 @@ CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations FO
 CREATE TRIGGER update_banners_updated_at BEFORE UPDATE ON banners FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_archives_updated_at BEFORE UPDATE ON archives FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_meeting_room_bookings_updated_at BEFORE UPDATE ON meeting_room_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_bus_trips_updated_at ON bus_trips;
 CREATE TRIGGER update_bus_trips_updated_at BEFORE UPDATE ON bus_trips FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_bus_bookings_updated_at ON bus_bookings;
 CREATE TRIGGER update_bus_bookings_updated_at BEFORE UPDATE ON bus_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
