@@ -196,6 +196,41 @@ CREATE TABLE IF NOT EXISTS inquiries (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 15. BusTrip 테이블 (버스 예약 - 회차 : 날짜 + 방향)
+CREATE TABLE IF NOT EXISTS bus_trips (
+    id BIGSERIAL PRIMARY KEY,
+    trip_date DATE NOT NULL,
+    direction VARCHAR(20) NOT NULL CHECK (direction IN ('sejong_to_seoul', 'seoul_to_sejong')),
+    departure_time VARCHAR(10) NOT NULL,
+    price INTEGER NOT NULL DEFAULT 0,
+    capacity INTEGER NOT NULL DEFAULT 28,
+    status VARCHAR(20) DEFAULT 'open',  -- open(모집중), confirmed(운행확정), cancelled(운행취소)
+    note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (trip_date, direction)
+);
+
+-- 16. BusBooking 테이블 (버스 예약 - 개별 신청/결제)
+CREATE TABLE IF NOT EXISTS bus_bookings (
+    id BIGSERIAL PRIMARY KEY,
+    trip_id BIGINT NOT NULL REFERENCES bus_trips(id) ON DELETE CASCADE,
+    passenger_name VARCHAR(100) NOT NULL,
+    passenger_phone VARCHAR(50) NOT NULL,
+    passenger_email VARCHAR(200) NOT NULL,
+    student_id VARCHAR(20),
+    depositor_name VARCHAR(100) NOT NULL,
+    seat_count INTEGER NOT NULL DEFAULT 1,
+    amount INTEGER NOT NULL,
+    order_number VARCHAR(30) UNIQUE NOT NULL,
+    payment_status VARCHAR(20) DEFAULT 'pending',   -- pending(입금대기), paid(입금완료), cancelled(취소), expired(만료)
+    booking_status VARCHAR(20) DEFAULT 'reserved',  -- reserved(예약됨), confirmed(운행확정), cancelled(취소)
+    booking_password_hash VARCHAR(200),
+    admin_note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================
 -- 인덱스 생성
 -- ============================================
@@ -246,6 +281,14 @@ CREATE INDEX IF NOT EXISTS idx_meeting_room_bookings_status ON meeting_room_book
 CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
 
+-- 버스 예약 검색 최적화
+CREATE INDEX IF NOT EXISTS idx_bus_trips_date ON bus_trips(trip_date DESC);
+CREATE INDEX IF NOT EXISTS idx_bus_trips_status ON bus_trips(status);
+CREATE INDEX IF NOT EXISTS idx_bus_bookings_trip_id ON bus_bookings(trip_id);
+CREATE INDEX IF NOT EXISTS idx_bus_bookings_order_number ON bus_bookings(order_number);
+CREATE INDEX IF NOT EXISTS idx_bus_bookings_payment_status ON bus_bookings(payment_status);
+CREATE INDEX IF NOT EXISTS idx_bus_bookings_email ON bus_bookings(passenger_email);
+
 -- ============================================
 -- Row Level Security (RLS) 정책
 -- ============================================
@@ -265,6 +308,8 @@ ALTER TABLE archive_images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE history_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meeting_room_bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inquiries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bus_trips ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bus_bookings ENABLE ROW LEVEL SECURITY;
 
 -- 모든 테이블에 대한 공개 읽기 정책 (SELECT)
 CREATE POLICY "Public read access" ON schedules FOR SELECT USING (true);
@@ -301,6 +346,12 @@ CREATE POLICY "Public insert access" ON meeting_room_bookings FOR INSERT WITH CH
 CREATE POLICY "Public insert access" ON inquiries FOR INSERT WITH CHECK (true);
 CREATE POLICY "Authenticated write access" ON inquiries FOR ALL USING (auth.role() = 'service_role');
 
+-- 버스 예약 정책
+CREATE POLICY "Public read access" ON bus_trips FOR SELECT USING (true);
+CREATE POLICY "Authenticated write access" ON bus_trips FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Public insert access" ON bus_bookings FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated write access" ON bus_bookings FOR ALL USING (auth.role() = 'service_role');
+
 -- ============================================
 -- 트리거: updated_at 자동 업데이트
 -- ============================================
@@ -322,3 +373,5 @@ CREATE TRIGGER update_organizations_updated_at BEFORE UPDATE ON organizations FO
 CREATE TRIGGER update_banners_updated_at BEFORE UPDATE ON banners FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_archives_updated_at BEFORE UPDATE ON archives FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_meeting_room_bookings_updated_at BEFORE UPDATE ON meeting_room_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_bus_trips_updated_at BEFORE UPDATE ON bus_trips FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_bus_bookings_updated_at BEFORE UPDATE ON bus_bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

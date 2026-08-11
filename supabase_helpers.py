@@ -662,3 +662,120 @@ class SupabaseHelper:
         """답변 대기 중인 문의사항 수 조회"""
         response = self.admin_client.table('inquiries').select('id', count='exact').eq('status', 'pending').execute()
         return response.count or 0
+
+    # ============ BusTrip 관련 (버스 예약 - 회차) ============
+
+    def convert_bus_trip_dates(self, trip: Dict[str, Any]) -> Dict[str, Any]:
+        """버스 회차 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if trip:
+            if 'created_at' in trip:
+                trip['created_at'] = self.parse_datetime(trip['created_at'])
+            if 'updated_at' in trip:
+                trip['updated_at'] = self.parse_datetime(trip['updated_at'])
+        return trip
+
+    def get_all_bus_trips(self, order_by: str = 'trip_date', ascending: bool = True) -> List[Dict[str, Any]]:
+        """모든 버스 회차 조회 (관리자용)"""
+        response = self.admin_client.table('bus_trips').select('*').order(order_by, desc=not ascending).execute()
+        return [self.convert_bus_trip_dates(t) for t in response.data]
+
+    def get_upcoming_bus_trips(self, from_date: str) -> List[Dict[str, Any]]:
+        """오늘 이후의 취소되지 않은 버스 회차 조회 (공개용)"""
+        response = self.client.table('bus_trips').select('*').gte('trip_date', from_date).neq('status', 'cancelled').order('trip_date', desc=False).execute()
+        return [self.convert_bus_trip_dates(t) for t in response.data]
+
+    def get_bus_trip_by_id(self, trip_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 버스 회차 조회"""
+        response = self.admin_client.table('bus_trips').select('*').eq('id', trip_id).execute()
+        if response.data:
+            return self.convert_bus_trip_dates(response.data[0])
+        return None
+
+    def get_bus_trip_by_date_direction(self, trip_date: str, direction: str) -> Optional[Dict[str, Any]]:
+        """날짜+방향으로 버스 회차 조회"""
+        response = self.client.table('bus_trips').select('*').eq('trip_date', trip_date).eq('direction', direction).execute()
+        if response.data:
+            return self.convert_bus_trip_dates(response.data[0])
+        return None
+
+    def create_bus_trip(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 회차 생성 (관리자용)"""
+        response = self.admin_client.table('bus_trips').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_bus_trip(self, trip_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 회차 수정"""
+        response = self.admin_client.table('bus_trips').update(data).eq('id', trip_id).execute()
+        return response.data[0] if response.data else None
+
+    # ============ BusBooking 관련 (버스 예약 - 개별 신청/결제) ============
+
+    def convert_bus_booking_dates(self, booking: Dict[str, Any]) -> Dict[str, Any]:
+        """버스 예약 데이터의 날짜 문자열을 datetime 객체로 변환"""
+        if booking:
+            if 'created_at' in booking:
+                booking['created_at'] = self.parse_datetime(booking['created_at'])
+            if 'updated_at' in booking:
+                booking['updated_at'] = self.parse_datetime(booking['updated_at'])
+        return booking
+
+    def get_bus_bookings_by_trip(self, trip_id: int) -> List[Dict[str, Any]]:
+        """특정 회차의 모든 예약 조회 (취소 포함, 관리자용)"""
+        response = self.admin_client.table('bus_bookings').select('*').eq('trip_id', trip_id).order('created_at', desc=False).execute()
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_all_bus_bookings(self) -> List[Dict[str, Any]]:
+        """모든 버스 예약 조회 (회차 정보 포함, 관리자용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').order('created_at', desc=True).execute()
+        for b in response.data:
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_bus_booking_by_id(self, booking_id: int) -> Optional[Dict[str, Any]]:
+        """ID로 버스 예약 조회"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('id', booking_id).execute()
+        if response.data:
+            b = response.data[0]
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+            return self.convert_bus_booking_dates(b)
+        return None
+
+    def get_bus_booking_by_order_number(self, order_number: str) -> Optional[Dict[str, Any]]:
+        """주문번호로 버스 예약 조회 (PayAction 웹훅/결제 상태 조회용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('order_number', order_number).execute()
+        if response.data:
+            b = response.data[0]
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+            return self.convert_bus_booking_dates(b)
+        return None
+
+    def get_bus_bookings_by_email(self, email: str) -> List[Dict[str, Any]]:
+        """이메일로 버스 예약 목록 조회 (취소되지 않은 것만, 자기 취소용)"""
+        response = self.admin_client.table('bus_bookings').select('*, trip:bus_trips(*)').eq('passenger_email', email).neq('booking_status', 'cancelled').order('created_at', desc=True).execute()
+        for b in response.data:
+            if b.get('trip'):
+                self.convert_bus_trip_dates(b['trip'])
+        return [self.convert_bus_booking_dates(b) for b in response.data]
+
+    def get_reserved_seat_count(self, trip_id: int) -> int:
+        """회차의 예약된(취소/만료 제외) 좌석 수 합계"""
+        response = self.admin_client.table('bus_bookings').select('seat_count').eq('trip_id', trip_id).neq('booking_status', 'cancelled').neq('payment_status', 'cancelled').neq('payment_status', 'expired').execute()
+        return sum((b.get('seat_count') or 0) for b in response.data)
+
+    def create_bus_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 예약 생성 (admin 클라이언트 사용 - RLS 우회)"""
+        response = self.admin_client.table('bus_bookings').insert(data).execute()
+        return response.data[0] if response.data else None
+
+    def update_bus_booking(self, booking_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """버스 예약 수정"""
+        response = self.admin_client.table('bus_bookings').update(data).eq('id', booking_id).execute()
+        return response.data[0] if response.data else None
+
+    def count_pending_bus_payments(self) -> int:
+        """입금 대기 중인 버스 예약 수 조회"""
+        response = self.admin_client.table('bus_bookings').select('id', count='exact').eq('payment_status', 'pending').eq('booking_status', 'reserved').execute()
+        return response.count or 0

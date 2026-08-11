@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}입금 안내 - 고려대학교 38대 총학생회{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-badge {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        border: 1px solid #e8e8ed;
+        animation: fadeInUp 0.45s cubic-bezier(0.16,1,0.3,1) backwards;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .info-row:last-child { border-bottom: none; }
+    @media (max-width: 640px) {
+        .payment-card { padding: 28px 20px; }
+    }
+</style>
+
+<div class="container" style="padding-top: 100px; padding-bottom: 100px; max-width: 640px;">
+
+    <div style="margin-bottom: 36px; animation: fadeInUp 0.4s cubic-bezier(0.16,1,0.3,1);">
+        <a href="{{ url_for('bus') }}" style="display:inline-flex;align-items:center;gap:6px;color:#888;font-size:0.88rem;font-weight:600;text-decoration:none;margin-bottom:20px;"
+           onmouseover="this.style.color='var(--ku-crimson)';" onmouseout="this.style.color='#888';">
+            ← 버스 예약 페이지로
+        </a>
+        <div style="text-align:center;margin-bottom:14px;">
+            <div style="display:inline-block;padding:8px 20px;background:rgba(150,26,50,0.08);border-radius:100px;border:1px solid rgba(150,26,50,0.15);">
+                <span style="color:var(--ku-crimson);font-weight:800;letter-spacing:0.12em;text-transform:uppercase;font-size:0.78rem;">Payment</span>
+            </div>
+        </div>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:#1a1a1a;margin:0 0 10px 0;letter-spacing:-0.02em;text-align:center;">입금 안내</h1>
+        <p style="color:#888;font-size:0.95rem;line-height:1.6;margin:0;text-align:center;">아래 계좌로 입금해주시면 자동으로 확인 후 이메일로 안내드립니다.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom: 24px;">
+        {% for category, message in messages %}
+        <div style="padding: 14px 18px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+                    background: {{ '#d1fae5' if category == 'success' else ('#fef3c7' if category == 'info' else '#fee2e2') }};
+                    color: {{ '#065f46' if category == 'success' else ('#92400e' if category == 'info' else '#991b1b') }};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- 상태 배지 -->
+    <div style="text-align:center;margin-bottom:20px;">
+        {% if booking.payment_status == 'paid' %}
+        <span style="display:inline-block;padding:10px 24px;background:#d1fae5;color:#065f46;border-radius:100px;font-weight:800;font-size:0.95rem;" id="statusBadge">✓ 입금 확인 완료</span>
+        {% else %}
+        <span style="display:inline-block;padding:10px 24px;background:#fef3c7;color:#92400e;border-radius:100px;font-weight:800;font-size:0.95rem;animation:pulse-badge 2s ease-in-out infinite;" id="statusBadge">⏳ 입금 대기 중</span>
+        {% endif %}
+    </div>
+
+    <div class="payment-card" style="margin-bottom: 24px;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 18px 0;">입금 계좌</h2>
+        <div style="padding:20px;background:#fff3cd;border-radius:12px;border-left:4px solid #92400e;margin-bottom:20px;">
+            <div style="font-size:1.15rem;font-weight:800;color:#92400e;margin-bottom:4px;">{{ bank_name }} {{ bank_account }}</div>
+            <div style="font-size:0.9rem;color:#92400e;">예금주 : {{ bank_holder }}</div>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">입금자명</span>
+            <span style="font-weight:800;color:#1a1a1a;font-size:1rem;">{{ booking.depositor_name }}</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">입금액</span>
+            <span style="font-weight:800;color:var(--ku-crimson);font-size:1.15rem;">{{ '{:,}'.format(booking.amount) }}원</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">주문번호</span>
+            <span style="font-weight:700;color:#555;font-size:0.85rem;">{{ booking.order_number }}</span>
+        </div>
+        <p style="font-size:0.8rem;color:#f59e0b;margin:16px 0 0 0;font-weight:600;">⚠ 입금자명이 다르면 자동으로 확인되지 않을 수 있습니다. 문제가 있으면 문의해주세요.</p>
+    </div>
+
+    <div class="payment-card" style="margin-bottom: 24px;">
+        <h2 style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin:0 0 18px 0;">예약 정보</h2>
+        {% if direction_info %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">노선</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ direction_info.label }} ({{ direction_info.time }} 출발)</span>
+        </div>
+        {% endif %}
+        {% if booking.trip %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">날짜</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.trip_date }}</span>
+        </div>
+        {% endif %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">탑승자</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.passenger_name }}</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">좌석 수</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.seat_count }}석</span>
+        </div>
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">예약 상태</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking_status_labels.get(booking.booking_status, booking.booking_status) }}</span>
+        </div>
+    </div>
+
+    <button onclick="checkPaymentStatus()" id="refreshBtn"
+            style="width:100%;padding:14px;background:white;border:1.5px solid #e5e5e5;border-radius:12px;color:#555;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;">
+        입금 상태 새로고침
+    </button>
+
+    <p style="text-align:center;color:#aaa;font-size:0.82rem;margin-top:20px;">이 페이지 주소를 저장해두시면 나중에 다시 확인하실 수 있습니다.<br>문의 : dsng3419@korea.ac.kr</p>
+</div>
+
+<script>
+const orderNumber = {{ booking.order_number | tojson }};
+const isPaid = {{ (booking.payment_status == 'paid') | tojson }};
+
+async function checkPaymentStatus() {
+    const btn = document.getElementById('refreshBtn');
+    btn.textContent = '확인 중...';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/bus/payment-status/${orderNumber}`);
+        const data = await res.json();
+        if (data.success && data.payment_status === 'paid') {
+            const badge = document.getElementById('statusBadge');
+            badge.textContent = '✓ 입금 확인 완료';
+            badge.style.background = '#d1fae5';
+            badge.style.color = '#065f46';
+            badge.style.animation = 'none';
+        }
+    } catch (e) {
+        // ignore network errors, allow manual retry
+    }
+    btn.textContent = '입금 상태 새로고침';
+    btn.disabled = false;
+}
+
+// 입금 대기 중이면 20초마다 자동으로 상태 확인 (최대 20회)
+if (!isPaid) {
+    let pollCount = 0;
+    const pollInterval = setInterval(() => {
+        pollCount++;
+        if (pollCount > 20) { clearInterval(pollInterval); return; }
+        checkPaymentStatus();
+    }, 20000);
+}
+</script>
+{% endblock %}
