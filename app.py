@@ -766,10 +766,13 @@ def _bus_trip_rows(booking):
     trip = booking.get('trip') or {}
     direction_info = get_bus_direction_info(trip.get('direction'))
     trip_date = trip.get('trip_date', '')
+    location = trip.get('location')
+    location_row = f"""
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승 장소</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{location}</td></tr>""" if location else ''
     return f"""
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">노선</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{direction_info['label']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{trip_date}</strong></td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>{location_row}
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('passenger_name', '')}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">좌석 수</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('seat_count', 1)}석</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">결제 금액</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking.get('amount', 0):,}원</strong></td></tr>
@@ -838,28 +841,111 @@ def send_bus_payment_confirmed_email(booking):
     return send_email(booking['passenger_email'], subject, html)
 
 
+BUS_ROUTE_ENDPOINTS = {
+    'sejong_to_seoul': ('세종', '서울'),
+    'seoul_to_sejong': ('서울', '세종'),
+}
+
+
 def send_bus_trip_confirmed_email(booking):
-    """버스 운행 확정 이메일 (신청자에게)"""
-    subject = '[총학생회] 예약하신 버스 운행이 확정되었습니다'
+    """버스 운행 확정 이메일 (신청자에게) — 실제 승차권처럼 일시·장소가 잘 보이도록 구성"""
+    trip = booking.get('trip') or {}
+    direction = trip.get('direction')
+    direction_info = get_bus_direction_info(direction)
+    origin, destination = BUS_ROUTE_ENDPOINTS.get(direction, (direction_info['label'], ''))
+    trip_date = trip.get('trip_date', '')
+    location = trip.get('location') or '추후 안내 (문의 바랍니다)'
+    passenger_name = booking.get('passenger_name', '')
+    student_id = booking.get('student_id')
+    order_number = booking.get('order_number', '')
+
+    subject = f'[총학생회] 🚌 버스 승차권 — {trip_date} {origin} → {destination}'
     html = f"""
-    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow: hidden;">
-      <div style="background: #1A7F37; padding: 32px 40px;">
-        <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 700;">고려대학교 세종캠퍼스 제38대 총학생회 비범</h1>
-        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">버스 운행 확정 안내</p>
+    <div style="font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; max-width: 600px; margin: 0 auto; background: #eef1f5; padding: 28px 16px;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 16px; font-weight: 800; color: #1a1a1a;">고려대학교 세종캠퍼스 제38대 총학생회 비범</div>
+        <div style="font-size: 13px; color: #888; margin-top: 4px;">버스 운행이 확정되었습니다 — 아래는 탑승자님의 승차권입니다</div>
       </div>
-      <div style="background: white; padding: 40px;">
-        <div style="display: inline-block; padding: 8px 20px; background: #d4edda; border-radius: 20px; margin-bottom: 20px;">
-          <span style="color: #155724; font-weight: 700; font-size: 15px;">🚌 운행 확정</span>
-        </div>
-        <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 8px 0;">버스 운행이 확정되었습니다!</h2>
-        <p style="color: #555; font-size: 15px; margin: 0 0 32px 0;">아래 일정으로 버스가 운행됩니다. 출발 시각에 늦지 않게 탑승 장소로 와주세요.</p>
-        <table style="width: 100%; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
-          {_bus_trip_rows(booking)}
-        </table>
-        <p style="color: #888; font-size: 13px; margin: 24px 0 0 0;">문의사항은 dsng3419@korea.ac.kr로 연락주세요.</p>
+
+      <!-- 승차권 -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.1);">
+        <tr>
+          <td style="background: linear-gradient(135deg, #961A32 0%, #6e1424 100%); padding: 22px 28px 26px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;">BOARDING PASS · 탑승권</td>
+                <td style="text-align: right; color: rgba(255,255,255,0.85); font-size: 18px;">🚌</td>
+              </tr>
+            </table>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 16px;">
+              <tr>
+                <td style="color: white; font-size: 26px; font-weight: 800;">{origin}</td>
+                <td style="width: 56px; text-align: center; color: rgba(255,255,255,0.65); font-size: 20px;">→</td>
+                <td style="color: white; font-size: 26px; font-weight: 800; text-align: right;">{destination}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 0 28px;">
+            <div style="border-top: 2px dashed #e0e0e0;"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 22px 28px 4px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="50%" style="padding: 8px 0; vertical-align: top;">
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">날짜</div>
+                  <div style="font-size: 18px; color: #1a1a1a; font-weight: 800; margin-top: 3px;">{trip_date}</div>
+                </td>
+                <td width="50%" style="padding: 8px 0; vertical-align: top;">
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">출발 시각</div>
+                  <div style="font-size: 18px; color: #1a1a1a; font-weight: 800; margin-top: 3px;">{direction_info['time']}</div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding: 8px 0;">
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">탑승 장소</div>
+                  <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-top: 3px;">{location}</div>
+                </td>
+              </tr>
+              <tr>
+                <td width="50%" style="padding: 8px 0;">
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">탑승자</div>
+                  <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-top: 3px;">{passenger_name}{f' ({student_id})' if student_id else ''}</div>
+                </td>
+                <td width="50%" style="padding: 8px 0;">
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">좌석</div>
+                  <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-top: 3px;">{booking.get('seat_count', 1)}석</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 28px 0;">
+            <div style="border-top: 2px dashed #e0e0e0;"></div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 18px 28px 24px; text-align: center;">
+            <div style="font-size: 10px; color: #999; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 6px;">TICKET NO.</div>
+            <div style="font-size: 16px; color: #1a1a1a; font-weight: 800; letter-spacing: 0.12em; font-family: 'Courier New', monospace;">{order_number}</div>
+          </td>
+        </tr>
+      </table>
+
+      <div style="margin-top: 18px; background: white; border-radius: 14px; padding: 18px 22px;">
+        <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.9;">
+          ✓ 출발 시각 <strong>10분 전까지</strong> 탑승 장소에 도착해주세요.<br>
+          ✓ 이 메일이 곧 승차권입니다. 캡처하거나 보관해두세요.<br>
+          ✓ 문의 : dsng3419@korea.ac.kr / 010-6598-6414
+        </p>
       </div>
-      <div style="background: #f5f5f7; padding: 20px 40px; text-align: center;">
-        <p style="color: #999; font-size: 12px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
+
+      <div style="text-align: center; padding: 16px 0 0;">
+        <p style="color: #aaa; font-size: 11px; margin: 0;">© 2026 고려대학교 세종캠퍼스 제38대 총학생회 비범</p>
       </div>
     </div>
     """
@@ -1430,15 +1516,12 @@ def bus_book():
     passenger_email = request.form.get('passenger_email', '').strip()
     student_id = request.form.get('student_id', '').strip()
     depositor_name = request.form.get('depositor_name', '').strip()
-    seat_count = request.form.get('seat_count', 1, type=int)
+    seat_count = 1  # 1인당 1좌석으로 고정 (여러 좌석이 필요하면 각자 따로 예약)
     booking_password = request.form.get('booking_password', '').strip()
 
-    if not all([trip_id, passenger_name, passenger_phone, passenger_email, depositor_name, booking_password]):
-        flash('필수 항목을 모두 입력해주세요.', 'error')
+    if not all([trip_id, passenger_name, passenger_phone, passenger_email, student_id, depositor_name, booking_password]):
+        flash('필수 항목을 모두 입력해주세요. (학번 포함)', 'error')
         return redirect(url_for('bus'))
-
-    if not seat_count or seat_count < 1:
-        seat_count = 1
 
     trip = db_helper.get_bus_trip_by_id(trip_id)
     if not trip or trip['status'] == 'cancelled':
@@ -1580,6 +1663,16 @@ def mark_bus_booking_paid(booking, source='webhook'):
     email_booking = {**booking, 'payment_status': 'paid'}
     threading.Thread(target=send_bus_payment_confirmed_email, args=(email_booking,), daemon=True).start()
     print(f'[버스 입금확인] 처리 완료 — booking_id={booking["id"]}, order_number={booking.get("order_number")}, source={source}')
+
+    # 입금 확인 시점에 이미 해당 회차의 운행이 확정되어 있었다면(=늦게 입금된 경우),
+    # 별도로 관리자가 운행확정 버튼을 다시 누르지 않아도 곧바로 운행확정(승차권) 메일도 발송한다.
+    trip = booking.get('trip')
+    if trip and trip.get('status') == 'confirmed' and booking['booking_status'] == 'reserved':
+        if db_helper.mark_bus_booking_confirmed_if_reserved(booking['id']):
+            ticket_email_booking = {**booking, 'payment_status': 'paid', 'booking_status': 'confirmed'}
+            threading.Thread(target=send_bus_trip_confirmed_email, args=(ticket_email_booking,), daemon=True).start()
+            print(f'[버스 입금확인] 이미 운행확정된 회차라 승차권 메일도 함께 발송 — booking_id={booking["id"]}')
+
     return True
 
 
@@ -2876,6 +2969,7 @@ def admin_bus_trip_create():
     direction = request.form.get('direction', '').strip()
     price = request.form.get('price', 0, type=int)
     capacity = request.form.get('capacity', 0, type=int)
+    location = request.form.get('location', '').strip()
     note = request.form.get('note', '').strip()
 
     if not trip_date or direction not in BUS_DIRECTIONS:
@@ -2898,6 +2992,7 @@ def admin_bus_trip_create():
         'price': price,
         'capacity': capacity,
         'status': 'open',
+        'location': location or None,
         'note': note or None,
     }
     trip = db_helper.create_bus_trip(data)
@@ -2918,6 +3013,7 @@ def admin_bus_trip_update(trip_id):
 
     price = request.form.get('price', type=int)
     capacity = request.form.get('capacity', type=int)
+    location = request.form.get('location', '').strip()
     note = request.form.get('note', '').strip()
 
     data = {}
@@ -2925,6 +3021,7 @@ def admin_bus_trip_update(trip_id):
         data['price'] = price
     if capacity is not None and capacity >= 1:
         data['capacity'] = capacity
+    data['location'] = location or None
     data['note'] = note or None
 
     updated = db_helper.update_bus_trip(trip_id, data)
@@ -2993,6 +3090,24 @@ def admin_bus_trip_cancel(trip_id):
     return redirect(url_for('admin_bus'))
 
 
+@app.route('/admin/bus/trips/<int:trip_id>/delete', methods=['POST'])
+@login_required
+def admin_bus_trip_delete(trip_id):
+    """버스 회차 완전 삭제 — 연결된 예약도 함께 삭제되며, 메일은 발송되지 않는다."""
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip:
+        flash('버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    direction_label = get_bus_direction_info(trip['direction'])['label']
+    ok = db_helper.delete_bus_trip(trip_id)
+    if ok:
+        flash(f'{trip["trip_date"]} {direction_label} 회차와 관련 예약이 모두 삭제되었습니다. (메일은 발송되지 않았습니다)', 'success')
+    else:
+        flash('삭제 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
+
+
 @app.route('/admin/bus/bookings/<int:booking_id>/mark-paid', methods=['POST'])
 @login_required
 def admin_bus_booking_mark_paid(booking_id):
@@ -3036,6 +3151,23 @@ def admin_bus_booking_cancel(booking_id):
         flash(f'{booking["passenger_name"]}님의 버스 예약이 취소되었습니다. 안내 메일이 발송됩니다.', 'success')
     else:
         flash('취소 처리 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/bookings/<int:booking_id>/delete', methods=['POST'])
+@login_required
+def admin_bus_booking_delete(booking_id):
+    """개별 버스 예약 완전 삭제 (메일 발송 없음)"""
+    booking = db_helper.get_bus_booking_by_id(booking_id)
+    if not booking:
+        flash('예약을 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    ok = db_helper.delete_bus_booking(booking_id)
+    if ok:
+        flash(f'{booking["passenger_name"]}님의 예약이 삭제되었습니다. (메일은 발송되지 않았습니다)', 'success')
+    else:
+        flash('삭제 중 오류가 발생했습니다.', 'error')
     return redirect(url_for('admin_bus'))
 
 

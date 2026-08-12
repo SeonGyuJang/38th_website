@@ -177,6 +177,12 @@
                 <div style="color:rgba(255,255,255,0.85);font-size:1.05rem;font-weight:700;margin-top:4px;">{{ trip.direction_info.time }} 출발</div>
             </div>
             <div style="padding:24px 28px 28px;">
+                {% if trip.location %}
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;font-size:0.85rem;color:#666;font-weight:600;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    탑승 장소 : {{ trip.location }}
+                </div>
+                {% endif %}
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
                     <div>
                         <div style="font-size:0.75rem;color:#999;font-weight:700;">편도 요금</div>
@@ -241,6 +247,7 @@
 
         <form method="POST" action="{{ url_for('bus_book') }}" id="bookingForm">
             <input type="hidden" name="trip_id" id="formTripId">
+            <input type="hidden" name="seat_count" value="1">
 
             <div style="display:grid;gap:14px;">
 
@@ -250,8 +257,8 @@
                         <input type="text" name="passenger_name" class="form-input" placeholder="탑승자 이름" required>
                     </div>
                     <div>
-                        <label class="form-label">좌석 수 <span class="required">*</span></label>
-                        <input type="number" name="seat_count" id="formSeatCount" class="form-input" min="1" value="1" required oninput="updateAmount()">
+                        <label class="form-label">학번 <span class="required">*</span></label>
+                        <input type="text" name="student_id" class="form-input" placeholder="예) 2024123456" required>
                     </div>
                 </div>
 
@@ -260,16 +267,12 @@
                     <input type="email" name="passenger_email" class="form-input" placeholder="입금 확인 안내를 받을 이메일" required>
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                    <div>
-                        <label class="form-label">연락처 <span class="required">*</span></label>
-                        <input type="tel" name="passenger_phone" class="form-input" placeholder="010-0000-0000" required>
-                    </div>
-                    <div>
-                        <label class="form-label">학번 <span style="font-weight:500;color:#aaa;">(선택)</span></label>
-                        <input type="text" name="student_id" class="form-input" placeholder="예) 2024123456">
-                    </div>
+                <div>
+                    <label class="form-label">연락처 <span class="required">*</span></label>
+                    <input type="tel" name="passenger_phone" class="form-input" placeholder="010-0000-0000" required>
                 </div>
+
+                <p style="font-size:0.78rem;color:#aaa;margin:-6px 0 0 2px;">예약은 1인당 1좌석입니다. 여러 명이 탑승하시려면 각자 따로 예약해주세요.</p>
 
                 <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
                     <label class="form-label">입금자명 <span class="required">*</span></label>
@@ -303,19 +306,11 @@
 </div>
 
 <script>
-let currentTripPrice = 0;
-let currentMaxSeats = 1;
-
 function openBookingModal(tripId, label, time, price, remainingSeats) {
     document.getElementById('formTripId').value = tripId;
     document.getElementById('modalTitle').textContent = label + ' 버스 예약';
     document.getElementById('modalSubtitle').textContent = time + ' 출발 · 편도 ' + price.toLocaleString() + '원';
-    currentTripPrice = price;
-    currentMaxSeats = remainingSeats;
-    const seatInput = document.getElementById('formSeatCount');
-    seatInput.value = 1;
-    seatInput.max = remainingSeats;
-    updateAmount();
+    document.getElementById('amountDisplay').textContent = price.toLocaleString() + '원';
     document.getElementById('bookingModalOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -324,14 +319,6 @@ function closeBookingModal(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('bookingModalOverlay').classList.remove('active');
     document.body.style.overflow = '';
-}
-
-function updateAmount() {
-    let seats = parseInt(document.getElementById('formSeatCount').value) || 1;
-    if (seats < 1) seats = 1;
-    if (seats > currentMaxSeats) seats = currentMaxSeats;
-    document.getElementById('formSeatCount').value = seats;
-    document.getElementById('amountDisplay').textContent = (currentTripPrice * seats).toLocaleString() + '원';
 }
 
 document.addEventListener('keydown', e => {

@@ -205,11 +205,15 @@ CREATE TABLE IF NOT EXISTS bus_trips (
     price INTEGER NOT NULL DEFAULT 0,
     capacity INTEGER NOT NULL DEFAULT 28,
     status VARCHAR(20) DEFAULT 'open',  -- open(모집중), confirmed(운행확정), cancelled(운행취소)
+    location VARCHAR(200),  -- 탑승 장소
     note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE (trip_date, direction)
 );
+
+-- 이미 배포된 DB에 bus_trips가 location 컬럼 없이 먼저 생성되어 있을 수 있으므로 추가 (재실행 안전)
+ALTER TABLE bus_trips ADD COLUMN IF NOT EXISTS location VARCHAR(200);
 
 -- 16. BusBooking 테이블 (버스 예약 - 개별 신청/결제)
 CREATE TABLE IF NOT EXISTS bus_bookings (

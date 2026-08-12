@@ -708,6 +708,11 @@ class SupabaseHelper:
         response = self.admin_client.table('bus_trips').update(data).eq('id', trip_id).execute()
         return response.data[0] if response.data else None
 
+    def delete_bus_trip(self, trip_id: int) -> bool:
+        """버스 회차 완전 삭제 (연결된 예약도 FK CASCADE로 함께 삭제됨, 메일 발송 없음)"""
+        response = self.admin_client.table('bus_trips').delete().eq('id', trip_id).execute()
+        return len(response.data) > 0
+
     # ============ BusBooking 관련 (버스 예약 - 개별 신청/결제) ============
 
     def convert_bus_booking_dates(self, booking: Dict[str, Any]) -> Dict[str, Any]:
@@ -789,6 +794,11 @@ class SupabaseHelper:
         """버스 예약 생성 (admin 클라이언트 사용 - RLS 우회)"""
         response = self.admin_client.table('bus_bookings').insert(data).execute()
         return response.data[0] if response.data else None
+
+    def delete_bus_booking(self, booking_id: int) -> bool:
+        """버스 예약 완전 삭제 (메일 발송 없음)"""
+        response = self.admin_client.table('bus_bookings').delete().eq('id', booking_id).execute()
+        return len(response.data) > 0
 
     def update_bus_booking(self, booking_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """버스 예약 수정"""
