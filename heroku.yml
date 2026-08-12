@@ -4,4 +4,4 @@ build:
   packages:
     - build-essential
 run:
-  web: gunicorn app:app --workers=2 --threads=4 --timeout=60 --preload --max-requests=1000 --max-requests-jitter=50
+  web: gunicorn app:app --workers=3 --threads=2 --timeout=60 --preload --max-requests=500 --max-requests-jitter=50
