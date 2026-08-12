@@ -41,6 +41,8 @@
     .btn-danger:hover { background: #fecaca; }
     .btn-neutral { background: #f3f4f6; color: #555; }
     .btn-neutral:hover { background: #e5e7eb; }
+    .btn-delete-hard { background: #7f1d1d; color: white; }
+    .btn-delete-hard:hover { background: #601515; }
 
     .filter-chip {
         padding: 6px 16px;
@@ -206,8 +208,12 @@
                         <input type="number" name="capacity" class="form-input" min="1" value="28" required>
                     </div>
                     <div>
+                        <label style="display:block;font-size:0.8rem;font-weight:700;color:#555;margin-bottom:5px;">탑승 장소</label>
+                        <input type="text" name="location" class="form-input" placeholder="예) 학생회관 앞">
+                    </div>
+                    <div>
                         <label style="display:block;font-size:0.8rem;font-weight:700;color:#555;margin-bottom:5px;">메모 (선택)</label>
-                        <input type="text" name="note" class="form-input" placeholder="예) 학생회관 앞 집결">
+                        <input type="text" name="note" class="form-input" placeholder="관리자 참고용 메모">
                     </div>
                     <button type="submit" style="padding: 10px 18px; background: var(--ku-crimson); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; height: 40px;">
                         등록
@@ -240,7 +246,7 @@
                             <td style="padding: 12px 16px; font-weight: 700; color: #1a1a1a; white-space: nowrap;">{{ trip.trip_date }}</td>
                             <td style="padding: 12px 16px; white-space: nowrap;">
                                 <div style="font-weight: 700; color: #1a1a1a;">{{ trip.direction_info.label }}</div>
-                                <div style="font-size: 0.75rem; color: #999;">{{ trip.direction_info.time }} 출발</div>
+                                <div style="font-size: 0.75rem; color: #999;">{{ trip.direction_info.time }} 출발{% if trip.location %} · {{ trip.location }}{% endif %}</div>
                             </td>
                             <td style="padding: 12px 16px; text-align: right; font-weight: 700; color: #1a1a1a; white-space: nowrap;">{{ '{:,}'.format(trip.price) }}원</td>
                             <td style="padding: 12px 16px; text-align: center; white-space: nowrap;">
@@ -262,7 +268,12 @@
                                     {% elif trip.status == 'confirmed' %}
                                     <button type="button" class="action-btn btn-danger" onclick='openTripCancelModal({{ trip.id }}, {{ (trip.trip_date ~ " " ~ trip.direction_info.label) | tojson }})'>운행취소</button>
                                     {% endif %}
-                                    <button type="button" class="action-btn btn-neutral" onclick='openTripEditModal({{ trip.id }}, {{ trip.price }}, {{ trip.capacity }}, {{ (trip.note or "") | tojson }})'>수정</button>
+                                    <button type="button" class="action-btn btn-neutral" onclick='openTripEditModal({{ trip.id }}, {{ trip.price }}, {{ trip.capacity }}, {{ (trip.note or "") | tojson }}, {{ (trip.location or "") | tojson }})'>수정</button>
+                                    <form method="POST" action="{{ url_for('admin_bus_trip_delete', trip_id=trip.id) }}"
+                                          onsubmit="return confirm({{ (trip.trip_date ~ ' ' ~ trip.direction_info.label ~ ' 회차를 완전히 삭제하시겠습니까?\n연결된 예약 정보도 모두 함께 삭제되며 되돌릴 수 없습니다.\n(취소와 달리 안내 메일은 발송되지 않습니다)') | tojson }});"
+                                          style="display:inline;">
+                                        <button type="submit" class="action-btn btn-delete-hard">삭제</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -332,6 +343,11 @@
                                     {% if b.booking_status != 'cancelled' %}
                                     <button type="button" class="action-btn btn-danger" onclick='openBookingCancelModal({{ b.id }}, {{ b.passenger_name | tojson }})'>취소</button>
                                     {% endif %}
+                                    <form method="POST" action="{{ url_for('admin_bus_booking_delete', booking_id=b.id) }}"
+                                          onsubmit="return confirm({{ (b.passenger_name ~ '님의 예약을 완전히 삭제하시겠습니까? 되돌릴 수 없습니다.\n(취소와 달리 안내 메일은 발송되지 않습니다)') | tojson }});"
+                                          style="display:inline;">
+                                        <button type="submit" class="action-btn btn-delete-hard">삭제</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -367,6 +383,11 @@
                 <div>
                     <label style="display:block;font-size:0.85rem;font-weight:700;color:#444;margin-bottom:6px;">정원(석)</label>
                     <input type="number" name="capacity" id="editTripCapacity" class="form-input" min="1" required>
+                </div>
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:700;color:#444;margin-bottom:6px;">탑승 장소</label>
+                    <input type="text" name="location" id="editTripLocation" class="form-input" placeholder="예) 학생회관 앞">
+                    <p style="font-size:0.78rem;color:#aaa;margin:6px 0 0 2px;">운행확정 승차권 메일에 표시됩니다.</p>
                 </div>
                 <div>
                     <label style="display:block;font-size:0.85rem;font-weight:700;color:#444;margin-bottom:6px;">메모</label>
@@ -446,10 +467,11 @@ document.addEventListener('keydown', e => {
     }
 });
 
-function openTripEditModal(tripId, price, capacity, note) {
+function openTripEditModal(tripId, price, capacity, note, location) {
     document.getElementById('editTripPrice').value = price;
     document.getElementById('editTripCapacity').value = capacity;
     document.getElementById('editTripNote').value = note || '';
+    document.getElementById('editTripLocation').value = location || '';
     document.getElementById('tripEditForm').action = '/admin/bus/trips/' + tripId + '/update';
     document.getElementById('tripEditModal').classList.add('active');
     document.body.style.overflow = 'hidden';

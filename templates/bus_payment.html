@@ -107,9 +107,15 @@
             <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.trip_date }}</span>
         </div>
         {% endif %}
+        {% if booking.trip and booking.trip.location %}
+        <div class="info-row">
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">탑승 장소</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.location }}</span>
+        </div>
+        {% endif %}
         <div class="info-row">
             <span style="color:#888;font-size:0.88rem;font-weight:600;">탑승자</span>
-            <span style="font-weight:700;color:#1a1a1a;">{{ booking.passenger_name }}</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.passenger_name }}{% if booking.student_id %} ({{ booking.student_id }}){% endif %}</span>
         </div>
         <div class="info-row">
             <span style="color:#888;font-size:0.88rem;font-weight:600;">좌석 수</span>
