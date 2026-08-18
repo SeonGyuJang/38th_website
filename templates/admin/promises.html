@@ -3,6 +3,22 @@
 {% block title %}공약 관리 - 관리자{% endblock %}
 
 {% block content %}
+<style>
+    .cat-filter-chip {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1.5px solid #e5e5e5;
+        background: white;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+    }
+    .cat-filter-chip:hover { border-color: var(--ku-crimson); color: var(--ku-crimson); }
+    .cat-filter-chip.active { background: var(--ku-crimson); border-color: var(--ku-crimson); color: white; }
+</style>
 <div style="background: #FAFAFA; min-height: 100vh; padding-top: 80px;">
     <div class="container" style="padding-top: 40px; padding-bottom: 80px;">
         <!-- 헤더 -->
@@ -31,9 +47,19 @@
         </div>
 
         {% if promises %}
+        {% set categories = promises | map(attribute='category') | unique | list | sort %}
+        {% if categories | length > 1 %}
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+            <button type="button" class="cat-filter-chip active" data-category="__all__" onclick="setPromiseCategoryFilter('__all__', this)">전체 ({{ promises|length }})</button>
+            {% for cat in categories %}
+            {% set cat_count = promises | selectattr('category', 'equalto', cat) | list | length %}
+            <button type="button" class="cat-filter-chip" data-category="{{ cat }}" onclick='setPromiseCategoryFilter({{ cat|tojson }}, this)'>{{ cat }} ({{ cat_count }})</button>
+            {% endfor %}
+        </div>
+        {% endif %}
         <div style="display: grid; gap: 16px;">
             {% for promise in promises %}
-            <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <div class="promise-admin-card" data-category="{{ promise.category }}" style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #E5E5E5; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.borderColor='var(--ku-crimson)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.06)';" onmouseout="this.style.borderColor='#E5E5E5'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <div style="display: flex; gap: 24px; align-items: start; flex-wrap: wrap;">
                     <!-- 순서 섹션 -->
                     <div style="text-align: center; min-width: 80px;">
@@ -99,8 +125,9 @@
                                 </a>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 10px;">
-                                {% for progress in progress_list[:3] %}
-                                <div style="background: #F5F5F7; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                                {% for progress in progress_list %}
+                                <div class="{{ 'promise-progress-extra' if loop.index > 3 else '' }}" data-promise-id="{{ promise.id }}"
+                                     style="background: #F5F5F7; padding: 12px; border-radius: 8px; display: {{ 'none' if loop.index > 3 else 'flex' }}; justify-content: space-between; align-items: start; gap: 12px;">
                                     <div style="flex: 1; min-width: 0;">
                                         <div style="font-size: 0.8rem; color: var(--ku-crimson); margin-bottom: 4px; font-weight: 600;">
                                             {{ progress.date.strftime('%Y.%m.%d') }}
@@ -108,7 +135,7 @@
                                         <div style="font-size: 0.85rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">
                                             {{ progress.title }}
                                         </div>
-                                        <div style="font-size: 0.8rem; color: #666; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        <div style="font-size: 0.8rem; color: #666; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;">
                                             {{ progress.content }}
                                         </div>
                                     </div>
@@ -125,9 +152,11 @@
                                 </div>
                                 {% endfor %}
                                 {% if progress_list|length > 3 %}
-                                <div style="font-size: 0.8rem; color: #666; text-align: center; padding: 8px;">
-                                    외 {{ progress_list|length - 3 }}개 더 있음
-                                </div>
+                                <button type="button" class="promise-progress-toggle-btn" onclick="togglePromiseProgressExtra(this, {{ promise.id }}, {{ progress_list|length - 3 }})"
+                                        style="font-size: 0.8rem; color: var(--ku-crimson); text-align: center; padding: 8px; background: white; border: 1px solid #E5E5E5; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                                        onmouseover="this.style.borderColor='var(--ku-crimson)';" onmouseout="this.style.borderColor='#E5E5E5';">
+                                    외 {{ progress_list|length - 3 }}개 더 보기
+                                </button>
                                 {% endif %}
                             </div>
                         </div>
@@ -177,4 +206,22 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+function setPromiseCategoryFilter(category, btn) {
+    document.querySelectorAll('.cat-filter-chip').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.promise-admin-card').forEach(card => {
+        card.style.display = (category === '__all__' || card.dataset.category === category) ? '' : 'none';
+    });
+}
+
+function togglePromiseProgressExtra(btn, promiseId, extraCount) {
+    const items = document.querySelectorAll(`.promise-progress-extra[data-promise-id="${promiseId}"]`);
+    if (!items.length) return;
+    const isHidden = items[0].style.display === 'none';
+    items.forEach(el => { el.style.display = isHidden ? 'flex' : 'none'; });
+    btn.textContent = isHidden ? '접기' : ('외 ' + extraCount + '개 더 보기');
+}
+</script>
 {% endblock %}

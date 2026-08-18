@@ -235,7 +235,7 @@
                                         {{ promise.status }}
                                     </span>
                                 </div>
-                                <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.7; color: var(--text-secondary); margin: 0 0 16px;">{{ promise.description }}</p>
+                                <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.7; color: var(--text-secondary); margin: 0 0 16px; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;">{{ promise.description }}</p>
 
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <div style="flex: 1; max-width: 300px;">
@@ -389,7 +389,7 @@
                         상세 설명
                     </h4>
                     <div style="background: linear-gradient(135deg, #F5F5F7 0%, #E8E8ED 100%); border-radius: 16px; padding: clamp(20px, 4vw, 28px); border: 1px solid rgba(0, 0, 0, 0.04);">
-                        <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-line;">${data.detailed_description}</p>
+                        <p style="font-size: clamp(0.9rem, 2.1vw, 1rem); line-height: 1.85; color: var(--text-primary); margin: 0; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;">${data.detailed_description}</p>
                     </div>
                 </div>
             `;
@@ -421,7 +421,7 @@
                             <h5 style="font-size: clamp(0.95rem, 2.2vw, 1.1rem); font-weight: 800; color: var(--text-primary); margin-bottom: 10px; letter-spacing: -0.01em;">
                                 ${update.title}
                             </h5>
-                            <p style="font-size: clamp(0.85rem, 2vw, 0.95rem); line-height: 1.75; color: var(--text-secondary); margin: 0; white-space: pre-line;">${update.content}</p>
+                            <p style="font-size: clamp(0.85rem, 2vw, 0.95rem); line-height: 1.75; color: var(--text-secondary); margin: 0; white-space: pre-line; word-break: keep-all; overflow-wrap: break-word;">${update.content}</p>
                         </div>
                     </div>
                 `;

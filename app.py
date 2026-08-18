@@ -18,6 +18,7 @@ import json
 import random
 import string
 import requests
+import calendar as calendar_module
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -251,8 +252,8 @@ def get_room_display_name(room_number):
 # ============================================
 
 BUS_DIRECTIONS = {
-    'sejong_to_seoul': {'label': '세종 → 서울', 'time': '09:00', 'short': '가는 버스'},
-    'seoul_to_sejong': {'label': '서울 → 세종', 'time': '19:00', 'short': '오는 버스'},
+    'sejong_to_seoul': {'label': '세종 → 서울', 'time': '07:00', 'short': '가는 버스'},
+    'seoul_to_sejong': {'label': '서울 → 세종', 'time': '20:00', 'short': '오는 버스'},
 }
 
 BUS_PAYMENT_STATUS_LABELS = {
@@ -1471,6 +1472,27 @@ def get_bus_trip_remaining_seats(trip):
     return max(0, (trip.get('capacity') or 0) - reserved)
 
 
+def build_bus_calendar(year, month, today, available_dates_set, selected_date_str):
+    """버스 예약 달력 그리드 생성 (월요일 시작). 주 단위 리스트를 반환한다."""
+    cal = calendar_module.Calendar(firstweekday=0)
+    weeks = []
+    for week in cal.monthdatescalendar(year, month):
+        week_cells = []
+        for d in week:
+            d_str = d.strftime('%Y-%m-%d')
+            week_cells.append({
+                'day': d.day,
+                'date_str': d_str,
+                'in_month': d.month == month,
+                'is_past': d < today,
+                'is_today': d == today,
+                'has_trips': d_str in available_dates_set,
+                'is_selected': d_str == selected_date_str,
+            })
+        weeks.append(week_cells)
+    return weeks
+
+
 @app.route('/bus')
 def bus():
     if not is_bus_booking_open() and not current_user.is_authenticated:
@@ -1483,25 +1505,54 @@ def bus():
 
     # 회차가 존재하는 날짜 목록 (오름차순, 중복 제거)
     available_dates = sorted({t['trip_date'] for t in all_trips})
+    available_dates_set = set(available_dates)
 
+    # 예약 가능한 날짜가 아니면 선택 안 함(=달력만 표시)
     selected_date_str = request.args.get('date', '')
-    if selected_date_str not in available_dates:
-        selected_date_str = available_dates[0] if available_dates else today_str
+    if selected_date_str not in available_dates_set:
+        selected_date_str = None
 
-    trips_today = [t for t in all_trips if t['trip_date'] == selected_date_str]
-    for t in trips_today:
-        t['remaining_seats'] = get_bus_trip_remaining_seats(t)
-        t['direction_info'] = get_bus_direction_info(t['direction'])
+    # 조회할 달 (YYYY-MM). 값이 없거나 잘못되면 오늘이 속한 달로 대체.
+    month_param = request.args.get('month', '')
+    try:
+        cal_year, cal_month = (int(p) for p in month_param.split('-'))
+        calendar_anchor = date(cal_year, cal_month, 1)
+    except (ValueError, TypeError):
+        # month 파라미터가 없는 첫 방문이라면, 예약 가능한 날짜 중 가장 이른 날짜가
+        # 속한 달을 기본으로 보여준다 (당장 이번 달에 열린 회차가 없어도 바로 보이도록).
+        if not month_param and available_dates:
+            calendar_anchor = datetime.strptime(available_dates[0], '%Y-%m-%d').date().replace(day=1)
+        else:
+            calendar_anchor = date(today.year, today.month, 1)
+        cal_year, cal_month = calendar_anchor.year, calendar_anchor.month
 
-    # 방향 순서 고정 (세종→서울, 서울→세종)
-    trips_today.sort(key=lambda t: 0 if t['direction'] == 'sejong_to_seoul' else 1)
+    calendar_weeks = build_bus_calendar(cal_year, cal_month, today, available_dates_set, selected_date_str)
+    prev_month_date = (calendar_anchor - timedelta(days=1)).replace(day=1)
+    next_month_date = (calendar_anchor.replace(day=28) + timedelta(days=4)).replace(day=1)
+    can_go_prev_month = calendar_anchor > date(today.year, today.month, 1)
+
+    trips_today = []
+    if selected_date_str:
+        trips_today = [t for t in all_trips if t['trip_date'] == selected_date_str]
+        for t in trips_today:
+            t['remaining_seats'] = get_bus_trip_remaining_seats(t)
+            t['direction_info'] = get_bus_direction_info(t['direction'])
+        # 방향 순서 고정 (세종→서울, 서울→세종)
+        trips_today.sort(key=lambda t: 0 if t['direction'] == 'sejong_to_seoul' else 1)
 
     return render_template('bus.html',
                            today=today,
                            available_dates=available_dates,
                            selected_date_str=selected_date_str,
                            trips_today=trips_today,
-                           bus_directions=BUS_DIRECTIONS)
+                           bus_directions=BUS_DIRECTIONS,
+                           calendar_weeks=calendar_weeks,
+                           calendar_year=cal_year,
+                           calendar_month=cal_month,
+                           current_month_str=calendar_anchor.strftime('%Y-%m'),
+                           prev_month_str=prev_month_date.strftime('%Y-%m'),
+                           next_month_str=next_month_date.strftime('%Y-%m'),
+                           can_go_prev_month=can_go_prev_month)
 
 
 @app.route('/bus/book', methods=['POST'])
@@ -1516,6 +1567,9 @@ def bus_book():
     passenger_email = request.form.get('passenger_email', '').strip()
     student_id = request.form.get('student_id', '').strip()
     depositor_name = request.form.get('depositor_name', '').strip()
+    refund_bank_name = request.form.get('refund_bank_name', '').strip()
+    refund_account_number = request.form.get('refund_account_number', '').strip()
+    refund_account_holder = request.form.get('refund_account_holder', '').strip()
     seat_count = 1  # 1인당 1좌석으로 고정 (여러 좌석이 필요하면 각자 따로 예약)
     booking_password = request.form.get('booking_password', '').strip()
 
@@ -1530,12 +1584,12 @@ def bus_book():
 
     if trip['trip_date'] < date.today().strftime('%Y-%m-%d'):
         flash('지난 날짜의 버스는 예약할 수 없습니다.', 'error')
-        return redirect(url_for('bus', date=trip['trip_date']))
+        return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
     remaining = get_bus_trip_remaining_seats(trip)
     if seat_count > remaining:
         flash(f'남은 좌석이 {remaining}석 뿐입니다. 좌석 수를 줄여주세요.', 'error')
-        return redirect(url_for('bus', date=trip['trip_date']))
+        return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
     amount = (trip.get('price') or 0) * seat_count
     order_number = generate_bus_order_number()
@@ -1547,6 +1601,9 @@ def bus_book():
         'passenger_email': passenger_email,
         'student_id': student_id or None,
         'depositor_name': depositor_name,
+        'refund_bank_name': refund_bank_name or None,
+        'refund_account_number': refund_account_number or None,
+        'refund_account_holder': refund_account_holder or None,
         'seat_count': seat_count,
         'amount': amount,
         'order_number': order_number,
@@ -1558,7 +1615,7 @@ def bus_book():
 
     if not booking:
         flash('예약 처리 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
-        return redirect(url_for('bus', date=trip['trip_date']))
+        return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
     # PayAction 주문 등록 (설정되어 있지 않으면 조용히 생략됨)
     auto_cancel_at = datetime.now() + timedelta(hours=24)
@@ -3023,6 +3080,9 @@ def admin_bus_trip_update(trip_id):
         data['capacity'] = capacity
     data['location'] = location or None
     data['note'] = note or None
+    # 출발 시각은 노선(direction)에 종속된 값이므로, 수정 시 현재 기준 시각으로 동기화한다.
+    # (과거에 다른 시각으로 생성된 회차를 새 기준 시각으로 맞추고 싶을 때도 "수정" 저장만 하면 됨)
+    data['departure_time'] = BUS_DIRECTIONS[trip['direction']]['time']
 
     updated = db_helper.update_bus_trip(trip_id, data)
     if updated:
