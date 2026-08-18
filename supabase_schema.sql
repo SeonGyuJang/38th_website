@@ -230,10 +230,18 @@ CREATE TABLE IF NOT EXISTS bus_bookings (
     payment_status VARCHAR(20) DEFAULT 'pending',   -- pending(입금대기), paid(입금완료), cancelled(취소), expired(만료)
     booking_status VARCHAR(20) DEFAULT 'reserved',  -- reserved(예약됨), confirmed(운행확정), cancelled(취소)
     booking_password_hash VARCHAR(200),
+    refund_bank_name VARCHAR(50),        -- 환불 계좌 정보 (선택 입력)
+    refund_account_number VARCHAR(50),
+    refund_account_holder VARCHAR(50),
     admin_note TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 이미 배포된 DB에 bus_bookings가 환불 계좌 컬럼 없이 먼저 생성되어 있을 수 있으므로 추가 (재실행 안전)
+ALTER TABLE bus_bookings ADD COLUMN IF NOT EXISTS refund_bank_name VARCHAR(50);
+ALTER TABLE bus_bookings ADD COLUMN IF NOT EXISTS refund_account_number VARCHAR(50);
+ALTER TABLE bus_bookings ADD COLUMN IF NOT EXISTS refund_account_holder VARCHAR(50);
 
 -- 17. AppSetting 테이블 (사이트 전역 설정 - key/value)
 CREATE TABLE IF NOT EXISTS app_settings (

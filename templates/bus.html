@@ -23,27 +23,54 @@
         box-shadow: 0 12px 32px rgba(0,0,0,0.1) !important;
     }
 
-    .date-pill {
-        display: inline-flex;
+    .cal-nav-btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        background: #f5f5f7;
+        color: #555;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cal-nav-btn:hover { background: #e8e8ed; }
+    .cal-nav-btn.disabled { color: #ccc; pointer-events: none; }
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+    .cal-weekday {
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #aaa;
+        padding: 4px 0 8px;
+    }
+    .cal-cell {
+        aspect-ratio: 1 / 1;
+        display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px 18px;
-        border-radius: 14px;
+        justify-content: center;
+        border-radius: 12px;
         text-decoration: none;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        flex-shrink: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        position: relative;
+        transition: all 0.15s ease;
     }
-    .date-pill:hover { transform: translateY(-2px); }
-    .date-scroll-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        display: flex;
-        gap: 8px;
-        padding: 4px 4px 8px;
+    .cal-cell.clickable { cursor: pointer; }
+    .cal-cell.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(150,26,50,0.15); }
+    .cal-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        margin-top: 3px;
     }
-    .date-scroll-wrapper::-webkit-scrollbar { height: 6px; }
-    .date-scroll-wrapper::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+    @media (max-width: 480px) {
+        .cal-cell { font-size: 0.8rem; border-radius: 9px; }
+    }
 
     .modal-overlay {
         position: fixed;
@@ -131,25 +158,54 @@
     </div>
     {% else %}
 
-    <!-- 날짜 선택 -->
-    <div style="margin-bottom: 40px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.05s backwards;">
-        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06);">
-            <h3 style="margin: 0 0 14px 0; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">날짜 선택</h3>
-            {% set day_names = ['월','화','수','목','금','토','일'] %}
-            <div class="date-scroll-wrapper">
-                {% for d_str in available_dates %}
-                {% set d = d_str.split('-') %}
-                {% set is_selected = d_str == selected_date_str %}
-                <a href="{{ url_for('bus', date=d_str) }}" class="date-pill"
-                   style="background:{{ 'var(--ku-crimson)' if is_selected else '#f5f5f7' }};
-                          border:2px solid {{ 'var(--ku-crimson)' if is_selected else 'transparent' }};">
-                    <span style="font-size:0.68rem;font-weight:700;color:{{ 'rgba(255,255,255,0.8)' if is_selected else '#999' }};">{{ d[0] }}년 {{ d[1]|int }}월</span>
-                    <span style="font-size:1.05rem;font-weight:800;color:{{ 'white' if is_selected else '#1a1a1a' }};">{{ d[2]|int }}일</span>
-                </a>
+    <!-- 날짜 선택 (달력) -->
+    <div style="margin-bottom: 32px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.05s backwards;">
+        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.06); max-width: 480px; margin: 0 auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                {% if can_go_prev_month %}
+                <a href="{{ url_for('bus', month=prev_month_str) }}" class="cal-nav-btn">← 이전달</a>
+                {% else %}
+                <span class="cal-nav-btn disabled">← 이전달</span>
+                {% endif %}
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1a1a1a;">{{ calendar_year }}년 {{ calendar_month }}월</h3>
+                <a href="{{ url_for('bus', month=next_month_str) }}" class="cal-nav-btn">다음달 →</a>
+            </div>
+            <div class="cal-grid" style="margin-bottom: 4px;">
+                {% for wd in ['월','화','수','목','금','토','일'] %}
+                <div class="cal-weekday">{{ wd }}</div>
                 {% endfor %}
+            </div>
+            {% for week in calendar_weeks %}
+            <div class="cal-grid" style="margin-bottom: 4px;">
+                {% for cell in week %}
+                {% if not cell.in_month %}
+                <div class="cal-cell" style="color:#ddd;">{{ cell.day }}</div>
+                {% elif cell.is_past or not cell.has_trips %}
+                <div class="cal-cell" style="color:#ccc;">{{ cell.day }}</div>
+                {% else %}
+                <a href="{{ url_for('bus', date=cell.date_str, month=current_month_str) }}" class="cal-cell clickable"
+                   style="background:{{ 'var(--ku-crimson)' if cell.is_selected else '#fdf1f3' }};
+                          color:{{ 'white' if cell.is_selected else 'var(--ku-crimson)' }};
+                          {% if cell.is_today and not cell.is_selected %}box-shadow: inset 0 0 0 2px var(--ku-crimson);{% endif %}">
+                    {{ cell.day }}
+                    <span class="cal-dot" style="background:{{ 'white' if cell.is_selected else 'var(--ku-crimson)' }};"></span>
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <div style="display:flex;align-items:center;gap:6px;margin-top:14px;font-size:0.78rem;color:#999;font-weight:600;">
+                <span style="width:8px;height:8px;border-radius:50%;background:#fdf1f3;border:1.5px solid var(--ku-crimson);display:inline-block;"></span>
+                예약 가능한 날짜
             </div>
         </div>
     </div>
+
+    {% if not selected_date_str %}
+    <div style="background:white;border-radius:20px;padding:48px 28px;text-align:center;border:1px solid #e8e8ed;animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;">
+        <p style="color:#999;font-size:0.95rem;font-weight:600;margin:0;">달력에서 날짜를 선택하면 버스 시간표가 표시됩니다.</p>
+    </div>
+    {% else %}
 
     <!-- 선택 날짜 -->
     <div style="margin-bottom: 28px; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;">
@@ -208,6 +264,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
     {% endif %}
     {% endif %}
 
@@ -278,6 +335,16 @@
                     <label class="form-label">입금자명 <span class="required">*</span></label>
                     <input type="text" name="depositor_name" class="form-input" placeholder="실제 입금하실 분의 성함" required>
                     <p style="font-size:0.78rem;color:#888;margin:5px 0 0 2px;">입금 시 반드시 이 이름으로 입금해야 자동으로 확인됩니다.</p>
+                </div>
+
+                <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
+                    <label class="form-label">환불 계좌 <span style="font-weight:500;color:#aaa;">(선택)</span></label>
+                    <p style="font-size:0.78rem;color:#888;margin:0 0 8px 2px;">운행 취소 등으로 환불이 필요한 경우 사용됩니다. 지금 몰라도 나중에 문의로 알려주셔도 됩니다.</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                        <input type="text" name="refund_bank_name" class="form-input" placeholder="은행명 (예: 국민은행)">
+                        <input type="text" name="refund_account_holder" class="form-input" placeholder="예금주">
+                    </div>
+                    <input type="text" name="refund_account_number" class="form-input" placeholder="계좌번호">
                 </div>
 
                 <div style="padding:14px 16px;background:#f5f5f7;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
