@@ -338,13 +338,13 @@
                 </div>
 
                 <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
-                    <label class="form-label">환불 계좌 <span style="font-weight:500;color:#aaa;">(선택)</span></label>
-                    <p style="font-size:0.78rem;color:#888;margin:0 0 8px 2px;">운행 취소 등으로 환불이 필요한 경우 사용됩니다. 지금 몰라도 나중에 문의로 알려주셔도 됩니다.</p>
+                    <label class="form-label">환불 계좌 <span class="required">*</span></label>
+                    <p style="font-size:0.78rem;color:#888;margin:0 0 8px 2px;">운행 취소 등으로 환불이 필요한 경우 사용됩니다.</p>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                        <input type="text" name="refund_bank_name" class="form-input" placeholder="은행명 (예: 국민은행)">
-                        <input type="text" name="refund_account_holder" class="form-input" placeholder="예금주">
+                        <input type="text" name="refund_bank_name" class="form-input" placeholder="은행명 (예: 국민은행)" required>
+                        <input type="text" name="refund_account_holder" class="form-input" placeholder="예금주" required>
                     </div>
-                    <input type="text" name="refund_account_number" class="form-input" placeholder="계좌번호">
+                    <input type="text" name="refund_account_number" class="form-input" placeholder="계좌번호" required>
                 </div>
 
                 <div style="padding:14px 16px;background:#f5f5f7;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
