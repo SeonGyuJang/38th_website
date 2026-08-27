@@ -16,6 +16,7 @@ import threading
 import smtplib
 import json
 import random
+import re
 import string
 import requests
 import calendar as calendar_module
@@ -252,9 +253,37 @@ def get_room_display_name(room_number):
 # ============================================
 
 BUS_DIRECTIONS = {
-    'sejong_to_seoul': {'label': '세종 → 서울', 'time': '07:00', 'short': '가는 버스'},
-    'seoul_to_sejong': {'label': '서울 → 세종', 'time': '20:00', 'short': '오는 버스'},
+    'seoul_to_sejong': {
+        'label': '서울 → 세종',
+        'time': '07:30',
+        'short': '오전 세종행 버스',
+        'stop_label': '탑승 장소',
+        'route': [
+            {'name': '강남역', 'time': '07:30', 'note': '출발'},
+            {'name': '신갈/죽전 간이정류장', 'time': '08:00', 'note': '경유'},
+            {'name': '고려대학교 세종캠퍼스', 'time': '09:30', 'note': '도착'},
+        ],
+        'selectable_stops': ['강남역', '신갈/죽전 간이정류장'],
+        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
+                       '(정류장에 일찍 도착하면 08:00 출발, 늦게 도착하면 도착 즉시 출발합니다)',
+    },
+    'sejong_to_seoul': {
+        'label': '세종 → 서울',
+        'time': '19:30',
+        'short': '오후 서울행 버스',
+        'stop_label': '하차 장소',
+        'route': [
+            {'name': '고려대학교 세종캠퍼스', 'time': '19:30', 'note': '출발'},
+            {'name': '신갈/죽전 간이정류장', 'time': '21:10', 'note': '경유'},
+            {'name': '강남역', 'time': '22:00', 'note': '도착'},
+        ],
+        'selectable_stops': ['신갈/죽전 간이정류장', '강남역'],
+        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
+                       '(정류장에 일찍 도착하면 21:10 출발, 늦게 도착하면 도착 즉시 출발합니다)',
+    },
 }
+
+BUS_BOOKING_CUTOFF_DAYS = 7  # 탑승일 기준 이 일수 이전까지만 예약 가능 (지나면 자동 마감)
 
 BUS_PAYMENT_STATUS_LABELS = {
     'pending': '입금 대기',
@@ -288,6 +317,13 @@ BUS_BOOKING_OPEN_SETTING_KEY = 'bus_booking_open'
 def is_bus_booking_open():
     """버스 예약 페이지 공개 여부. 관리자가 명시적으로 열기 전까지는 기본적으로 닫혀 있다."""
     return db_helper.get_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'false') == 'true'
+
+
+def is_bus_trip_booking_deadline_passed(trip_date_str):
+    """탑승일 기준 BUS_BOOKING_CUTOFF_DAYS일 전이 지나면 자동으로 예약을 마감한다."""
+    trip_date = datetime.strptime(trip_date_str, '%Y-%m-%d').date()
+    deadline = trip_date - timedelta(days=BUS_BOOKING_CUTOFF_DAYS)
+    return date.today() > deadline
 
 # ============================================
 # 이메일 발송 함수
@@ -767,13 +803,13 @@ def _bus_trip_rows(booking):
     trip = booking.get('trip') or {}
     direction_info = get_bus_direction_info(trip.get('direction'))
     trip_date = trip.get('trip_date', '')
-    location = trip.get('location')
-    location_row = f"""
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승 장소</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{location}</td></tr>""" if location else ''
+    stop_name = booking.get('stop_name')
+    stop_row = f"""
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">{direction_info.get('stop_label', '정류장')}</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{stop_name}</td></tr>""" if stop_name else ''
     return f"""
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">노선</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{direction_info['label']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{trip_date}</strong></td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>{location_row}
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>{stop_row}
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('passenger_name', '')}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">좌석 수</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('seat_count', 1)}석</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">결제 금액</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking.get('amount', 0):,}원</strong></td></tr>
@@ -842,23 +878,28 @@ def send_bus_payment_confirmed_email(booking):
     return send_email(booking['passenger_email'], subject, html)
 
 
-BUS_ROUTE_ENDPOINTS = {
-    'sejong_to_seoul': ('세종', '서울'),
-    'seoul_to_sejong': ('서울', '세종'),
-}
-
-
 def send_bus_trip_confirmed_email(booking):
-    """버스 운행 확정 이메일 (신청자에게) — 실제 승차권처럼 일시·장소가 잘 보이도록 구성"""
+    """버스 운행 확정 이메일 (신청자에게) — 실제 승차권처럼 일시·경유지·정류장이 잘 보이도록 구성"""
     trip = booking.get('trip') or {}
     direction = trip.get('direction')
     direction_info = get_bus_direction_info(direction)
-    origin, destination = BUS_ROUTE_ENDPOINTS.get(direction, (direction_info['label'], ''))
+    route = direction_info.get('route', [])
+    origin = route[0]['name'] if route else direction_info['label']
+    destination = route[-1]['name'] if route else ''
     trip_date = trip.get('trip_date', '')
-    location = trip.get('location') or '추후 안내 (문의 바랍니다)'
+    stop_name = booking.get('stop_name') or '추후 안내 (문의 바랍니다)'
     passenger_name = booking.get('passenger_name', '')
     student_id = booking.get('student_id')
     order_number = booking.get('order_number', '')
+
+    route_rows = ''.join(
+        f"""
+              <tr>
+                <td style="padding:8px 0;font-size:13px;color:{'#961A32' if stop['name'] == booking.get('stop_name') else '#555'};font-weight:{'800' if stop['name'] == booking.get('stop_name') else '600'};">{stop['time']}</td>
+                <td style="padding:8px 0 8px 12px;font-size:13px;color:{'#961A32' if stop['name'] == booking.get('stop_name') else '#555'};font-weight:{'800' if stop['name'] == booking.get('stop_name') else '600'};">{stop['name']}{' ✓ 탑승/하차' if stop['name'] == booking.get('stop_name') else ''} <span style="color:#aaa;font-weight:500;">({stop['note']})</span></td>
+              </tr>"""
+        for stop in route
+    )
 
     subject = f'[총학생회] 🚌 버스 승차권 — {trip_date} {origin} → {destination}'
     html = f"""
@@ -907,8 +948,8 @@ def send_bus_trip_confirmed_email(booking):
               </tr>
               <tr>
                 <td colspan="2" style="padding: 8px 0;">
-                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">탑승 장소</div>
-                  <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-top: 3px;">{location}</div>
+                  <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">{direction_info.get('stop_label', '정류장')}</div>
+                  <div style="font-size: 16px; color: #1a1a1a; font-weight: 700; margin-top: 3px;">{stop_name}</div>
                 </td>
               </tr>
               <tr>
@@ -937,9 +978,17 @@ def send_bus_trip_confirmed_email(booking):
         </tr>
       </table>
 
-      <div style="margin-top: 18px; background: white; border-radius: 14px; padding: 18px 22px;">
+      <div style="margin-top: 14px; background: white; border-radius: 14px; padding: 18px 22px;">
+        <div style="font-size: 11px; color: #999; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;">전체 경유 시간표</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          {route_rows}
+        </table>
+        <p style="margin: 12px 0 0 0; font-size: 12px; color: #999; line-height: 1.7;">{direction_info.get('route_note', '').replace(chr(10), '<br>')}</p>
+      </div>
+
+      <div style="margin-top: 14px; background: white; border-radius: 14px; padding: 18px 22px;">
         <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.9;">
-          ✓ 출발 시각 <strong>10분 전까지</strong> 탑승 장소에 도착해주세요.<br>
+          ✓ 표시된 탑승/하차 정류장의 출발 시각 <strong>10분 전까지</strong> 도착해주세요.<br>
           ✓ 이 메일이 곧 승차권입니다. 캡처하거나 보관해두세요.<br>
           ✓ 문의 : dsng3419@korea.ac.kr / 010-6598-6414
         </p>
@@ -1537,8 +1586,9 @@ def bus():
         for t in trips_today:
             t['remaining_seats'] = get_bus_trip_remaining_seats(t)
             t['direction_info'] = get_bus_direction_info(t['direction'])
-        # 방향 순서 고정 (세종→서울, 서울→세종)
-        trips_today.sort(key=lambda t: 0 if t['direction'] == 'sejong_to_seoul' else 1)
+            t['booking_closed'] = is_bus_trip_booking_deadline_passed(t['trip_date'])
+        # 방향 순서 고정 (오전 서울→세종, 오후 세종→서울)
+        trips_today.sort(key=lambda t: 0 if t['direction'] == 'seoul_to_sejong' else 1)
 
     return render_template('bus.html',
                            today=today,
@@ -1567,14 +1617,16 @@ def bus_book():
     passenger_email = request.form.get('passenger_email', '').strip()
     student_id = request.form.get('student_id', '').strip()
     depositor_name = request.form.get('depositor_name', '').strip()
+    stop_name = request.form.get('stop_name', '').strip()
     refund_bank_name = request.form.get('refund_bank_name', '').strip()
     refund_account_number = request.form.get('refund_account_number', '').strip()
     refund_account_holder = request.form.get('refund_account_holder', '').strip()
     seat_count = 1  # 1인당 1좌석으로 고정 (여러 좌석이 필요하면 각자 따로 예약)
     booking_password = request.form.get('booking_password', '').strip()
 
-    if not all([trip_id, passenger_name, passenger_phone, passenger_email, student_id, depositor_name, booking_password]):
-        flash('필수 항목을 모두 입력해주세요. (학번 포함)', 'error')
+    if not all([trip_id, passenger_name, passenger_phone, passenger_email, student_id, depositor_name, stop_name,
+                refund_bank_name, refund_account_number, refund_account_holder, booking_password]):
+        flash('필수 항목을 모두 입력해주세요. (학번, 탑승/하차 정류장, 환불 계좌 포함)', 'error')
         return redirect(url_for('bus'))
 
     trip = db_helper.get_bus_trip_by_id(trip_id)
@@ -1584,6 +1636,15 @@ def bus_book():
 
     if trip['trip_date'] < date.today().strftime('%Y-%m-%d'):
         flash('지난 날짜의 버스는 예약할 수 없습니다.', 'error')
+        return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
+
+    if is_bus_trip_booking_deadline_passed(trip['trip_date']):
+        flash(f'탑승 {BUS_BOOKING_CUTOFF_DAYS}일 전이 지나 이 회차는 예약이 마감되었습니다.', 'error')
+        return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
+
+    direction_info = get_bus_direction_info(trip['direction'])
+    if stop_name not in direction_info.get('selectable_stops', []):
+        flash('올바른 탑승/하차 정류장을 선택해주세요.', 'error')
         return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
     remaining = get_bus_trip_remaining_seats(trip)
@@ -1601,6 +1662,7 @@ def bus_book():
         'passenger_email': passenger_email,
         'student_id': student_id or None,
         'depositor_name': depositor_name,
+        'stop_name': stop_name,
         'refund_bank_name': refund_bank_name or None,
         'refund_account_number': refund_account_number or None,
         'refund_account_holder': refund_account_holder or None,
@@ -3022,41 +3084,53 @@ def admin_bus_toggle_open():
 @app.route('/admin/bus/trips/create', methods=['POST'])
 @login_required
 def admin_bus_trip_create():
-    trip_date = request.form.get('trip_date', '').strip()
-    direction = request.form.get('direction', '').strip()
+    """버스 회차 등록. 날짜를 여러 개(쉼표/줄바꿈/공백 구분) 입력하고 노선을 복수 선택하면
+    각 날짜×노선 조합마다 회차를 한 번에 생성한다 (이미 있는 조합은 건너뜀)."""
+    raw_dates = request.form.get('trip_dates', '')
+    directions = [d for d in request.form.getlist('directions') if d in BUS_DIRECTIONS]
     price = request.form.get('price', 0, type=int)
     capacity = request.form.get('capacity', 0, type=int)
     location = request.form.get('location', '').strip()
     note = request.form.get('note', '').strip()
 
-    if not trip_date or direction not in BUS_DIRECTIONS:
-        flash('날짜와 노선을 올바르게 선택해주세요.', 'error')
+    trip_dates = sorted(set(re.findall(r'\d{4}-\d{2}-\d{2}', raw_dates)))
+
+    if not trip_dates or not directions:
+        flash('날짜와 노선을 올바르게 입력/선택해주세요. (날짜는 YYYY-MM-DD 형식)', 'error')
         return redirect(url_for('admin_bus'))
 
     if price < 0 or capacity < 1:
         flash('요금은 0 이상, 정원은 1석 이상이어야 합니다.', 'error')
         return redirect(url_for('admin_bus'))
 
-    existing = db_helper.get_bus_trip_by_date_direction(trip_date, direction)
-    if existing:
-        flash('해당 날짜·노선의 버스 회차가 이미 존재합니다.', 'error')
-        return redirect(url_for('admin_bus'))
+    created, skipped = [], []
+    for trip_date in trip_dates:
+        for direction in directions:
+            existing = db_helper.get_bus_trip_by_date_direction(trip_date, direction)
+            if existing:
+                skipped.append(f'{trip_date} {BUS_DIRECTIONS[direction]["label"]}')
+                continue
+            data = {
+                'trip_date': trip_date,
+                'direction': direction,
+                'departure_time': BUS_DIRECTIONS[direction]['time'],
+                'price': price,
+                'capacity': capacity,
+                'status': 'open',
+                'location': location or None,
+                'note': note or None,
+            }
+            trip = db_helper.create_bus_trip(data)
+            if trip:
+                created.append(f'{trip_date} {BUS_DIRECTIONS[direction]["label"]}')
 
-    data = {
-        'trip_date': trip_date,
-        'direction': direction,
-        'departure_time': BUS_DIRECTIONS[direction]['time'],
-        'price': price,
-        'capacity': capacity,
-        'status': 'open',
-        'location': location or None,
-        'note': note or None,
-    }
-    trip = db_helper.create_bus_trip(data)
-    if trip:
-        flash(f'{trip_date} {BUS_DIRECTIONS[direction]["label"]} 버스 회차가 등록되었습니다.', 'success')
+    if created:
+        msg = f'{len(created)}개 회차가 등록되었습니다.'
+        if skipped:
+            msg += f' (이미 존재해 건너뛴 {len(skipped)}개 제외)'
+        flash(msg, 'success')
     else:
-        flash('버스 회차 등록 중 오류가 발생했습니다.', 'error')
+        flash('등록된 회차가 없습니다. 입력한 날짜·노선이 이미 모두 등록되어 있는지 확인해주세요.', 'error')
     return redirect(url_for('admin_bus'))
 
 
