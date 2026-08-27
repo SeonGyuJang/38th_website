@@ -256,7 +256,7 @@ BUS_DIRECTIONS = {
     'seoul_to_sejong': {
         'label': '서울 → 세종',
         'time': '07:30',
-        'short': '등교 버스 (오전)',
+        'short': '오전 세종행 버스',
         'stop_label': '탑승 장소',
         'route': [
             {'name': '강남역', 'time': '07:30', 'note': '출발'},
@@ -264,13 +264,13 @@ BUS_DIRECTIONS = {
             {'name': '고려대학교 세종캠퍼스', 'time': '09:30', 'note': '도착'},
         ],
         'selectable_stops': ['강남역', '신갈/죽전 간이정류장'],
-        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다. '
+        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
                        '(정류장에 일찍 도착하면 08:00 출발, 늦게 도착하면 도착 즉시 출발합니다)',
     },
     'sejong_to_seoul': {
         'label': '세종 → 서울',
         'time': '19:30',
-        'short': '귀가 버스 (오후)',
+        'short': '오후 서울행 버스',
         'stop_label': '하차 장소',
         'route': [
             {'name': '고려대학교 세종캠퍼스', 'time': '19:30', 'note': '출발'},
@@ -278,7 +278,7 @@ BUS_DIRECTIONS = {
             {'name': '강남역', 'time': '22:00', 'note': '도착'},
         ],
         'selectable_stops': ['신갈/죽전 간이정류장', '강남역'],
-        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다. '
+        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
                        '(정류장에 일찍 도착하면 21:10 출발, 늦게 도착하면 도착 즉시 출발합니다)',
     },
 }
@@ -983,7 +983,7 @@ def send_bus_trip_confirmed_email(booking):
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           {route_rows}
         </table>
-        <p style="margin: 12px 0 0 0; font-size: 12px; color: #999; line-height: 1.7;">{direction_info.get('route_note', '')}</p>
+        <p style="margin: 12px 0 0 0; font-size: 12px; color: #999; line-height: 1.7;">{direction_info.get('route_note', '').replace(chr(10), '<br>')}</p>
       </div>
 
       <div style="margin-top: 14px; background: white; border-radius: 14px; padding: 18px 22px;">
@@ -1587,8 +1587,8 @@ def bus():
             t['remaining_seats'] = get_bus_trip_remaining_seats(t)
             t['direction_info'] = get_bus_direction_info(t['direction'])
             t['booking_closed'] = is_bus_trip_booking_deadline_passed(t['trip_date'])
-        # 방향 순서 고정 (세종→서울, 서울→세종)
-        trips_today.sort(key=lambda t: 0 if t['direction'] == 'sejong_to_seoul' else 1)
+        # 방향 순서 고정 (오전 서울→세종, 오후 세종→서울)
+        trips_today.sort(key=lambda t: 0 if t['direction'] == 'seoul_to_sejong' else 1)
 
     return render_template('bus.html',
                            today=today,
