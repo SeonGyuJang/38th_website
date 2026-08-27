@@ -1624,8 +1624,9 @@ def bus_book():
     seat_count = 1  # 1인당 1좌석으로 고정 (여러 좌석이 필요하면 각자 따로 예약)
     booking_password = request.form.get('booking_password', '').strip()
 
-    if not all([trip_id, passenger_name, passenger_phone, passenger_email, student_id, depositor_name, stop_name, booking_password]):
-        flash('필수 항목을 모두 입력해주세요. (학번, 탑승/하차 정류장 포함)', 'error')
+    if not all([trip_id, passenger_name, passenger_phone, passenger_email, student_id, depositor_name, stop_name,
+                refund_bank_name, refund_account_number, refund_account_holder, booking_password]):
+        flash('필수 항목을 모두 입력해주세요. (학번, 탑승/하차 정류장, 환불 계좌 포함)', 'error')
         return redirect(url_for('bus'))
 
     trip = db_helper.get_bus_trip_by_id(trip_id)
