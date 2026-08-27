@@ -107,10 +107,10 @@
             <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.trip_date }}</span>
         </div>
         {% endif %}
-        {% if booking.trip and booking.trip.location %}
+        {% if booking.stop_name %}
         <div class="info-row">
-            <span style="color:#888;font-size:0.88rem;font-weight:600;">탑승 장소</span>
-            <span style="font-weight:700;color:#1a1a1a;">{{ booking.trip.location }}</span>
+            <span style="color:#888;font-size:0.88rem;font-weight:600;">{{ direction_info.stop_label if direction_info else '정류장' }}</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ booking.stop_name }}</span>
         </div>
         {% endif %}
         <div class="info-row">

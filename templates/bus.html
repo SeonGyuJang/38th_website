@@ -232,13 +232,20 @@
                 <div style="color:white;font-size:1.3rem;font-weight:800;margin-top:6px;">{{ trip.direction_info.label }}</div>
                 <div style="color:rgba(255,255,255,0.85);font-size:1.05rem;font-weight:700;margin-top:4px;">{{ trip.direction_info.time }} 출발</div>
             </div>
-            <div style="padding:24px 28px 28px;">
-                {% if trip.location %}
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;font-size:0.85rem;color:#666;font-weight:600;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    탑승 장소 : {{ trip.location }}
+            <div style="padding:20px 28px 28px;">
+                <!-- 경유 시간표 -->
+                <div style="background:#f9f9fa;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+                    {% for stop in trip.direction_info.route %}
+                    <div style="display:flex;align-items:center;gap:10px;{{ 'margin-bottom:6px;' if not loop.last else '' }}">
+                        <span style="font-size:0.8rem;font-weight:800;color:#1a1a1a;min-width:38px;">{{ stop.time }}</span>
+                        <span style="width:6px;height:6px;border-radius:50%;background:{{ 'var(--ku-crimson)' if loop.first or loop.last else '#ccc' }};flex-shrink:0;"></span>
+                        <span style="font-size:0.82rem;color:#444;font-weight:600;">{{ stop.name }}</span>
+                        <span style="font-size:0.72rem;color:#aaa;">{{ stop.note }}</span>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endif %}
+                <p style="font-size:0.74rem;color:#aaa;line-height:1.6;margin:0 0 16px 0;">{{ trip.direction_info.route_note }}</p>
+
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
                     <div>
                         <div style="font-size:0.75rem;color:#999;font-weight:700;">편도 요금</div>
@@ -249,16 +256,18 @@
                         <div style="font-size:1.4rem;font-weight:800;color:{{ '#991b1b' if trip.remaining_seats == 0 else '#1A7F37' }};">{{ trip.remaining_seats }}석</div>
                     </div>
                 </div>
-                {% if trip.remaining_seats > 0 and trip.status != 'cancelled' %}
-                <button onclick="openBookingModal({{ trip.id }}, '{{ trip.direction_info.label }}', '{{ trip.direction_info.time }}', {{ trip.price }}, {{ trip.remaining_seats }})"
+                {% if trip.status == 'cancelled' %}
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">운행 취소됨</div>
+                {% elif trip.booking_closed %}
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">신청 마감 (탑승 7일 전 마감)</div>
+                {% elif trip.remaining_seats <= 0 %}
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">예약 마감 (좌석 없음)</div>
+                {% else %}
+                <button onclick='openBookingModal({{ trip.id }}, {{ trip.direction_info.label | tojson }}, {{ trip.direction_info.time | tojson }}, {{ trip.price }}, {{ trip.direction_info.stop_label | tojson }}, {{ trip.direction_info.selectable_stops | tojson }})'
                         style="width:100%;padding:13px;background:var(--ku-crimson);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
                         onmouseover="this.style.background='#7a1528';" onmouseout="this.style.background='var(--ku-crimson)';">
                     예약하기
                 </button>
-                {% elif trip.status == 'cancelled' %}
-                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">운행 취소됨</div>
-                {% else %}
-                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">예약 마감</div>
                 {% endif %}
             </div>
         </div>
@@ -278,6 +287,7 @@
             <li>예약 후 안내되는 계좌로 <strong>무통장 입금</strong>을 하시면 자동으로 입금 확인 안내 메일을 받으실 수 있습니다.</li>
             <li>입금자명은 예약 시 입력하신 <strong>입금자명과 반드시 동일</strong>해야 자동으로 확인됩니다.</li>
             <li>탑승 인원이 충분히 모이면 <strong>운행이 확정</strong>되며, 확정 안내 메일을 발송해드립니다.</li>
+            <li>예약은 <strong>탑승일 7일 전까지만</strong> 가능하며, 이후에는 자동으로 마감됩니다.</li>
             <li>예약 취소는 <a href="{{ url_for('bus_cancel') }}" style="color:var(--ku-crimson);font-weight:700;">예약 취소 페이지</a>에서 이메일과 비밀번호로 직접 가능합니다.</li>
             <li>문의 : <a href="mailto:dsng3419@korea.ac.kr" style="color:var(--dark);font-weight:700;">부총학생회장 장선규(010-6598-6414)</a></li>
         </ul>
@@ -329,6 +339,13 @@
                     <input type="tel" name="passenger_phone" class="form-input" placeholder="010-0000-0000" required>
                 </div>
 
+                <div>
+                    <label class="form-label" id="stopNameLabel">정류장 <span class="required">*</span></label>
+                    <select name="stop_name" id="formStopName" class="form-input" required style="background:white;">
+                        <option value="">정류장을 선택하세요</option>
+                    </select>
+                </div>
+
                 <p style="font-size:0.78rem;color:#aaa;margin:-6px 0 0 2px;">예약은 1인당 1좌석입니다. 여러 명이 탑승하시려면 각자 따로 예약해주세요.</p>
 
                 <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
@@ -373,11 +390,17 @@
 </div>
 
 <script>
-function openBookingModal(tripId, label, time, price, remainingSeats) {
+function openBookingModal(tripId, label, time, price, stopLabel, selectableStops) {
     document.getElementById('formTripId').value = tripId;
     document.getElementById('modalTitle').textContent = label + ' 버스 예약';
     document.getElementById('modalSubtitle').textContent = time + ' 출발 · 편도 ' + price.toLocaleString() + '원';
     document.getElementById('amountDisplay').textContent = price.toLocaleString() + '원';
+
+    document.getElementById('stopNameLabel').firstChild.textContent = stopLabel + ' ';
+    const stopSelect = document.getElementById('formStopName');
+    stopSelect.innerHTML = '<option value="">' + stopLabel + '을(를) 선택하세요</option>' +
+        selectableStops.map(s => `<option value="${s}">${s}</option>`).join('');
+
     document.getElementById('bookingModalOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
