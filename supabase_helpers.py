@@ -790,6 +790,18 @@ class SupabaseHelper:
         response = self.admin_client.table('bus_bookings').select('seat_count').eq('trip_id', trip_id).neq('booking_status', 'cancelled').neq('payment_status', 'cancelled').neq('payment_status', 'expired').execute()
         return sum((b.get('seat_count') or 0) for b in response.data)
 
+    def get_reserved_seat_counts_by_trip_ids(self, trip_ids: List[int]) -> Dict[int, int]:
+        """여러 회차의 예약된(취소/만료 제외) 좌석 수 합계를 한 번의 조회로 반환 (trip_id -> 합계)"""
+        if not trip_ids:
+            return {}
+        response = self.admin_client.table('bus_bookings').select('trip_id, seat_count').in_('trip_id', trip_ids).neq('booking_status', 'cancelled').neq('payment_status', 'cancelled').neq('payment_status', 'expired').execute()
+        counts: Dict[int, int] = {tid: 0 for tid in trip_ids}
+        for b in response.data:
+            tid = b.get('trip_id')
+            if tid in counts:
+                counts[tid] += (b.get('seat_count') or 0)
+        return counts
+
     def create_bus_booking(self, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """버스 예약 생성 (admin 클라이언트 사용 - RLS 우회)"""
         response = self.admin_client.table('bus_bookings').insert(data).execute()

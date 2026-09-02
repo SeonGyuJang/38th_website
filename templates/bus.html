@@ -180,13 +180,23 @@
                 {% for cell in week %}
                 {% if not cell.in_month %}
                 <div class="cal-cell" style="color:#ddd;">{{ cell.day }}</div>
-                {% elif cell.is_past or not cell.has_trips %}
+                {% elif cell.is_past %}
                 <div class="cal-cell" style="color:#ccc;">{{ cell.day }}</div>
+                {% elif not cell.has_trips %}
+                    {% if cell.schedule_info %}
+                    <div class="cal-cell" style="color:#a9720f;" title="{{ cell.schedule_info.deadline_label }} 예약 마감 · {{ cell.schedule_info.confirm_label }} 확정 메일 발송">
+                        {{ cell.day }}
+                        <span style="width:5px;height:5px;border-radius:50%;background:#e2a53a;margin-top:3px;display:inline-block;"></span>
+                    </div>
+                    {% else %}
+                    <div class="cal-cell" style="color:#ccc;">{{ cell.day }}</div>
+                    {% endif %}
                 {% else %}
                 <a href="{{ url_for('bus', date=cell.date_str, month=current_month_str) }}" class="cal-cell clickable"
                    style="background:{{ 'var(--ku-crimson)' if cell.is_selected else '#fdf1f3' }};
                           color:{{ 'white' if cell.is_selected else 'var(--ku-crimson)' }};
-                          {% if cell.is_today and not cell.is_selected %}box-shadow: inset 0 0 0 2px var(--ku-crimson);{% endif %}">
+                          {% if cell.is_today and not cell.is_selected %}box-shadow: inset 0 0 0 2px var(--ku-crimson);{% endif %}"
+                   {% if cell.schedule_info %}title="{{ cell.schedule_info.deadline_label }} 예약 마감 · {{ cell.schedule_info.confirm_label }} 확정 메일 발송"{% endif %}>
                     {{ cell.day }}
                     <span class="cal-dot" style="background:{{ 'white' if cell.is_selected else 'var(--ku-crimson)' }};"></span>
                 </a>
@@ -194,10 +204,29 @@
                 {% endfor %}
             </div>
             {% endfor %}
-            <div style="display:flex;align-items:center;gap:6px;margin-top:14px;font-size:0.78rem;color:#999;font-weight:600;">
-                <span style="width:8px;height:8px;border-radius:50%;background:#fdf1f3;border:1.5px solid var(--ku-crimson);display:inline-block;"></span>
-                예약 가능한 날짜
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:14px;font-size:0.78rem;color:#999;font-weight:600;">
+                <span style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#fdf1f3;border:1.5px solid var(--ku-crimson);display:inline-block;"></span>
+                    예약 가능한 날짜
+                </span>
+                {% if bus_schedule_groups %}
+                <span style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#e2a53a;display:inline-block;"></span>
+                    예약 예정 일정
+                </span>
+                {% endif %}
             </div>
+
+            {% if bus_schedule_groups %}
+            <div style="margin-top:14px;padding:14px 16px;background:#fff9ee;border:1px solid #f5e3bf;border-radius:12px;">
+                <div style="font-size:0.8rem;font-weight:800;color:#a9720f;margin-bottom:8px;">📅 예약 일정 안내</div>
+                {% for group in bus_schedule_groups %}
+                <div style="font-size:0.8rem;color:#8a6a1f;line-height:1.75;">
+                    <strong>{{ group.range_label }}</strong> 탑승 &mdash; <strong>{{ group.deadline_label }} 예약 마감</strong> · <strong>{{ group.confirm_label }} 확정 메일 발송</strong>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -212,6 +241,11 @@
         <h2 style="font-size: 1.4rem; font-weight: 800; color: #1a1a1a; margin: 0;">
             <span style="color: var(--ku-crimson);">{{ selected_date_str }}</span> 버스 시간표
         </h2>
+        {% if selected_date_schedule_info %}
+        <p style="margin:10px 0 0 0;font-size:0.85rem;font-weight:700;color:#a9720f;">
+            ⏰ 이 날짜에 탑승하시려면 <strong>{{ selected_date_schedule_info.deadline_label }}</strong>까지 예약을 완료해야 하며, <strong>{{ selected_date_schedule_info.confirm_label }}</strong>에 운행 확정 메일이 발송됩니다.
+        </p>
+        {% endif %}
     </div>
 
     {% if not trips_today %}
