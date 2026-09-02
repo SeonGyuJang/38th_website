@@ -222,7 +222,7 @@
                 <div style="font-size:0.8rem;font-weight:800;color:#a9720f;margin-bottom:8px;">📅 예약 일정 안내</div>
                 {% for group in bus_schedule_groups %}
                 <div style="font-size:0.8rem;color:#8a6a1f;line-height:1.75;">
-                    <strong>{{ group.range_label }}</strong> 탑승분 &mdash; <strong>{{ group.deadline_label }} 예약 마감</strong> · <strong>{{ group.confirm_label }} 확정 메일 발송</strong>
+                    <strong>{{ group.range_label }}</strong> 탑승 &mdash; <strong>{{ group.deadline_label }} 예약 마감</strong> · <strong>{{ group.confirm_label }} 확정 메일 발송</strong>
                 </div>
                 {% endfor %}
             </div>
@@ -243,7 +243,7 @@
         </h2>
         {% if selected_date_schedule_info %}
         <p style="margin:10px 0 0 0;font-size:0.85rem;font-weight:700;color:#a9720f;">
-            ⏰ 이 날짜 탑승분은 <strong>{{ selected_date_schedule_info.deadline_label }}</strong>에 예약이 마감되며, <strong>{{ selected_date_schedule_info.confirm_label }}</strong>에 운행 확정 메일이 발송됩니다.
+            ⏰ 이 날짜에 탑승하시려면 <strong>{{ selected_date_schedule_info.deadline_label }}</strong>까지 예약을 완료해야 하며, <strong>{{ selected_date_schedule_info.confirm_label }}</strong>에 운행 확정 메일이 발송됩니다.
         </p>
         {% endif %}
     </div>
