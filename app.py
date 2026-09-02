@@ -259,13 +259,14 @@ BUS_DIRECTIONS = {
         'short': '오전 세종행 버스',
         'stop_label': '탑승 장소',
         'route': [
-            {'name': '강남역', 'time': '07:30', 'note': '출발'},
-            {'name': '신갈/죽전 간이정류장', 'time': '08:00', 'note': '경유'},
+            {'name': '강남역 5번 출구 파리크라상', 'time': '07:30', 'note': '출발'},
+            {'name': '양재역 2번 출구 SC제일은행', 'time': '07:35', 'note': '경유'},
+            {'name': '죽전 간이정류장', 'time': '07:50', 'note': '경유'},
+            {'name': '신갈 버스정류장', 'time': '07:55', 'note': '경유'},
             {'name': '고려대학교 세종캠퍼스', 'time': '09:30', 'note': '도착'},
         ],
-        'selectable_stops': ['강남역', '신갈/죽전 간이정류장'],
-        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
-                       '(정류장에 일찍 도착하면 08:00 출발, 늦게 도착하면 도착 즉시 출발합니다)',
+        'selectable_stops': ['강남역 5번 출구 파리크라상', '양재역 2번 출구 SC제일은행', '죽전 간이정류장', '신갈 버스정류장'],
+        'route_note': '교통 상황에 따라 각 정류장 경유 시각 및 도착 시각은 달라질 수 있습니다.',
     },
     'sejong_to_seoul': {
         'label': '세종 → 서울',
@@ -274,16 +275,53 @@ BUS_DIRECTIONS = {
         'stop_label': '하차 장소',
         'route': [
             {'name': '고려대학교 세종캠퍼스', 'time': '19:30', 'note': '출발'},
-            {'name': '신갈/죽전 간이정류장', 'time': '21:10', 'note': '경유'},
-            {'name': '강남역', 'time': '22:00', 'note': '도착'},
+            {'name': '신갈 버스정류장', 'time': '21:15', 'note': '경유'},
+            {'name': '죽전 간이정류장', 'time': '21:30', 'note': '경유'},
+            {'name': '양재역 2번 출구 맞은편', 'time': '21:55', 'note': '경유'},
+            {'name': '강남역 5번 출구 맞은편', 'time': '22:00', 'note': '도착'},
         ],
-        'selectable_stops': ['신갈/죽전 간이정류장', '강남역'],
-        'route_note': '교통 상황에 따라 신갈/죽전 간이정류장 출발 시각 및 도착 시각은 달라질 수 있습니다.\n'
-                       '(정류장에 일찍 도착하면 21:10 출발, 늦게 도착하면 도착 즉시 출발합니다)',
+        'selectable_stops': ['신갈 버스정류장', '죽전 간이정류장', '양재역 2번 출구 맞은편', '강남역 5번 출구 맞은편'],
+        'route_note': '교통 상황에 따라 각 정류장 경유 시각 및 도착 시각은 달라질 수 있습니다.',
     },
 }
 
 BUS_BOOKING_CUTOFF_DAYS = 7  # 탑승일 기준 이 일수 이전까지만 예약 가능 (지나면 자동 마감)
+
+
+def _date_range_strs(start_str, end_str):
+    """'YYYY-MM-DD' 시작~종료(포함) 날짜 문자열 리스트 생성"""
+    start = datetime.strptime(start_str, '%Y-%m-%d').date()
+    end = datetime.strptime(end_str, '%Y-%m-%d').date()
+    days = (end - start).days
+    return [(start + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(days + 1)]
+
+
+# 탑승일 그룹별 예약 마감일 / 운행 확정 메일 발송일 안내
+# (해당 그룹의 탑승일들은 마감일까지 일괄 예약을 받고, 다음날 운행 확정 메일을 일괄 발송합니다)
+BUS_RESERVATION_SCHEDULE_GROUPS = [
+    {
+        'dates': _date_range_strs('2026-09-14', '2026-09-18'),
+        'range_label': '9/14 ~ 9/18',
+        'deadline_label': '9/6',
+        'confirm_label': '9/7',
+    },
+    {
+        'dates': _date_range_strs('2026-09-21', '2026-09-22'),
+        'range_label': '9/21 ~ 9/22',
+        'deadline_label': '9/13',
+        'confirm_label': '9/14',
+    },
+    {
+        'dates': _date_range_strs('2026-09-28', '2026-09-30'),
+        'range_label': '9/28 ~ 9/30',
+        'deadline_label': '9/20',
+        'confirm_label': '9/21',
+    },
+]
+
+BUS_RESERVATION_SCHEDULE_BY_DATE = {
+    d: group for group in BUS_RESERVATION_SCHEDULE_GROUPS for d in group['dates']
+}
 
 BUS_PAYMENT_STATUS_LABELS = {
     'pending': '입금 대기',
@@ -1521,6 +1559,15 @@ def get_bus_trip_remaining_seats(trip):
     return max(0, (trip.get('capacity') or 0) - reserved)
 
 
+def annotate_bus_trips_remaining_seats(trips):
+    """여러 회차의 남은 좌석 수를 일괄 조회 1회로 계산해 각 trip에 채워 넣는다 (N+1 방지)."""
+    reserved_counts = db_helper.get_reserved_seat_counts_by_trip_ids([t['id'] for t in trips])
+    for t in trips:
+        reserved = reserved_counts.get(t['id'], 0)
+        t['remaining_seats'] = max(0, (t.get('capacity') or 0) - reserved)
+    return trips
+
+
 def build_bus_calendar(year, month, today, available_dates_set, selected_date_str):
     """버스 예약 달력 그리드 생성 (월요일 시작). 주 단위 리스트를 반환한다."""
     cal = calendar_module.Calendar(firstweekday=0)
@@ -1537,6 +1584,7 @@ def build_bus_calendar(year, month, today, available_dates_set, selected_date_st
                 'is_today': d == today,
                 'has_trips': d_str in available_dates_set,
                 'is_selected': d_str == selected_date_str,
+                'schedule_info': BUS_RESERVATION_SCHEDULE_BY_DATE.get(d_str),
             })
         weeks.append(week_cells)
     return weeks
@@ -1583,8 +1631,8 @@ def bus():
     trips_today = []
     if selected_date_str:
         trips_today = [t for t in all_trips if t['trip_date'] == selected_date_str]
+        annotate_bus_trips_remaining_seats(trips_today)
         for t in trips_today:
-            t['remaining_seats'] = get_bus_trip_remaining_seats(t)
             t['direction_info'] = get_bus_direction_info(t['direction'])
             t['booking_closed'] = is_bus_trip_booking_deadline_passed(t['trip_date'])
         # 방향 순서 고정 (오전 서울→세종, 오후 세종→서울)
@@ -1602,7 +1650,9 @@ def bus():
                            current_month_str=calendar_anchor.strftime('%Y-%m'),
                            prev_month_str=prev_month_date.strftime('%Y-%m'),
                            next_month_str=next_month_date.strftime('%Y-%m'),
-                           can_go_prev_month=can_go_prev_month)
+                           can_go_prev_month=can_go_prev_month,
+                           bus_schedule_groups=BUS_RESERVATION_SCHEDULE_GROUPS,
+                           selected_date_schedule_info=BUS_RESERVATION_SCHEDULE_BY_DATE.get(selected_date_str))
 
 
 @app.route('/bus/book', methods=['POST'])
@@ -3052,8 +3102,8 @@ def admin_inquiry_delete(inquiry_id):
 @login_required
 def admin_bus():
     trips = db_helper.get_all_bus_trips(order_by='trip_date', ascending=False)
+    annotate_bus_trips_remaining_seats(trips)
     for t in trips:
-        t['remaining_seats'] = get_bus_trip_remaining_seats(t)
         t['direction_info'] = get_bus_direction_info(t['direction'])
 
     bookings = db_helper.get_all_bus_bookings()
