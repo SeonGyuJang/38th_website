@@ -98,7 +98,7 @@
         {% if direction_info %}
         <div class="info-row">
             <span style="color:#888;font-size:0.88rem;font-weight:600;">노선</span>
-            <span style="font-weight:700;color:#1a1a1a;">{{ direction_info.label }} ({{ direction_info.time }} 출발)</span>
+            <span style="font-weight:700;color:#1a1a1a;">{{ direction_info.label }} ({{ get_stop_departure_time(direction_info, booking.stop_name) }} 출발)</span>
         </div>
         {% endif %}
         {% if booking.trip %}

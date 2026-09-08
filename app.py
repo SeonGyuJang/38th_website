@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, send_from_directory, g
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_compress import Compress
 from werkzeug.utils import secure_filename
@@ -285,6 +285,27 @@ BUS_DIRECTIONS = {
     },
 }
 
+# 정류장 이름 -> 시각 매핑을 미리 계산해 둔다 (중간 경유지 탑승 시 해당 정류장 시각을 바로 조회하기 위함)
+for _direction_info in BUS_DIRECTIONS.values():
+    _direction_info['stop_times'] = {stop['name']: stop['time'] for stop in _direction_info.get('route', [])}
+
+
+def get_stop_departure_time(direction_info, stop_name):
+    """예약자가 선택한 탑승/하차 정류장의 실제 시각을 반환한다.
+    중간 경유지를 선택한 경우 그 정류장의 시각을, 선택하지 않았거나 매칭되지 않으면
+    노선의 기본(출발지) 시각을 반환한다."""
+    if not direction_info:
+        return ''
+    if stop_name:
+        stop_time = direction_info.get('stop_times', {}).get(stop_name)
+        if stop_time:
+            return stop_time
+    return direction_info.get('time', '')
+
+
+app.jinja_env.globals['get_stop_departure_time'] = get_stop_departure_time
+
+
 BUS_BOOKING_CUTOFF_DAYS = 7  # 탑승일 기준 이 일수 이전까지만 예약 가능 (지나면 자동 마감)
 
 
@@ -351,10 +372,53 @@ def generate_bus_order_number():
 
 BUS_BOOKING_OPEN_SETTING_KEY = 'bus_booking_open'
 
+# ============================================
+# 공개 페이지 공개/비공개(오픈/클로즈) 설정
+# ============================================
+# 관리자 대시보드(사이트 설정)에서 각 메뉴를 켜고 끌 수 있다.
+# 꺼진 페이지는 일반 학우에게는 노출되지 않고(내비게이션에서도 숨김),
+# 서버 쪽에서도 해당 페이지의 데이터 조회를 건너뛰어 불필요한 트래픽을 줄인다.
+# 버스 예약은 기존 정책을 그대로 유지하기 위해 기본값이 '비공개(false)'이고,
+# 나머지 메뉴는 이미 공개되어 있던 기존 동작을 깨지 않도록 기본값이 '공개(true)'이다.
+PAGE_VISIBILITY_CONFIG = [
+    {'key': 'organization', 'setting_key': 'page_open_organization', 'label': '조직도', 'default': 'true'},
+    {'key': 'promises', 'setting_key': 'page_open_promises', 'label': '공약', 'default': 'true'},
+    {'key': 'minutes', 'setting_key': 'page_open_minutes', 'label': '회의록', 'default': 'true'},
+    {'key': 'regulations', 'setting_key': 'page_open_regulations', 'label': '회칙', 'default': 'true'},
+    {'key': 'schedule', 'setting_key': 'page_open_schedule', 'label': '일정', 'default': 'true'},
+    {'key': 'programs', 'setting_key': 'page_open_programs', 'label': '프로그램', 'default': 'true'},
+    {'key': 'meeting_room', 'setting_key': 'page_open_meeting_room', 'label': '회의실 대관', 'default': 'true'},
+    {'key': 'bus', 'setting_key': BUS_BOOKING_OPEN_SETTING_KEY, 'label': '버스 예약', 'default': 'false'},
+    {'key': 'archive', 'setting_key': 'page_open_archive', 'label': '아카이브', 'default': 'true'},
+]
+PAGE_VISIBILITY_BY_KEY = {c['key']: c for c in PAGE_VISIBILITY_CONFIG}
+
+
+def get_page_visibility_map():
+    """모든 페이지의 공개 여부를 한 번의 DB 조회로 계산 (요청 1회당 캐시)"""
+    if not hasattr(g, '_page_visibility_map'):
+        settings = db_helper.get_all_settings()
+        g._page_visibility_map = {
+            c['key']: settings.get(c['setting_key'], c['default']) == 'true'
+            for c in PAGE_VISIBILITY_CONFIG
+        }
+    return g._page_visibility_map
+
+
+def is_page_open(key):
+    """특정 페이지(key)가 현재 일반 방문자에게 공개되어 있는지 여부"""
+    return get_page_visibility_map().get(key, True)
+
+
+def page_closed_response(key):
+    """비공개 처리된 페이지에 접근했을 때 보여줄 안내 페이지"""
+    label = PAGE_VISIBILITY_BY_KEY.get(key, {}).get('label', '이 페이지')
+    return render_template('page_closed.html', page_title=label)
+
 
 def is_bus_booking_open():
     """버스 예약 페이지 공개 여부. 관리자가 명시적으로 열기 전까지는 기본적으로 닫혀 있다."""
-    return db_helper.get_setting(BUS_BOOKING_OPEN_SETTING_KEY, 'false') == 'true'
+    return is_page_open('bus')
 
 
 def is_bus_trip_booking_deadline_passed(trip_date_str):
@@ -362,6 +426,17 @@ def is_bus_trip_booking_deadline_passed(trip_date_str):
     trip_date = datetime.strptime(trip_date_str, '%Y-%m-%d').date()
     deadline = trip_date - timedelta(days=BUS_BOOKING_CUTOFF_DAYS)
     return date.today() > deadline
+
+
+@app.context_processor
+def inject_page_visibility():
+    """내비게이션 메뉴에서 비공개 처리된 페이지를 숨기기 위한 전역 템플릿 변수.
+    관리자는 비공개 상태와 무관하게 모든 메뉴를 볼 수 있다."""
+    if current_user.is_authenticated:
+        nav_visible = {c['key']: True for c in PAGE_VISIBILITY_CONFIG}
+    else:
+        nav_visible = get_page_visibility_map()
+    return {'nav_visible': nav_visible}
 
 # ============================================
 # 이메일 발송 함수
@@ -533,7 +608,7 @@ def send_booking_submitted_user_email(booking):
 
 def send_booking_admin_notification_email(booking):
     """새 대관 신청 알림 이메일 (관리자에게)"""
-    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    admin_emails = db_helper.get_admin_notification_email_addresses()
     if not admin_emails:
         return False
 
@@ -718,7 +793,7 @@ def send_booking_user_cancelled_email(booking):
 
 def send_cancellation_admin_notification_email(booking):
     """사용자 자기 취소 알림 이메일 (관리자에게)"""
-    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    admin_emails = db_helper.get_admin_notification_email_addresses()
     if not admin_emails:
         return False
 
@@ -763,9 +838,7 @@ def send_cancellation_admin_notification_email(booking):
 
 def send_inquiry_admin_notification(inquiry):
     """새 문의 접수 알림 이메일 (관리자에게)"""
-    admin_emails = app.config.get('ADMIN_EMAILS', [])
-    admin_email = app.config.get('ADMIN_EMAIL', '')
-    all_emails = list(set(admin_emails + ([admin_email] if admin_email else [])))
+    all_emails = db_helper.get_admin_notification_email_addresses()
     if not all_emails:
         return False
 
@@ -847,7 +920,7 @@ def _bus_trip_rows(booking):
     return f"""
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; width: 120px; border-bottom: 1px solid #eee;">노선</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{direction_info['label']}</strong></td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">날짜</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;"><strong>{trip_date}</strong></td></tr>
-          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{direction_info['time']}</td></tr>{stop_row}
+          <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">출발 시각</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{get_stop_departure_time(direction_info, stop_name)}</td></tr>{stop_row}
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">탑승자</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('passenger_name', '')}</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444; border-bottom: 1px solid #eee;">좌석 수</td><td style="padding: 12px 16px; color: #1a1a1a; border-bottom: 1px solid #eee;">{booking.get('seat_count', 1)}석</td></tr>
           <tr><td style="padding: 12px 16px; font-weight: 700; color: #444;">결제 금액</td><td style="padding: 12px 16px; color: #1a1a1a;"><strong>{booking.get('amount', 0):,}원</strong></td></tr>
@@ -856,7 +929,7 @@ def _bus_trip_rows(booking):
 
 def send_bus_booking_admin_notification_email(booking):
     """새 버스 예약 알림 이메일 (관리자에게)"""
-    admin_emails = app.config.get('ADMIN_EMAILS', [])
+    admin_emails = db_helper.get_admin_notification_email_addresses()
     if not admin_emails:
         return False
     subject = f'[총학생회] 새로운 버스 예약 - {booking.get("passenger_name", "")}'
@@ -925,7 +998,9 @@ def send_bus_trip_confirmed_email(booking):
     origin = route[0]['name'] if route else direction_info['label']
     destination = route[-1]['name'] if route else ''
     trip_date = trip.get('trip_date', '')
-    stop_name = booking.get('stop_name') or '추후 안내 (문의 바랍니다)'
+    raw_stop_name = booking.get('stop_name')
+    stop_name = raw_stop_name or '추후 안내 (문의 바랍니다)'
+    departure_time = get_stop_departure_time(direction_info, raw_stop_name)
     passenger_name = booking.get('passenger_name', '')
     student_id = booking.get('student_id')
     order_number = booking.get('order_number', '')
@@ -981,7 +1056,7 @@ def send_bus_trip_confirmed_email(booking):
                 </td>
                 <td width="50%" style="padding: 8px 0; vertical-align: top;">
                   <div style="font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">출발 시각</div>
-                  <div style="font-size: 18px; color: #1a1a1a; font-weight: 800; margin-top: 3px;">{direction_info['time']}</div>
+                  <div style="font-size: 18px; color: #1a1a1a; font-weight: 800; margin-top: 3px;">{departure_time}</div>
                 </td>
               </tr>
               <tr>
@@ -1169,15 +1244,23 @@ def index():
     # 배너 로직 강화: 모든 활성 배너 노출 (캐러셀)
     banners = db_helper.get_all_banners(is_active=True)
 
+    # 비공개 처리된 메뉴는 홈 화면에서도 노출하지 않고, 해당 데이터 조회 자체를 건너뛴다
+    # (조회할 데이터가 줄어드는 만큼 홈 화면 응답이 가벼워진다)
+    show_promises = is_page_open('promises') or current_user.is_authenticated
+    show_schedules = is_page_open('schedule') or current_user.is_authenticated
+    show_minutes = is_page_open('minutes') or current_user.is_authenticated
+
     # 전반적인 공약 이행률 계산
-    promises_list = db_helper.get_all_promises()
-    promise_rate = round(sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list)) if promises_list else 0
+    promise_rate = 0
+    if show_promises:
+        promises_list = db_helper.get_all_promises()
+        promise_rate = round(sum(p.get('progress_rate', 0) for p in promises_list) / len(promises_list)) if promises_list else 0
 
     # 메인 페이지용 다가오는 일정 (2개)
-    upcoming_schedules = db_helper.get_upcoming_schedules(limit=2)
+    upcoming_schedules = db_helper.get_upcoming_schedules(limit=2) if show_schedules else []
 
     # 메인 페이지용 최근 회의록 (2개)
-    recent_minutes = db_helper.get_recent_minutes(limit=2)
+    recent_minutes = db_helper.get_recent_minutes(limit=2) if show_minutes else []
 
     return render_template('index.html',
                            banners=banners,
@@ -1187,6 +1270,8 @@ def index():
 
 @app.route('/schedule')
 def schedule():
+    if not is_page_open('schedule') and not current_user.is_authenticated:
+        return page_closed_response('schedule')
     schedules_raw = db_helper.get_all_schedules(order_by='start_date', ascending=False)
     # Serialize Schedule objects for JSON compatibility
     schedules = [{
@@ -1202,6 +1287,8 @@ def schedule():
 
 @app.route('/organization')
 def organization():
+    if not is_page_open('organization') and not current_user.is_authenticated:
+        return page_closed_response('organization')
     # 부서명 매핑: 축약형 → 풀네임
     DEPT_MAPPING = {
         '중집위_미디어소통국': '중앙집행위원회 미디어소통국',
@@ -1269,6 +1356,8 @@ def organization():
 
 @app.route('/promises')
 def promises():
+    if not is_page_open('promises') and not current_user.is_authenticated:
+        return page_closed_response('promises')
     # N+1 쿼리 방지: 모든 데이터를 한 번에 가져오기
     promises_list = db_helper.get_all_promises()
     all_progress = db_helper.get_all_promise_progress()  # 한 번에 모든 진행 상황 조회
@@ -1287,6 +1376,8 @@ def promises():
 
 @app.route('/promises/<int:promise_id>')
 def promise_detail(promise_id):
+    if not is_page_open('promises') and not current_user.is_authenticated:
+        return page_closed_response('promises')
     promise = db_helper.get_promise_by_id(promise_id)
     if not promise:
         flash('공약을 찾을 수 없습니다.', 'error')
@@ -1297,6 +1388,8 @@ def promise_detail(promise_id):
 @app.route('/api/promise/<int:promise_id>/details')
 def api_promise_details(promise_id):
     """공약 상세 정보 API (Ajax 요청용)"""
+    if not is_page_open('promises') and not current_user.is_authenticated:
+        return jsonify({'error': 'Page not open'}), 404
     promise = db_helper.get_promise_by_id(promise_id)
     if not promise:
         return jsonify({'error': 'Promise not found'}), 404
@@ -1321,11 +1414,15 @@ def api_promise_details(promise_id):
 
 @app.route('/minutes')
 def minutes():
+    if not is_page_open('minutes') and not current_user.is_authenticated:
+        return page_closed_response('minutes')
     meeting_minutes = db_helper.get_all_minutes()
     return render_template('minutes.html', minutes=meeting_minutes)
 
 @app.route('/minutes/<int:minute_id>')
 def minute_detail(minute_id):
+    if not is_page_open('minutes') and not current_user.is_authenticated:
+        return page_closed_response('minutes')
     minute = db_helper.get_minute_by_id(minute_id)
     if not minute:
         flash('회의록을 찾을 수 없습니다.', 'error')
@@ -1334,6 +1431,8 @@ def minute_detail(minute_id):
 
 @app.route('/regulations')
 def regulations():
+    if not is_page_open('regulations') and not current_user.is_authenticated:
+        return page_closed_response('regulations')
     regulations_list = db_helper.get_all_regulations()
     categories = {}
     for regulation in regulations_list:
@@ -1346,22 +1445,30 @@ def regulations():
 @app.route('/regulations/pdf/<path:filename>')
 def regulation_pdf(filename):
     """회칙 PDF 파일 제공"""
+    if not is_page_open('regulations') and not current_user.is_authenticated:
+        return page_closed_response('regulations')
     # static/uploads/regulations 폴더에서 파일 제공
     regulations_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'regulations')
     return send_from_directory(regulations_dir, filename)
 
 @app.route('/programs')
 def programs():
+    if not is_page_open('programs') and not current_user.is_authenticated:
+        return page_closed_response('programs')
     programs_list = db_helper.get_all_programs(is_active=True)
     return render_template('programs.html', programs=programs_list)
 
 @app.route('/archive')
 def archive():
+    if not is_page_open('archive') and not current_user.is_authenticated:
+        return page_closed_response('archive')
     archives_list = db_helper.get_all_archives(is_active=True)
     return render_template('archive.html', archives=archives_list)
 
 @app.route('/archive/<int:archive_id>')
 def archive_detail(archive_id):
+    if not is_page_open('archive') and not current_user.is_authenticated:
+        return page_closed_response('archive')
     archive_item = db_helper.get_archive_by_id(archive_id)
     if not archive_item:
         flash('아카이브를 찾을 수 없습니다.', 'error')
@@ -1374,6 +1481,8 @@ def archive_detail(archive_id):
 
 @app.route('/meeting-room')
 def meeting_room():
+    if not is_page_open('meeting_room') and not current_user.is_authenticated:
+        return page_closed_response('meeting_room')
     today = date.today()
     max_date = today + timedelta(days=14)  # 최대 2주 앞까지 예약 가능
 
@@ -1422,6 +1531,10 @@ def meeting_room():
 
 @app.route('/meeting-room/book', methods=['POST'])
 def meeting_room_book():
+    if not is_page_open('meeting_room') and not current_user.is_authenticated:
+        flash('회의실 대관 페이지는 현재 비공개 상태입니다.', 'error')
+        return redirect(url_for('meeting_room'))
+
     room_number = request.form.get('room_number', type=int)
     applicant_name = request.form.get('applicant_name', '').strip()
     applicant_email = request.form.get('applicant_email', '').strip()
@@ -1977,6 +2090,103 @@ def admin_maintenance_toggle():
         flash('유지보수 모드 변경에 실패했습니다.', 'error')
 
     return redirect(url_for('admin_dashboard'))
+
+# ============================================
+# 사이트 설정 (관리자 알림 메일 수신자 / 메뉴 공개-비공개) — Super Admin 전용
+# ============================================
+
+@app.route('/admin/settings')
+@login_required
+def admin_settings():
+    if not current_user.is_super_admin:
+        flash('Super Admin만 사이트 설정에 접근할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    admin_emails = db_helper.get_all_admin_notification_emails()
+    page_visibility = get_page_visibility_map()
+    return render_template('admin/settings.html',
+                           admin_emails=admin_emails,
+                           page_visibility=page_visibility,
+                           page_visibility_config=PAGE_VISIBILITY_CONFIG)
+
+
+@app.route('/admin/settings/emails/add', methods=['POST'])
+@login_required
+def admin_settings_email_add():
+    if not current_user.is_super_admin:
+        flash('Super Admin만 변경할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    email = request.form.get('email', '').strip().lower()
+    label = request.form.get('label', '').strip() or None
+    if not email or '@' not in email:
+        flash('올바른 이메일 주소를 입력해주세요.', 'error')
+        return redirect(url_for('admin_settings'))
+
+    try:
+        created = db_helper.create_admin_notification_email(email, label)
+    except Exception as e:
+        print(f'[관리자 알림 이메일 추가 오류] {e}')
+        created = None
+
+    if created:
+        flash(f'{email} 이(가) 알림 수신자로 추가되었습니다.', 'success')
+    else:
+        flash('추가에 실패했습니다. 이미 등록된 이메일일 수 있습니다.', 'error')
+    return redirect(url_for('admin_settings'))
+
+
+@app.route('/admin/settings/emails/<int:email_id>/edit', methods=['POST'])
+@login_required
+def admin_settings_email_edit(email_id):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 변경할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    email = request.form.get('email', '').strip().lower()
+    label = request.form.get('label', '').strip() or None
+    if not email or '@' not in email:
+        flash('올바른 이메일 주소를 입력해주세요.', 'error')
+        return redirect(url_for('admin_settings'))
+
+    try:
+        updated = db_helper.update_admin_notification_email(email_id, {'email': email, 'label': label})
+    except Exception as e:
+        print(f'[관리자 알림 이메일 수정 오류] {e}')
+        updated = None
+
+    flash('수정되었습니다.' if updated else '수정에 실패했습니다. 이미 등록된 이메일일 수 있습니다.', 'success' if updated else 'error')
+    return redirect(url_for('admin_settings'))
+
+
+@app.route('/admin/settings/emails/<int:email_id>/delete', methods=['POST'])
+@login_required
+def admin_settings_email_delete(email_id):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 변경할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    db_helper.delete_admin_notification_email(email_id)
+    flash('알림 수신자가 삭제되었습니다.', 'success')
+    return redirect(url_for('admin_settings'))
+
+
+@app.route('/admin/settings/pages/<page_key>/toggle', methods=['POST'])
+@login_required
+def admin_settings_page_toggle(page_key):
+    if not current_user.is_super_admin:
+        flash('Super Admin만 변경할 수 있습니다.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    config = PAGE_VISIBILITY_BY_KEY.get(page_key)
+    if not config:
+        flash('알 수 없는 페이지입니다.', 'error')
+        return redirect(url_for('admin_settings'))
+
+    new_value = not is_page_open(page_key)
+    db_helper.set_setting(config['setting_key'], 'true' if new_value else 'false')
+    flash(f"{config['label']} 페이지가 {'공개' if new_value else '비공개'}로 전환되었습니다.", 'success')
+    return redirect(url_for('admin_settings'))
 
 # ============================================
 # 일정 관리

@@ -303,7 +303,7 @@
                 {% elif trip.remaining_seats <= 0 %}
                 <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">예약 마감 (좌석 없음)</div>
                 {% else %}
-                <button onclick='openBookingModal({{ trip.id }}, {{ trip.direction_info.label | tojson }}, {{ trip.direction_info.time | tojson }}, {{ trip.price }}, {{ trip.direction_info.stop_label | tojson }}, {{ trip.direction_info.selectable_stops | tojson }})'
+                <button onclick='openBookingModal({{ trip.id }}, {{ trip.direction_info.label | tojson }}, {{ trip.direction_info.time | tojson }}, {{ trip.price }}, {{ trip.direction_info.stop_label | tojson }}, {{ trip.direction_info.selectable_stops | tojson }}, {{ trip.direction_info.stop_times | tojson }})'
                         style="width:100%;padding:13px;background:var(--ku-crimson);color:white;border:none;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
                         onmouseover="this.style.background='#7a1528';" onmouseout="this.style.background='var(--ku-crimson)';">
                     예약하기
@@ -439,20 +439,37 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function openBookingModal(tripId, label, time, price, stopLabel, selectableStops) {
+let currentBoardingPrice = 0;
+let currentOriginTime = '';
+let currentStopTimes = {};
+
+function updateModalSubtitle(stopName) {
+    const time = (stopName && currentStopTimes[stopName]) || currentOriginTime;
+    document.getElementById('modalSubtitle').textContent = time + ' 출발 · 편도 ' + currentBoardingPrice.toLocaleString() + '원';
+}
+
+function openBookingModal(tripId, label, time, price, stopLabel, selectableStops, stopTimes) {
     document.getElementById('formTripId').value = tripId;
     document.getElementById('modalTitle').textContent = label + ' 버스 예약';
-    document.getElementById('modalSubtitle').textContent = time + ' 출발 · 편도 ' + price.toLocaleString() + '원';
+    currentBoardingPrice = price;
+    currentOriginTime = time;
+    currentStopTimes = stopTimes || {};
+    updateModalSubtitle('');
     document.getElementById('amountDisplay').textContent = price.toLocaleString() + '원';
 
     document.getElementById('stopNameLabel').firstChild.textContent = stopLabel + ' ';
     const stopSelect = document.getElementById('formStopName');
     stopSelect.innerHTML = '<option value="">' + stopLabel + '을(를) 선택하세요</option>' +
         selectableStops.map(s => `<option value="${s}">${s}</option>`).join('');
+    stopSelect.value = '';
 
     document.getElementById('bookingModalOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
+
+document.getElementById('formStopName').addEventListener('change', function () {
+    updateModalSubtitle(this.value);
+});
 
 function closeBookingModal(event) {
     if (event && event.target !== event.currentTarget) return;

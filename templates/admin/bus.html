@@ -324,7 +324,7 @@
                         <tr class="row-anim" data-payment="{{ b.payment_status }}" data-booking="{{ b.booking_status }}" style="border-bottom: 1px solid #f0f0f0; animation-delay: {{ loop.index0 * 0.02 }}s;">
                             <td style="padding: 12px 16px; white-space: nowrap;">
                                 <div style="font-weight: 700; color: #1a1a1a;">{{ dir_info.label if dir_info else '-' }}</div>
-                                <div style="font-size: 0.78rem; color: #888;">{{ b.trip.trip_date if b.trip else '' }} · {{ dir_info.time if dir_info else '' }}</div>
+                                <div style="font-size: 0.78rem; color: #888;">{{ b.trip.trip_date if b.trip else '' }} · {{ get_stop_departure_time(dir_info, b.stop_name) if dir_info else '' }}</div>
                                 {% if b.stop_name %}
                                 <div style="font-size: 0.72rem; color: var(--ku-crimson); margin-top: 2px; font-weight: 700;">{{ dir_info.stop_label if dir_info else '정류장' }}: {{ b.stop_name }}</div>
                                 {% endif %}

@@ -33,11 +33,7 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
-    ADMIN_EMAILS = [
-        'hongwook5179@korea.ac.kr',
-        'ekdus0510@korea.ac.kr',
-        'rhajaejoon02@naver.com'
-    ]
+    # 관리자 알림 메일 수신자 목록은 admin_notification_emails 테이블(관리자 대시보드 > 사이트 설정)에서 관리한다.
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'dsng3419@korea.ac.kr')
 
     # PayAction (무통장입금 자동확인) 설정

@@ -252,6 +252,27 @@ CREATE TABLE IF NOT EXISTS app_settings (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 18. AdminNotificationEmail 테이블 (관리자 알림 메일 수신자 - 관리자 대시보드에서 추가/수정/삭제)
+CREATE TABLE IF NOT EXISTS admin_notification_emails (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(200) UNIQUE NOT NULL,
+    label VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE admin_notification_emails ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin full access" ON admin_notification_emails;
+CREATE POLICY "Admin full access" ON admin_notification_emails FOR ALL USING (auth.role() = 'service_role');
+
+-- 기존에 config.py에 하드코딩되어 있던 관리자 알림 수신자를 초기값으로 이전 (재실행 안전)
+INSERT INTO admin_notification_emails (email, label) VALUES
+    ('hongwook5179@korea.ac.kr', NULL),
+    ('ekdus0510@korea.ac.kr', NULL),
+    ('rhajaejoon02@naver.com', NULL),
+    ('dsng3419@korea.ac.kr', NULL)
+ON CONFLICT (email) DO NOTHING;
+
 -- ============================================
 -- 인덱스 생성
 -- ============================================

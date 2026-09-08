@@ -175,7 +175,7 @@
                             </span>
                         </div>
                         <div style="font-size:0.9rem;color:#444;font-weight:600;">
-                            {{ b.trip.trip_date if b.trip else '' }} &nbsp;·&nbsp; {{ dir_info.time if dir_info else '' }} 출발 &nbsp;·&nbsp; {{ b.seat_count }}석
+                            {{ b.trip.trip_date if b.trip else '' }} &nbsp;·&nbsp; {{ get_stop_departure_time(dir_info, b.stop_name) if dir_info else '' }} 출발 &nbsp;·&nbsp; {{ b.seat_count }}석
                         </div>
                         <div style="font-size:0.8rem;color:#aaa;margin-top:3px;">{{ b.passenger_name }} · {{ '{:,}'.format(b.amount) }}원</div>
                     </div>

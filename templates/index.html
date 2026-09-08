@@ -242,6 +242,7 @@
 
 </style>
 
+{% if nav_visible.promises %}
 <!-- 공약 현황 섹션 -->
 <section class="promise-section" style="padding: clamp(80px, 15vw, 140px) 0; background: var(--bg-primary); position: relative; overflow: hidden;">
     <div class="container" style="position: relative; z-index: 2;">
@@ -346,7 +347,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endif %}
 
+{% if nav_visible.schedule %}
 <!-- 다가오는 일정 섹션 -->
 <section class="schedule-section" style="padding: clamp(80px, 15vw, 140px) 0; background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%); position: relative; overflow: hidden;">
     <!-- 배경 장식 -->
@@ -446,7 +449,9 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </section>
+{% endif %}
 
+{% if nav_visible.minutes %}
 <!-- 회의록 섹션 -->
 <section class="minutes-section" style="padding: clamp(80px, 15vw, 140px) 0; background: white; position: relative; overflow: hidden;">
     <!-- 배경 장식 -->
@@ -551,6 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- 연락 정보 섹션 (Connect With Us) -->
 <section class="contact-section" style="padding: clamp(120px, 22vw, 200px) 0; background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 50%, #f5f5f7 100%); color: var(--text-primary); position: relative; overflow: hidden;">

@@ -860,3 +860,34 @@ class SupabaseHelper:
         else:
             response = self.admin_client.table('app_settings').insert({'key': key, 'value': value}).execute()
         return response.data[0] if response.data else None
+
+    def get_all_settings(self) -> Dict[str, str]:
+        """모든 설정값을 한 번에 조회 (key -> value)"""
+        response = self.admin_client.table('app_settings').select('key, value').execute()
+        return {row['key']: row['value'] for row in response.data}
+
+    # ============ AdminNotificationEmail 관련 (관리자 알림 메일 수신자) ============
+
+    def get_all_admin_notification_emails(self) -> List[Dict[str, Any]]:
+        """모든 관리자 알림 메일 수신자 조회"""
+        response = self.admin_client.table('admin_notification_emails').select('*').order('id').execute()
+        return response.data
+
+    def get_admin_notification_email_addresses(self) -> List[str]:
+        """관리자 알림 메일을 받을 이메일 주소 목록만 조회"""
+        return [row['email'] for row in self.get_all_admin_notification_emails()]
+
+    def create_admin_notification_email(self, email: str, label: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """관리자 알림 메일 수신자 추가"""
+        response = self.admin_client.table('admin_notification_emails').insert({'email': email, 'label': label}).execute()
+        return response.data[0] if response.data else None
+
+    def update_admin_notification_email(self, email_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """관리자 알림 메일 수신자 수정"""
+        response = self.admin_client.table('admin_notification_emails').update(data).eq('id', email_id).execute()
+        return response.data[0] if response.data else None
+
+    def delete_admin_notification_email(self, email_id: int) -> bool:
+        """관리자 알림 메일 수신자 삭제"""
+        response = self.admin_client.table('admin_notification_emails').delete().eq('id', email_id).execute()
+        return len(response.data) > 0
