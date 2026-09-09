@@ -299,7 +299,9 @@
                 {% if trip.status == 'cancelled' %}
                 <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">운행 취소됨</div>
                 {% elif trip.booking_closed %}
-                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">신청 마감 (탑승 7일 전 마감)</div>
+                <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">
+                    {{ '신청 마감' if trip.booking_override == 'closed' else '신청 마감 (탑승 7일 전 마감)' }}
+                </div>
                 {% elif trip.remaining_seats <= 0 %}
                 <div style="width:100%;padding:13px;background:#f3f4f6;color:#9ca3af;border-radius:12px;font-size:0.95rem;font-weight:700;text-align:center;">예약 마감 (좌석 없음)</div>
                 {% else %}

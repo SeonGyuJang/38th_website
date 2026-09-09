@@ -428,6 +428,22 @@ def is_bus_trip_booking_deadline_passed(trip_date_str):
     return date.today() > deadline
 
 
+# 관리자가 회차별로 설정할 수 있는 예약 잠금 오버라이드 값
+BUS_BOOKING_OVERRIDE_TO_DB = {'auto': None, 'open': 'open', 'closed': 'closed'}
+
+
+def is_bus_trip_locked(trip):
+    """회차의 예약 잠금 여부. 관리자가 회차별로 강제로 열거나(open) 잠그면(closed) 그
+    설정이 탑승일 기준 자동 마감 로직보다 우선한다. 오버라이드가 없으면(auto) 기존처럼
+    탑승 BUS_BOOKING_CUTOFF_DAYS일 전이 지났는지로 판단한다."""
+    override = trip.get('booking_override')
+    if override == 'open':
+        return False
+    if override == 'closed':
+        return True
+    return is_bus_trip_booking_deadline_passed(trip['trip_date'])
+
+
 @app.context_processor
 def inject_page_visibility():
     """내비게이션 메뉴에서 비공개 처리된 페이지를 숨기기 위한 전역 템플릿 변수.
@@ -1747,7 +1763,7 @@ def bus():
         annotate_bus_trips_remaining_seats(trips_today)
         for t in trips_today:
             t['direction_info'] = get_bus_direction_info(t['direction'])
-            t['booking_closed'] = is_bus_trip_booking_deadline_passed(t['trip_date'])
+            t['booking_closed'] = is_bus_trip_locked(t)
         # 방향 순서 고정 (오전 서울→세종, 오후 세종→서울)
         trips_today.sort(key=lambda t: 0 if t['direction'] == 'seoul_to_sejong' else 1)
 
@@ -1801,8 +1817,11 @@ def bus_book():
         flash('지난 날짜의 버스는 예약할 수 없습니다.', 'error')
         return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
-    if is_bus_trip_booking_deadline_passed(trip['trip_date']):
-        flash(f'탑승 {BUS_BOOKING_CUTOFF_DAYS}일 전이 지나 이 회차는 예약이 마감되었습니다.', 'error')
+    if is_bus_trip_locked(trip):
+        if trip.get('booking_override') == 'closed':
+            flash('관리자가 이 회차의 예약을 잠갔습니다. 잠시 후 다시 시도해주세요.', 'error')
+        else:
+            flash(f'탑승 {BUS_BOOKING_CUTOFF_DAYS}일 전이 지나 이 회차는 예약이 마감되었습니다.', 'error')
         return redirect(url_for('bus', date=trip['trip_date'], month=trip['trip_date'][:7]))
 
     direction_info = get_bus_direction_info(trip['direction'])
@@ -3315,6 +3334,7 @@ def admin_bus():
     annotate_bus_trips_remaining_seats(trips)
     for t in trips:
         t['direction_info'] = get_bus_direction_info(t['direction'])
+        t['booking_locked'] = is_bus_trip_locked(t)
 
     bookings = db_helper.get_all_bus_bookings()
 
@@ -3325,7 +3345,8 @@ def admin_bus():
                            payment_status_labels=BUS_PAYMENT_STATUS_LABELS,
                            booking_status_labels=BUS_BOOKING_STATUS_LABELS,
                            today=date.today(),
-                           is_bus_booking_open=is_bus_booking_open())
+                           is_bus_booking_open=is_bus_booking_open(),
+                           bus_booking_cutoff_days=BUS_BOOKING_CUTOFF_DAYS)
 
 
 @app.route('/admin/bus/toggle-open', methods=['POST'])
@@ -3423,6 +3444,35 @@ def admin_bus_trip_update(trip_id):
         flash('버스 회차 정보가 수정되었습니다.', 'success')
     else:
         flash('수정 중 오류가 발생했습니다.', 'error')
+    return redirect(url_for('admin_bus'))
+
+
+@app.route('/admin/bus/trips/<int:trip_id>/booking-override', methods=['POST'])
+@login_required
+def admin_bus_trip_booking_override(trip_id):
+    """회차별 예약 잠금 수동 오버라이드. 탑승일 기준 자동 마감과 무관하게
+    관리자가 임의로 예약을 열거나(open) 잠글(closed) 수 있고, 자동(auto)으로
+    되돌리면 다시 탑승 BUS_BOOKING_CUTOFF_DAYS일 전 기준 자동 마감을 따른다."""
+    trip = db_helper.get_bus_trip_by_id(trip_id)
+    if not trip:
+        flash('버스 회차를 찾을 수 없습니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    override = request.form.get('booking_override', 'auto')
+    if override not in BUS_BOOKING_OVERRIDE_TO_DB:
+        flash('올바르지 않은 값입니다.', 'error')
+        return redirect(url_for('admin_bus'))
+
+    db_helper.update_bus_trip(trip_id, {'booking_override': BUS_BOOKING_OVERRIDE_TO_DB[override]})
+
+    direction_label = get_bus_direction_info(trip['direction'])['label']
+    trip_label = f'{trip["trip_date"]} {direction_label}'
+    if override == 'open':
+        flash(f'{trip_label} 회차의 예약 잠금을 해제했습니다. 마감일이 지났어도 예약할 수 있습니다.', 'success')
+    elif override == 'closed':
+        flash(f'{trip_label} 회차의 예약을 강제로 잠갔습니다.', 'success')
+    else:
+        flash(f'{trip_label} 회차의 예약 마감을 자동(탑승 {BUS_BOOKING_CUTOFF_DAYS}일 전) 기준으로 되돌렸습니다.', 'success')
     return redirect(url_for('admin_bus'))
 
 
